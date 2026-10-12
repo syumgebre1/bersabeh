@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from slowapi.errors import RateLimitExceeded
 
-from app.api import auth, health, users
+from app.api import appointments, auth, encounters, health, users
 from app.core.config import settings
 from app.core.rate_limit import limiter
 
@@ -75,7 +75,6 @@ app.state.limiter = limiter
 
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
-    """Return a clean JSON 429 instead of slowapi's default plaintext."""
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests. Please try again later."},
@@ -102,6 +101,8 @@ API_PREFIX = "/api/v1"
 app.include_router(health.router, prefix=API_PREFIX)
 app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(users.router, prefix=API_PREFIX)
+app.include_router(appointments.router, prefix=API_PREFIX)
+app.include_router(encounters.router, prefix=API_PREFIX)
 
 
 # ------------------------------------------------------------

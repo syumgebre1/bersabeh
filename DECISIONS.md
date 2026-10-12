@@ -42,3 +42,27 @@ Machine-translated Amharic/Tigrigna is often wrong. Clinic will translate proper
 
 ## D013 — Pin WeasyPrint behind DYLD_FALLBACK_LIBRARY_PATH
 On Apple Silicon, Homebrew libs live in /opt/homebrew/lib. python.org Python does not search there by default.
+
+## D014 — Three-step pattern for adding NOT NULL columns
+When adding a NOT NULL column to a populated table, Alembic autogenerate writes a
+single ALTER TABLE that fails. The correct pattern is: (1) add as nullable, (2) backfill
+existing rows, (3) ALTER to NOT NULL. Do this manually for any new NOT NULL column.
+
+## D015 — Never hardcode UUIDs in scripts
+A single mis-typed character in a hardcoded UUID breaks every downstream query with
+no error message beyond "not found". Always extract IDs from the database or a fresh
+API response. Environment variables or psql output are the source of truth.
+
+## D016 — Use `docker exec -i` (no `-t`) when parsing output
+macOS TTY allocation with `-t` appends `\r` to output lines, silently breaking string
+comparisons in scripts. Use `-i` only (no `-t`) for any non-interactive command.
+
+## D017 — Raise AUTH_RATE_LIMIT for dev
+Production limit is 5/15min per IP (correct for a clinic). During development, set
+`AUTH_RATE_LIMIT=1000/15minutes` in `.env`. Restart uvicorn after changing — `--reload`
+watches only `.py` files, not `.env`.
+
+## D018 — Always set `created_by_id` on audit-tracked entities
+Every auditable model (Appointment, Encounter, and future Prescriptions, Labs, Bills)
+has a NOT NULL `created_by_id`. The endpoint that creates the row must set it —
+Python can't inject `current_user` at the model layer.
