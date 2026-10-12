@@ -113,6 +113,9 @@ class User(Base):
 
     # ---- Soft delete (anonymization) ----
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
+    # Marks rows created by scripts/seed.py. The admin CMS offers a
+    # one-click "delete demo data" that anonymizes every is_seed_data=True row.
+    is_seed_data: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # ---- Timestamps ----
