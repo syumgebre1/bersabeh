@@ -2,30 +2,31 @@
 FastAPI application entry point.
 
 Responsibilities:
-  - Create the FastAPI app instance with metadata (title, version, contact).
-  - Configure CORS for the Expo web dev server + native mobile clients.
-  - Register routers under /api/v1 (versioned API).
-  - Provide startup/shutdown logs so we can see what's happening in dev.
+  - Create the FastAPI app instance with metadata.
+  - Configure CORS for Expo web dev + native clients.
+  - Wire slowapi (rate limiting).
+  - Register routers under /api/v1.
+  - Provide startup/shutdown logs.
 
 Run locally:
     uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-Run from this directory (backend/) with the venv active.
 """
 
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from slowapi.errors import RateLimitExceeded
 
-from app.api import health
+from app.api import auth, health, users
 from app.core.config import settings
+from app.core.rate_limit import limiter
 
 
 # ------------------------------------------------------------
-# Logging — basic config; expanded later with structured logs.
+# Logging
 # ------------------------------------------------------------
 logging.basicConfig(
     level=settings.LOG_LEVEL.upper(),
@@ -35,8 +36,7 @@ logger = logging.getLogger("bersabeh")
 
 
 # ------------------------------------------------------------
-# Lifespan — runs once at startup and once at shutdown.
-# Use this for: warm caches, start background workers, close pools.
+# Lifespan
 # ------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
 
 
 # ------------------------------------------------------------
-# App instance
+# App
 # ------------------------------------------------------------
 app = FastAPI(
     title=settings.APP_NAME,
@@ -68,10 +68,22 @@ app = FastAPI(
 
 
 # ------------------------------------------------------------
-# CORS — required so the Expo web dev server can call the API.
-# Native mobile doesn't need CORS, but Expo Web does.
-# Origins are read from .env (CORS_ORIGINS) and can be a JSON
-# array or a comma-separated string — see config.py validator.
+# Rate limiting (slowapi)
+# ------------------------------------------------------------
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Return a clean JSON 429 instead of slowapi's default plaintext."""
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please try again later."},
+    )
+
+
+# ------------------------------------------------------------
+# CORS
 # ------------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
@@ -83,17 +95,18 @@ app.add_middleware(
 
 
 # ------------------------------------------------------------
-# Routers — all under /api/v1 for future versioning.
+# Routers
 # ------------------------------------------------------------
 API_PREFIX = "/api/v1"
 
 app.include_router(health.router, prefix=API_PREFIX)
+app.include_router(auth.router, prefix=API_PREFIX)
+app.include_router(users.router, prefix=API_PREFIX)
 
 
 # ------------------------------------------------------------
-# Root — redirect to docs for convenience during dev.
+# Root → docs
 # ------------------------------------------------------------
 @app.get("/", include_in_schema=False)
 async def root():
-    """Redirect the root URL to the interactive API docs."""
     return RedirectResponse(url="/docs")

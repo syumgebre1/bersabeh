@@ -1,13 +1,16 @@
 """
 ORM models package.
 
-As we add models (User, Patient, Encounter, ...) in M2+, they get imported
-here so that `import app.models` in alembic/env.py picks them all up for
-autogenerate.
-
-Example (later):
-    from app.models.user import User          # noqa: F401
-    from app.models.patient import Patient    # noqa: F401
+Every model is imported here so that `import app.models` (from alembic/env.py)
+registers all tables with Base.metadata.
 """
 
-__all__ = []
+from app.models.refresh_token import RefreshToken
+from app.models.user import User, UserRole, UserStatus
+
+__all__ = [
+    "User",
+    "UserRole",
+    "UserStatus",
+    "RefreshToken",
+]
