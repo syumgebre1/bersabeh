@@ -66,3 +66,27 @@ watches only `.py` files, not `.env`.
 Every auditable model (Appointment, Encounter, and future Prescriptions, Labs, Bills)
 has a NOT NULL `created_by_id`. The endpoint that creates the row must set it —
 Python can't inject `current_user` at the model layer.
+
+## D019 — PDF generation via WeasyPrint + embedded Jinja2 templates
+Prescription, lab report, and (future) encounter summary PDFs are rendered
+server-side with WeasyPrint. Templates live in app/services/pdf.py as Python
+string constants (not a separate templates/ folder) to keep the service
+self-contained. If templates grow past ~100 lines each, extract them.
+Each PDF includes a QR code linking to a verify URL — the CMS can later
+add a public /verify/{id} endpoint that shows a signed summary.
+
+## D019 — PDF generation via WeasyPrint + embedded Jinja2 templates
+Prescription, lab report, and (future) encounter summary PDFs are rendered
+server-side with WeasyPrint. Templates live in app/services/pdf.py as Python
+string constants (not a separate templates/ folder) to keep the service
+self-contained. If templates grow past ~100 lines each, extract them.
+Each PDF includes a QR code linking to a verify URL — the CMS can later
+add a public /verify/{id} endpoint that shows a signed summary.
+
+## D020 — Removed a no-op migration during M5
+Running `alembic revision --autogenerate` twice in quick succession produced
+two migrations: 6b7a0ea0ebe8 (the real one, which creates prescriptions, vitals,
+lab_orders, lab_results) and 4823b3a4268a (an empty `pass` stub, because the
+diff was already captured). To keep the history clean, we deleted the stub
+file and manually updated `alembic_version` to point at 6b7a0ea0ebe8.
+All tables are intact.

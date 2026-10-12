@@ -20,7 +20,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from slowapi.errors import RateLimitExceeded
 
-from app.api import appointments, auth, encounters, health, users
+from app.api import (
+    appointments,
+    auth,
+    encounters,
+    health,
+    labs,
+    prescriptions,
+    users,
+    vitals,
+)
 from app.core.config import settings
 from app.core.rate_limit import limiter
 
@@ -103,6 +112,9 @@ app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(users.router, prefix=API_PREFIX)
 app.include_router(appointments.router, prefix=API_PREFIX)
 app.include_router(encounters.router, prefix=API_PREFIX)
+app.include_router(prescriptions.router, prefix=API_PREFIX)
+app.include_router(vitals.router, prefix=API_PREFIX)
+app.include_router(labs.router, prefix=API_PREFIX)
 
 
 # ------------------------------------------------------------
