@@ -90,3 +90,11 @@ lab_orders, lab_results) and 4823b3a4268a (an empty `pass` stub, because the
 diff was already captured). To keep the history clean, we deleted the stub
 file and manually updated `alembic_version` to point at 6b7a0ea0ebe8.
 All tables are intact.
+
+## D020 — Removed a no-op migration during M5
+Running `alembic revision --autogenerate` twice in quick succession produced
+two migrations: 6b7a0ea0ebe8 (the real one, which creates prescriptions, vitals,
+lab_orders, lab_results) and 4823b3a4268a (an empty `pass` stub, because the
+diff was already captured). To keep the history clean, we deleted the stub
+file and manually updated `alembic_version` to point at 6b7a0ea0ebe8.
+All tables are intact.
