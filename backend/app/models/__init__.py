@@ -3,8 +3,6 @@ ORM models package.
 
 Every model is imported here so that `import app.models` (from alembic/env.py)
 registers all tables with Base.metadata.
-
-Add new models to this list as you create them.
 """
 
 from app.models.appointment import Appointment, AppointmentStatus
@@ -15,6 +13,18 @@ from app.models.lab import (
     LabPriority,
     LabResult,
     LabResultType,
+)
+from app.models.messaging import (
+    Message,
+    MessageAttachment,
+    Thread,
+    ThreadKind,
+    ThreadParticipant,
+)
+from app.models.notification import (
+    Notification,
+    NotificationChannel,
+    NotificationKind,
 )
 from app.models.prescription import (
     Prescription,
@@ -31,7 +41,7 @@ __all__ = [
     "UserRole",
     "UserStatus",
     "RefreshToken",
-    # Scheduling & clinical
+    # Clinical
     "Appointment",
     "AppointmentStatus",
     "Encounter",
@@ -46,4 +56,13 @@ __all__ = [
     "LabPriority",
     "LabResult",
     "LabResultType",
+    # Messaging & notifications
+    "Thread",
+    "ThreadKind",
+    "ThreadParticipant",
+    "Message",
+    "MessageAttachment",
+    "Notification",
+    "NotificationKind",
+    "NotificationChannel",
 ]

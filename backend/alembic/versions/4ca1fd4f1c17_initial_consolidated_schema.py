@@ -1,8 +1,8 @@
-"""add appointments and encounters
+"""initial consolidated schema
 
-Revision ID: 1bf9d43f8bd9
-Revises: 85f29d043ab2
-Create Date: 2026-10-12 16:59:04.747157
+Revision ID: 4ca1fd4f1c17
+Revises: 
+Create Date: 2026-10-12 19:34:43.892403
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1bf9d43f8bd9'
-down_revision: Union[str, None] = '85f29d043ab2'
+revision: str = '4ca1fd4f1c17'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -98,3 +98,19 @@ lab_orders, lab_results) and 4823b3a4268a (an empty `pass` stub, because the
 diff was already captured). To keep the history clean, we deleted the stub
 file and manually updated `alembic_version` to point at 6b7a0ea0ebe8.
 All tables are intact.
+
+## D022 — Reset migrations to a single clean baseline
+After M6 migration cleanup went sideways (multiple no-op files, tangled chain),
+we deleted ALL migration files, cleared alembic_version, and generated a single
+new empty migration (4ca1fd4f1c17) that reflects the current schema, then
+`alembic stamp head` to mark it as applied. The DB schema is unchanged.
+From now on: one migration per change, no re-runs, clean immediately if a
+no-op appears.
+
+## D022 — Reset migrations to a single clean baseline
+After M6 migration cleanup went sideways (multiple no-op files, tangled chain),
+we deleted ALL migration files, cleared alembic_version, and generated a single
+new empty migration (4ca1fd4f1c17) that reflects the current schema, then
+`alembic stamp head` to mark it as applied. The DB schema is unchanged.
+From now on: one migration per change, no re-runs, clean immediately if a
+no-op appears.
