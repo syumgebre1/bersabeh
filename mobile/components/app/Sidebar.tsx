@@ -73,11 +73,11 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { key: "results",  label: "Results",       href: "/(app)/lab", Icon: FlaskConical },
   ],
   admin: [
-    { key: "overview",  label: "Overview",      href: "/(app)/admin", Icon: LayoutDashboard },
-    { key: "staff",     label: "Staff",         href: "/(app)/admin", Icon: Users },
-    { key: "patients",  label: "Patients",      href: "/(app)/admin", Icon: UserCircle },
-    { key: "content",   label: "Content",       href: "/(app)/admin", Icon: FileText },
-    { key: "reports",   label: "Reports",       href: "/(app)/admin", Icon: Activity },
+    { key: "overview",  label: "Overview",      href: "/(app)/admin",              Icon: LayoutDashboard },
+    { key: "content",   label: "Content CMS",   href: "/(app)/admin/content",      Icon: FileText },
+    { key: "staff",     label: "Staff",         href: "/(app)/admin/staff",        Icon: Users },
+    { key: "patients",  label: "Patients",      href: "/(app)/admin/patients",     Icon: UserCircle },
+    { key: "reports",   label: "Reports",       href: "/(app)/admin",              Icon: Activity },
   ],
   super_admin: [
     { key: "overview",  label: "Overview",   href: "/(app)/super-admin", Icon: LayoutDashboard },

@@ -35,6 +35,7 @@ from app.models.appointment import Appointment
 from app.models.audit_log import AuditAction, AuditLog
 from app.models.billing import Bill
 from app.models.call import VideoCall
+from app.models.content import ContentBlock
 from app.models.encounter import Encounter
 from app.models.lab import LabOrder, LabResult
 from app.models.messaging import Message, Thread
@@ -61,6 +62,7 @@ AUDITED_MODELS: set[type] = {
     VideoCall,
     Thread,
     Message,
+    ContentBlock,
 }
 
 
