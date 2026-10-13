@@ -23,6 +23,7 @@ from slowapi.errors import RateLimitExceeded
 from app.api import (
     appointments,
     auth,
+    calls,
     encounters,
     health,
     labs,
@@ -119,6 +120,7 @@ app.include_router(encounters.router, prefix=API_PREFIX)
 app.include_router(prescriptions.router, prefix=API_PREFIX)
 app.include_router(vitals.router, prefix=API_PREFIX)
 app.include_router(labs.router, prefix=API_PREFIX)
+app.include_router(calls.router, prefix=API_PREFIX)
 app.include_router(messages.router, prefix=API_PREFIX)
 app.include_router(uploads.router, prefix=API_PREFIX)
 # WebSocket router has its own path (/ws/notifications) — mount under /api/v1

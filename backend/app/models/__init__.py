@@ -6,6 +6,7 @@ registers all tables with Base.metadata.
 """
 
 from app.models.appointment import Appointment, AppointmentStatus
+from app.models.call import CallStatus, VideoCall
 from app.models.encounter import Encounter, EncounterStatus, EncounterType
 from app.models.lab import (
     LabOrder,
@@ -65,4 +66,7 @@ __all__ = [
     "Notification",
     "NotificationKind",
     "NotificationChannel",
+    # Video
+    "VideoCall",
+    "CallStatus",
 ]

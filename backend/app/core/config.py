@@ -70,6 +70,8 @@ class Settings(BaseSettings):
     MAX_PDF_MB: int = 25
     MAX_VIDEO_MB: int = 100
 
+    # ---- Jitsi (video calls) ----
+    JITSI_BASE_URL: str = "https://meet.jit.si"
     # ---- Rate limiting ----
     AUTH_RATE_LIMIT: str = "5/15minutes"
 
