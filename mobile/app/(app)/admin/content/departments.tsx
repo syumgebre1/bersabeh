@@ -1,0 +1,211 @@
+/**
+ * Departments editor — list of 8 departments, each with name + description + icon.
+ *
+ * Data shape: the CMS stores each field as
+ *   departments.{key}.name
+ *   departments.{key}.description
+ *   departments.{key}.icon
+ */
+
+import { ArrowLeft, Check, Save } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+} from "react-native";
+
+import { Button } from "@/components/ui/Button";
+import { useContentBundle, useUpsertContentBlock, type ContentCategory } from "@/lib/admin";
+import { theme } from "@/constants/theme";
+
+
+// Known department keys — must match seed (clinic_config.py DEPARTMENTS_SEED)
+const DEPARTMENTS: { key: string; defaultName: string }[] = [
+  { key: "internal_medicine", defaultName: "Internal Medicine" },
+  { key: "general_surgery",   defaultName: "General Surgery" },
+  { key: "gastroenterology",  defaultName: "Gastroenterology" },
+  { key: "cardiology",        defaultName: "Cardiology" },
+  { key: "nephrology",        defaultName: "Nephrology" },
+  { key: "pulmonology",       defaultName: "Pulmonology" },
+  { key: "post_op_care",      defaultName: "Post-op Care" },
+  { key: "wound_care",        defaultName: "Wound Care" },
+];
+
+const CATEGORY: ContentCategory = "departments";
+
+
+export default function DepartmentsEditor() {
+  const router = useRouter();
+  const { data: bundle, isLoading, isError, refetch } = useContentBundle("en");
+  const upsert = useUpsertContentBlock();
+
+  // drafts keyed by content KEY
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [savingState, setSavingState] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // All keys we care about
+  const allKeys = useMemo(() => {
+    const out: string[] = [];
+    for (const d of DEPARTMENTS) {
+      out.push(`departments.${d.key}.name`);
+      out.push(`departments.${d.key}.description`);
+      out.push(`departments.${d.key}.icon`);
+    }
+    return out;
+  }, []);
+
+  useEffect(() => {
+    if (bundle?.content) {
+      const next: Record<string, string> = {};
+      for (const k of allKeys) next[k] = String(bundle.content[k] ?? "");
+      setDrafts(next);
+    }
+  }, [bundle, allKeys]);
+
+  const dirtyKeys = useMemo(() => {
+    if (!bundle?.content) return [];
+    return allKeys.filter((k) => drafts[k] !== String(bundle.content[k] ?? ""));
+  }, [bundle, drafts, allKeys]);
+
+  const hasChanges = dirtyKeys.length > 0;
+
+  const handleChange = (key: string, value: string) => {
+    setDrafts((prev) => ({ ...prev, [key]: value }));
+    if (savingState === "success") setSavingState("idle");
+  };
+
+  const handleSave = async () => {
+    if (!hasChanges) return;
+    setSavingState("saving");
+    setErrorMessage(null);
+    try {
+      for (const key of dirtyKeys) {
+        await upsert.mutateAsync({ key, locale: "en", value: drafts[key], category: CATEGORY, sort_order: 0 });
+      }
+      setSavingState("success");
+    } catch (err) {
+      setSavingState("error");
+      setErrorMessage(err instanceof Error ? err.message : "Failed to save");
+    }
+  };
+
+  return (
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <View style={styles.topBar}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <ArrowLeft size={16} color={theme.colors.text} strokeWidth={2.2} />
+          <Text style={styles.backText}>CMS</Text>
+        </Pressable>
+        <View style={styles.topBarMeta}>
+          <Text style={styles.eyebrow}>Content editor</Text>
+          <Text style={styles.title}>Departments</Text>
+        </View>
+        <View style={styles.topBarActions}>
+          {hasChanges ? (
+            <View style={styles.dirtyPill}><Text style={styles.dirtyPillText}>{dirtyKeys.length} unsaved</Text></View>
+          ) : savingState === "success" ? (
+            <View style={[styles.dirtyPill, styles.savedPill]}>
+              <Check size={12} color={theme.colors.success} strokeWidth={2.6} />
+              <Text style={[styles.dirtyPillText, styles.savedPillText]}>Saved</Text>
+            </View>
+          ) : null}
+          <Button label="Save changes" variant="primary" size="sm" onPress={handleSave}
+            disabled={!hasChanges || savingState === "saving"}
+            loading={savingState === "saving"}
+            leftIcon={<Save size={14} color={theme.colors.textInverse} strokeWidth={2.2} />} />
+        </View>
+      </View>
+
+      {savingState === "error" && errorMessage ? (
+        <View style={styles.errorBanner}><Text style={styles.errorText}>{errorMessage}</Text></View>
+      ) : null}
+
+      {isLoading ? (
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Loading departments...</Text>
+        </View>
+      ) : isError || !bundle ? (
+        <View style={styles.loadingWrap}>
+          <Text style={styles.errorText}>Could not load departments.</Text>
+          <Button label="Retry" variant="outline" size="sm" onPress={() => refetch()} />
+        </View>
+      ) : (
+        <View style={styles.list}>
+          {DEPARTMENTS.map((d) => {
+            const nameKey = `departments.${d.key}.name`;
+            const descKey = `departments.${d.key}.description`;
+            const iconKey = `departments.${d.key}.icon`;
+            const isDirty = dirtyKeys.includes(nameKey) || dirtyKeys.includes(descKey) || dirtyKeys.includes(iconKey);
+
+            return (
+              <View key={d.key} style={[styles.deptCard, isDirty && styles.deptCardDirty]}>
+                <View style={styles.deptHeader}>
+                  <Text style={styles.deptKey}>{d.key}</Text>
+                  {isDirty && <View style={styles.dirtyDot} />}
+                </View>
+
+                <View style={styles.field}>
+                  <Text style={styles.label}>Name</Text>
+                  <TextInput value={drafts[nameKey] ?? ""} onChangeText={(v) => handleChange(nameKey, v)}
+                    placeholder={d.defaultName} placeholderTextColor={theme.colors.mutedLight}
+                    style={styles.input} />
+                </View>
+
+                <View style={styles.field}>
+                  <Text style={styles.label}>Description</Text>
+                  <TextInput value={drafts[descKey] ?? ""} onChangeText={(v) => handleChange(descKey, v)}
+                    placeholder="One-line description" placeholderTextColor={theme.colors.mutedLight}
+                    multiline numberOfLines={2} style={[styles.input, styles.inputMultiline]} />
+                </View>
+
+                <View style={styles.field}>
+                  <Text style={styles.label}>Lucide icon name</Text>
+                  <TextInput value={drafts[iconKey] ?? ""} onChangeText={(v) => handleChange(iconKey, v)}
+                    placeholder="stethoscope" placeholderTextColor={theme.colors.mutedLight}
+                    style={styles.input} />
+                  <Text style={styles.helpText}>
+                    One of: stethoscope · scissors · activity · heart-pulse · droplet · wind · bed · bandage
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+
+const styles = StyleSheet.create({
+  scroll: { flex: 1, backgroundColor: theme.colors.bg },
+  content: { padding: theme.spacing.xxl, gap: theme.spacing.xl, maxWidth: 900, width: "100%", alignSelf: "center" },
+  topBar: { flexDirection: "row", alignItems: "center", gap: theme.spacing.lg, flexWrap: "wrap" },
+  backBtn: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm, borderWidth: 1, borderColor: theme.colors.border },
+  backText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 13, color: theme.colors.text },
+  topBarMeta: { flex: 1, minWidth: 200 },
+  eyebrow: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: theme.colors.secondary },
+  title: { fontFamily: theme.fontFamily.heading, fontSize: 28, letterSpacing: -0.5, color: theme.colors.text, marginTop: 2 },
+  topBarActions: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md },
+  dirtyPill: { paddingHorizontal: theme.spacing.md, paddingVertical: 6, backgroundColor: theme.colors.warningBg, borderRadius: theme.radius.full },
+  dirtyPillText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12, color: theme.colors.warning },
+  savedPill: { backgroundColor: theme.colors.successBg, flexDirection: "row", alignItems: "center", gap: 4 },
+  savedPillText: { color: theme.colors.success },
+  errorBanner: { backgroundColor: theme.colors.dangerBg, padding: theme.spacing.md, borderRadius: theme.radius.md },
+  errorText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.danger },
+  loadingWrap: { alignItems: "center", justifyContent: "center", paddingVertical: theme.spacing.huge, gap: theme.spacing.md },
+  loadingText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.muted },
+  list: { gap: theme.spacing.base },
+  deptCard: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg, gap: theme.spacing.md },
+  deptCardDirty: { borderColor: theme.colors.warning },
+  deptHeader: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs, paddingBottom: theme.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  deptKey: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", color: theme.colors.muted, flex: 1 },
+  dirtyDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: theme.colors.warning },
+  field: { gap: theme.spacing.xs },
+  label: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11.5, letterSpacing: 0.6, textTransform: "uppercase", color: theme.colors.muted },
+  input: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm + 2, fontFamily: theme.fontFamily.body, fontSize: 14.5, color: theme.colors.text, backgroundColor: theme.colors.bg },
+  inputMultiline: { minHeight: 64, textAlignVertical: "top" },
+  helpText: { fontFamily: theme.fontFamily.body, fontSize: 11, fontStyle: "italic", color: theme.colors.mutedLight },
+});
