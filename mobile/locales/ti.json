@@ -1,0 +1,100 @@
+{
+  "_meta": {
+    "status": "placeholder",
+    "note": "TODO: translate all values to Tigrigna. Currently English placeholders."
+  },
+  "utility": {
+    "emergency": "Emergency (TODO: translate)",
+    "hours": "Mon–Sat 8:00–20:00 · Sun 9:00–13:00 (TODO: translate)",
+    "languageLabel": "Language (TODO: translate)"
+  },
+  "header": {
+    "home": "Home (TODO: translate)",
+    "departments": "Departments (TODO: translate)",
+    "doctors": "Doctors (TODO: translate)",
+    "services": "Services (TODO: translate)",
+    "contact": "Contact (TODO: translate)",
+    "patientPortal": "Patient Portal (TODO: translate)",
+    "bookAppointment": "Book Appointment (TODO: translate)"
+  },
+  "hero": {
+    "headline": "Trusted care for Addis Ababa families. (TODO: translate)",
+    "subhead": "Modern medicine, delivered by experienced physicians in the heart of the city. (TODO: translate)",
+    "ctaPrimary": "Book Appointment (TODO: translate)",
+    "ctaSecondary": "Explore Departments (TODO: translate)",
+    "booking": {
+      "title": "Book an appointment (TODO: translate)",
+      "date": "Preferred date (TODO: translate)",
+      "datePlaceholder": "Select a date (TODO: translate)",
+      "department": "Department (TODO: translate)",
+      "departmentPlaceholder": "Choose a department (TODO: translate)",
+      "check": "Check availability (TODO: translate)",
+      "success": "We'll confirm your appointment by phone within 2 hours. (TODO: translate)"
+    }
+  },
+  "trust": {
+    "licensed": "MoH licensed (TODO: translate)",
+    "doctors": "Experienced specialists (TODO: translate)",
+    "years": "Since 2009 (TODO: translate)",
+    "emergency": "24/7 emergency line (TODO: translate)",
+    "license": "License (TODO: translate)"
+  },
+  "departments": {
+    "title": "Departments (TODO: translate)",
+    "subtitle": "Specialist care across the medical spectrum. (TODO: translate)",
+    "viewDoctors": "View doctors (TODO: translate)",
+    "empty": "Departments coming soon. (TODO: translate)"
+  },
+  "doctors": {
+    "title": "Our doctors (TODO: translate)",
+    "subtitle": "Specialists you can trust. (TODO: translate)",
+    "bookWith": "Book with (TODO: translate)",
+    "yearsShort": "yrs (TODO: translate)",
+    "empty": "Doctor profiles coming soon. (TODO: translate)"
+  },
+  "howItWorks": {
+    "title": "How it works (TODO: translate)",
+    "step1Title": "Register (TODO: translate)",
+    "step1Body": "Create your patient account in under 2 minutes. (TODO: translate)",
+    "step2Title": "Verify (TODO: translate)",
+    "step2Body": "Our team confirms your details within one working day. (TODO: translate)",
+    "step3Title": "Book (TODO: translate)",
+    "step3Body": "Pick a doctor and time. Get reminders by phone. (TODO: translate)"
+  },
+  "services": {
+    "title": "Services & pricing (TODO: translate)",
+    "subtitle": "Transparent pricing in Ethiopian Birr. (TODO: translate)",
+    "rangePrefix": "From (TODO: translate)"
+  },
+  "location": {
+    "title": "Find us (TODO: translate)",
+    "hoursTitle": "Opening hours (TODO: translate)",
+    "weekdays": "Mon–Sat (TODO: translate)",
+    "weekdaysHours": "08:00 – 20:00 (TODO: translate)",
+    "weekend": "Sunday (TODO: translate)",
+    "weekendHours": "09:00 – 13:00 (TODO: translate)",
+    "parking": "Parking (TODO: translate)",
+    "directions": "Get directions (TODO: translate)"
+  },
+  "portal": {
+    "title": "Already a patient? (TODO: translate)",
+    "body": "Access your appointments, prescriptions, and lab results in the patient portal. (TODO: translate)",
+    "cta": "Open Patient Portal (TODO: translate)"
+  },
+  "footer": {
+    "tagline": "Trusted care for Addis Ababa since 2009. (TODO: translate)",
+    "quickLinks": "Quick links (TODO: translate)",
+    "contact": "Contact (TODO: translate)",
+    "followUs": "Follow us (TODO: translate)",
+    "rights": "All rights reserved. (TODO: translate)",
+    "license": "License (TODO: translate)"
+  },
+  "common": {
+    "retry": "Retry (TODO: translate)",
+    "loading": "Loading… (TODO: translate)",
+    "error": "Something went wrong. (TODO: translate)",
+    "seeAll": "See all (TODO: translate)",
+    "cancel": "Cancel (TODO: translate)",
+    "confirm": "Confirm (TODO: translate)"
+  }
+}

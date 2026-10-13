@@ -1,0 +1,96 @@
+{
+  "utility": {
+    "emergency": "Emergency",
+    "hours": "Mon–Sat 8:00–20:00 · Sun 9:00–13:00",
+    "languageLabel": "Language"
+  },
+  "header": {
+    "home": "Home",
+    "departments": "Departments",
+    "doctors": "Doctors",
+    "services": "Services",
+    "contact": "Contact",
+    "patientPortal": "Patient Portal",
+    "bookAppointment": "Book Appointment"
+  },
+  "hero": {
+    "headline": "Trusted care for Addis Ababa families.",
+    "subhead": "Modern medicine, delivered by experienced physicians in the heart of the city. From routine check-ups to specialist consultations.",
+    "ctaPrimary": "Book Appointment",
+    "ctaSecondary": "Explore Departments",
+    "booking": {
+      "title": "Book an appointment",
+      "date": "Preferred date",
+      "datePlaceholder": "Select a date",
+      "department": "Department",
+      "departmentPlaceholder": "Choose a department",
+      "check": "Check availability",
+      "success": "We'll confirm your appointment by phone within 2 hours."
+    }
+  },
+  "trust": {
+    "licensed": "MoH licensed",
+    "doctors": "Experienced specialists",
+    "years": "Since 2009",
+    "emergency": "24/7 emergency line",
+    "license": "License"
+  },
+  "departments": {
+    "title": "Departments",
+    "subtitle": "Specialist care across the medical spectrum.",
+    "viewDoctors": "View doctors",
+    "empty": "Departments coming soon."
+  },
+  "doctors": {
+    "title": "Our doctors",
+    "subtitle": "Specialists you can trust.",
+    "bookWith": "Book with",
+    "yearsShort": "yrs",
+    "empty": "Doctor profiles coming soon."
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "step1Title": "Register",
+    "step1Body": "Create your patient account in under 2 minutes.",
+    "step2Title": "Verify",
+    "step2Body": "Our team confirms your details within one working day.",
+    "step3Title": "Book",
+    "step3Body": "Pick a doctor and time. Get reminders by phone."
+  },
+  "services": {
+    "title": "Services & pricing",
+    "subtitle": "Transparent pricing in Ethiopian Birr.",
+    "rangePrefix": "From"
+  },
+  "location": {
+    "title": "Find us",
+    "hoursTitle": "Opening hours",
+    "weekdays": "Mon–Sat",
+    "weekdaysHours": "08:00 – 20:00",
+    "weekend": "Sunday",
+    "weekendHours": "09:00 – 13:00",
+    "parking": "Parking",
+    "directions": "Get directions"
+  },
+  "portal": {
+    "title": "Already a patient?",
+    "body": "Access your appointments, prescriptions, and lab results in the patient portal.",
+    "cta": "Open Patient Portal"
+  },
+  "footer": {
+    "tagline": "Trusted care for Addis Ababa since 2009.",
+    "quickLinks": "Quick links",
+    "contact": "Contact",
+    "followUs": "Follow us",
+    "rights": "All rights reserved.",
+    "license": "License"
+  },
+  "common": {
+    "retry": "Retry",
+    "loading": "Loading…",
+    "error": "Something went wrong.",
+    "seeAll": "See all",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  }
+}

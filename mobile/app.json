@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Bersabeh Clinic",
+    "slug": "bersabeh-clinic",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "bersabeh",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bersabeh.clinic"
+    },
+    "android": {
+      "package": "com.bersabeh.clinic"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "apiUrl": "http://localhost:8000",
+      "wsUrl": "ws://localhost:8000"
+    }
+  }
+}
