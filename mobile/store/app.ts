@@ -29,6 +29,7 @@ export interface SessionUser {
   full_name: string;
   role: string;
   status: string;
+  phone?: string | null;
   photo_url?: string | null;
 }
 
