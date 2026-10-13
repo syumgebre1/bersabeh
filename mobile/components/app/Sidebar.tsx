@@ -6,6 +6,7 @@
  */
 
 import { useRouter, usePathname } from "expo-router";
+import { useTranslation } from "react-i18next";
 import {
   Activity,
   CalendarDays,
@@ -19,6 +20,7 @@ import {
   Shield,
   Stethoscope,
   UserCircle,
+  UserPlus,
   Users,
   type LucideIcon,
 } from "lucide-react-native";
@@ -33,57 +35,58 @@ import { useAppStore } from "@/store/app";
 // ============================================================
 interface NavItem {
   key: string;
-  label: string;
+  labelKey: string;  // i18n key; falls back to English
+  labelFallback: string;
   href: string;
   Icon: LucideIcon;
 }
 
 const NAV_BY_ROLE: Record<string, NavItem[]> = {
   patient: [
-    { key: "overview",      label: "Overview",       href: "/(app)/patient",                 Icon: LayoutDashboard },
-    { key: "appointments",  label: "Appointments",   href: "/(app)/patient",                 Icon: CalendarDays },
-    { key: "prescriptions", label: "Prescriptions",  href: "/(app)/patient",                 Icon: Pill },
-    { key: "labs",          label: "Lab results",    href: "/(app)/patient",                 Icon: FlaskConical },
-    { key: "bills",         label: "Bills",          href: "/(app)/patient",                 Icon: Receipt },
-    { key: "messages",      label: "Messages",       href: "/(app)/patient",                 Icon: MessageSquare },
+    { key: "overview",      labelKey: "patient.nav.overview",      labelFallback: "Overview",       href: "/(app)/patient",                 Icon: LayoutDashboard },
+    { key: "appointments",  labelKey: "patient.nav.appointments",  labelFallback: "Appointments",   href: "/(app)/patient/appointments",    Icon: CalendarDays },
+    { key: "prescriptions", labelKey: "patient.nav.prescriptions", labelFallback: "Prescriptions",  href: "/(app)/patient/prescriptions",   Icon: Pill },
+    { key: "labs",          labelKey: "patient.nav.labs",          labelFallback: "Lab results",    href: "/(app)/patient/labs",            Icon: FlaskConical },
+    { key: "bills",         labelKey: "patient.nav.bills",         labelFallback: "Bills",          href: "/(app)/patient/bills",           Icon: Receipt },
+    { key: "messages",      labelKey: "patient.nav.messages",      labelFallback: "Messages",       href: "/(app)/patient/messages",        Icon: MessageSquare },
   ],
   doctor: [
-    { key: "today",      label: "Today",         href: "/(app)/doctor", Icon: LayoutDashboard },
-    { key: "queue",      label: "Patient queue", href: "/(app)/doctor", Icon: Users },
-    { key: "prescribe",  label: "Prescribe",     href: "/(app)/doctor", Icon: Pill },
-    { key: "labs",       label: "Lab orders",    href: "/(app)/doctor", Icon: FlaskConical },
-    { key: "messages",   label: "Messages",      href: "/(app)/doctor", Icon: MessageSquare },
+    { key: "today",      labelKey: "doctor.nav.today",      labelFallback: "Today",         href: "/(app)/doctor",          Icon: LayoutDashboard },
+    { key: "queue",      labelKey: "doctor.nav.queue",      labelFallback: "Patient queue", href: "/(app)/doctor/queue",    Icon: Users },
+    { key: "prescribe",  labelKey: "doctor.nav.prescribe",  labelFallback: "Prescribe",     href: "/(app)/doctor/prescribe",Icon: Pill },
+    { key: "labs",       labelKey: "doctor.nav.labs",       labelFallback: "Lab orders",    href: "/(app)/doctor/labs",     Icon: FlaskConical },
+    { key: "messages",   labelKey: "doctor.nav.messages",   labelFallback: "Messages",      href: "/(app)/doctor/messages", Icon: MessageSquare },
   ],
   nurse: [
-    { key: "wards",      label: "Wards",         href: "/(app)/nurse", Icon: LayoutDashboard },
-    { key: "vitals",     label: "Log vitals",    href: "/(app)/nurse", Icon: Activity },
-    { key: "meds",       label: "Medications",   href: "/(app)/nurse", Icon: Pill },
-    { key: "handover",   label: "Handover",      href: "/(app)/nurse", Icon: ClipboardList },
-    { key: "messages",   label: "Messages",      href: "/(app)/nurse", Icon: MessageSquare },
+    { key: "wards",      labelKey: "nurse.nav.wards",      labelFallback: "Wards",         href: "/(app)/nurse",              Icon: LayoutDashboard },
+    { key: "vitals",     labelKey: "nurse.nav.vitals",     labelFallback: "Log vitals",    href: "/(app)/nurse/vitals",       Icon: Activity },
+    { key: "meds",       labelKey: "nurse.nav.medications",labelFallback: "Medications",   href: "/(app)/nurse/medications",  Icon: Pill },
+    { key: "handover",   labelKey: "nurse.nav.handover",   labelFallback: "Handover",      href: "/(app)/nurse/handover",     Icon: ClipboardList },
+    { key: "messages",   labelKey: "nurse.nav.messages",   labelFallback: "Messages",      href: "/(app)/nurse/messages",     Icon: MessageSquare },
   ],
   reception: [
-    { key: "checkin",   label: "Check-in",      href: "/(app)/reception", Icon: LayoutDashboard },
-    { key: "book",      label: "Book",          href: "/(app)/reception", Icon: CalendarDays },
-    { key: "walkin",    label: "Walk-in",       href: "/(app)/reception", Icon: UserCircle },
-    { key: "billing",   label: "Billing",       href: "/(app)/reception", Icon: Receipt },
-    { key: "messages",  label: "Messages",      href: "/(app)/reception", Icon: MessageSquare },
+    { key: "checkin",  labelKey: "reception.nav.checkin",  labelFallback: "Check-in",  href: "/(app)/reception",          Icon: LayoutDashboard },
+    { key: "book",     labelKey: "reception.nav.book",     labelFallback: "Book",      href: "/(app)/reception/book",     Icon: CalendarDays },
+    { key: "walkin",   labelKey: "reception.nav.walkin",   labelFallback: "Walk-in",   href: "/(app)/reception/walkin",   Icon: UserPlus },
+    { key: "billing",  labelKey: "reception.nav.billing",  labelFallback: "Billing",   href: "/(app)/reception/billing",  Icon: Receipt },
+    { key: "messages", labelKey: "reception.nav.messages", labelFallback: "Messages",  href: "/(app)/reception/messages", Icon: MessageSquare },
   ],
   lab: [
-    { key: "pending",  label: "Pending",       href: "/(app)/lab", Icon: LayoutDashboard },
-    { key: "results",  label: "Results",       href: "/(app)/lab", Icon: FlaskConical },
+    { key: "pending",  labelKey: "lab.nav.pending",  labelFallback: "Pending",  href: "/(app)/lab",          Icon: LayoutDashboard },
+    { key: "results",  labelKey: "lab.nav.results",  labelFallback: "Results",  href: "/(app)/lab/orders",   Icon: FlaskConical },
   ],
   admin: [
-    { key: "overview",  label: "Overview",      href: "/(app)/admin",              Icon: LayoutDashboard },
-    { key: "content",   label: "Content CMS",   href: "/(app)/admin/content",      Icon: FileText },
-    { key: "staff",     label: "Staff",         href: "/(app)/admin/staff",        Icon: Users },
-    { key: "patients",  label: "Patients",      href: "/(app)/admin/patients",     Icon: UserCircle },
-    { key: "reports",   label: "Reports",       href: "/(app)/admin",              Icon: Activity },
+    { key: "overview",  labelKey: "admin.nav.overview",  labelFallback: "Overview",      href: "/(app)/admin",              Icon: LayoutDashboard },
+    { key: "content",   labelKey: "admin.nav.content",   labelFallback: "Content CMS",   href: "/(app)/admin/content",      Icon: FileText },
+    { key: "staff",     labelKey: "admin.nav.staff",     labelFallback: "Staff",         href: "/(app)/admin/staff",        Icon: Users },
+    { key: "patients",  labelKey: "admin.nav.patients",  labelFallback: "Patients",      href: "/(app)/admin/patients",     Icon: UserCircle },
+    { key: "reports",   labelKey: "admin.nav.reports",   labelFallback: "Reports",       href: "/(app)/admin/reports",      Icon: Activity },
   ],
   super_admin: [
-    { key: "overview",  label: "Overview",   href: "/(app)/super-admin", Icon: LayoutDashboard },
-    { key: "admins",    label: "Admins",     href: "/(app)/super-admin", Icon: Shield },
-    { key: "audit",     label: "Audit log",  href: "/(app)/super-admin", Icon: FileText },
-    { key: "clinic",    label: "Clinic config", href: "/(app)/super-admin", Icon: Stethoscope },
+    { key: "overview",  labelKey: "superAdmin.nav.overview",  labelFallback: "Overview",      href: "/(app)/super-admin",         Icon: LayoutDashboard },
+    { key: "admins",    labelKey: "superAdmin.nav.admins",    labelFallback: "Admins",        href: "/(app)/super-admin/admins",  Icon: Shield },
+    { key: "audit",     labelKey: "superAdmin.nav.audit",     labelFallback: "Audit log",     href: "/(app)/super-admin/audit",   Icon: FileText },
+    { key: "clinic",    labelKey: "superAdmin.nav.clinic",    labelFallback: "Clinic config", href: "/(app)/super-admin/clinic",  Icon: Stethoscope },
   ],
 };
 
@@ -92,6 +95,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
 // Component
 // ============================================================
 export function Sidebar() {
+  const { t } = useTranslation();
   const user = useAppStore((s) => s.user);
   const { width } = useWindowDimensions();
   const isWide = width >= 900;
@@ -142,7 +146,7 @@ export function Sidebar() {
                   style={[styles.navLabel, active && styles.navLabelActive]}
                   numberOfLines={1}
                 >
-                  {item.label}
+                  {t(item.labelKey, { defaultValue: item.labelFallback })}
                 </Text>
               )}
             </Pressable>

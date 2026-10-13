@@ -39,6 +39,7 @@ from app.schemas.lab import (
     LabResultCreate,
     LabResultRead,
 )
+from app.core.pdf_translations import get_medical_translations
 from app.services.pdf import render_lab_report_pdf
 
 
@@ -244,6 +245,7 @@ async def download_lab_pdf(
     order_id: uuid.UUID,
     current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
+    locale: str = Query("en", description="PDF language: en | am | ti"),
 ):
     o = await _get_order_or_404(db, order_id)
     if not _can_view(current_user, o):
@@ -277,7 +279,7 @@ async def download_lab_pdf(
         "reference_range": r.reference_range,
         "interpretation": r.interpretation,
         "lab_notes": r.notes,
-    })
+    }, locale=locale)
 
     return Response(
         content=pdf_bytes,

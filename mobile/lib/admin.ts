@@ -281,3 +281,253 @@ export function useCreateStaff() {
     },
   });
 }
+
+
+// ============================================================
+// Audit log
+// ============================================================
+export interface AuditLogEntry {
+  id: string;
+  actor_id: string | null;
+  actor_email: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  description: string;
+  diff: Record<string, unknown> | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+export function useAuditLogs(filters: {
+  action?: string;
+  entity_type?: string;
+  actor_id?: string;
+  limit?: number;
+  offset?: number;
+} = {}) {
+  const params = new URLSearchParams();
+  if (filters.action)      params.set("action", filters.action);
+  if (filters.entity_type) params.set("entity_type", filters.entity_type);
+  if (filters.actor_id)    params.set("actor_id", filters.actor_id);
+  if (filters.limit)       params.set("limit", String(filters.limit));
+  if (filters.offset)      params.set("offset", String(filters.offset));
+
+  return useQuery({
+    queryKey: ["audit-logs", filters],
+    queryFn: () =>
+      apiFetch<AuditLogEntry[]>(`/api/v1/audit-logs?${params.toString()}`),
+  });
+}
+
+
+// ============================================================
+// Admin management (super-admin only)
+// ============================================================
+export interface CreateAdminPayload {
+  email: string;
+  full_name: string;
+  password: string;
+  role: "admin" | "super_admin";
+}
+
+export function useCreateAdmin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateAdminPayload) =>
+      apiFetch<SessionUser>("/api/v1/users", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
+
+// ============================================================
+// Appointments (used by Doctor, Patient, Reception)
+// ============================================================
+export interface AppointmentRead {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  scheduled_at: string;
+  duration_minutes: number;
+  status: string;
+  reason: string | null;
+  room: string | null;
+  patient?: { full_name: string; phone: string | null };
+  doctor?:  { full_name: string; specialty: string | null };
+}
+
+export function useAppointments(filters: {
+  status?: string;
+  date?: string;
+  limit?: number;
+} = {}) {
+  const params = new URLSearchParams();
+  if (filters.status) params.set("status", filters.status);
+  if (filters.date)   params.set("date", filters.date);
+  if (filters.limit)  params.set("limit", String(filters.limit));
+
+  return useQuery({
+    queryKey: ["appointments", filters],
+    queryFn: () =>
+      apiFetch<AppointmentRead[]>(`/api/v1/appointments?${params.toString()}`),
+  });
+}
+
+
+// ============================================================
+// Prescriptions (Doctor + Patient)
+// ============================================================
+export interface PrescriptionRead {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  status: string;
+  notes: string | null;
+  follow_up_date: string | null;
+  created_at: string;
+  patient?: { full_name: string };
+  items?: Array<{
+    medication_name: string;
+    dose: string;
+    frequency: string;
+    duration_days: number | null;
+  }>;
+}
+
+export function usePrescriptions(filters: { status?: string; limit?: number } = {}) {
+  const params = new URLSearchParams();
+  if (filters.status) params.set("status", filters.status);
+  if (filters.limit)  params.set("limit", String(filters.limit));
+
+  return useQuery({
+    queryKey: ["prescriptions", filters],
+    queryFn: () =>
+      apiFetch<PrescriptionRead[]>(`/api/v1/prescriptions?${params.toString()}`),
+  });
+}
+
+
+// ============================================================
+// Lab orders (Doctor + Lab + Patient)
+// ============================================================
+export interface LabOrderRead {
+  id: string;
+  patient_id: string;
+  test_name: string;
+  status: string;
+  priority: string;
+  ordered_at: string;
+  result?: {
+    result_type: string;
+    value_numeric: number | null;
+    value_text: string | null;
+    units: string | null;
+  } | null;
+}
+
+export function useLabOrders(filters: { status?: string; limit?: number } = {}) {
+  const params = new URLSearchParams();
+  if (filters.status) params.set("status", filters.status);
+  if (filters.limit)  params.set("limit", String(filters.limit));
+
+  return useQuery({
+    queryKey: ["lab-orders", filters],
+    queryFn: () =>
+      apiFetch<LabOrderRead[]>(`/api/v1/labs?${params.toString()}`),
+  });
+}
+
+
+// ============================================================
+// Bills (Reception + Patient)
+// ============================================================
+export interface BillRead {
+  id: string;
+  patient_id: string;
+  amount_etb: number;
+  paid_amount_etb: number;
+  status: string;
+  payment_method: string | null;
+  created_at: string;
+  paid_at: string | null;
+  items?: Array<{
+    description: string;
+    quantity: number;
+    unit_price_etb: number;
+  }>;
+}
+
+export function useBills(filters: { status?: string; limit?: number } = {}) {
+  const params = new URLSearchParams();
+  if (filters.status) params.set("status", filters.status);
+  if (filters.limit)  params.set("limit", String(filters.limit));
+
+  return useQuery({
+    queryKey: ["bills", filters],
+    queryFn: () =>
+      apiFetch<BillRead[]>(`/api/v1/bills?${params.toString()}`),
+  });
+}
+
+
+// ============================================================
+// Threads (all roles with messaging)
+// ============================================================
+export interface ThreadRead {
+  id: string;
+  kind: string;
+  subject: string | null;
+  updated_at: string;
+  unread_count?: number;
+  participants?: Array<{
+    user_id: string;
+    full_name: string;
+    role: string;
+  }>;
+}
+
+export function useThreads() {
+  return useQuery({
+    queryKey: ["threads"],
+    queryFn: () => apiFetch<ThreadRead[]>("/api/v1/threads"),
+  });
+}
+
+
+// ============================================================
+// Vitals (Nurse + Doctor + Patient)
+// ============================================================
+export interface VitalRead {
+  id: string;
+  patient_id: string;
+  temperature_c: number | null;
+  heart_rate_bpm: number | null;
+  bp_systolic: number | null;
+  bp_diastolic: number | null;
+  spo2_percent: number | null;
+  pain_scale: number | null;
+  notes: string | null;
+  recorded_at: string;
+}
+
+export function useVitals(filters: { patient_id?: string; limit?: number } = {}) {
+  const params = new URLSearchParams();
+  if (filters.patient_id) params.set("patient_id", filters.patient_id);
+  if (filters.limit)      params.set("limit", String(filters.limit));
+
+  const url = filters.patient_id
+    ? `/api/v1/vitals/patient/${filters.patient_id}?${params.toString()}`
+    : `/api/v1/vitals?${params.toString()}`;
+
+  return useQuery({
+    queryKey: ["vitals", filters],
+    queryFn: () => apiFetch<VitalRead[]>(url),
+  });
+}

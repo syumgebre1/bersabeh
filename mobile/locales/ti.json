@@ -4,56 +4,61 @@
     "note": "TODO: translate all values to Tigrigna. Currently English placeholders."
   },
   "utility": {
-    "emergency": "Emergency (TODO: translate)",
-    "hours": "Mon–Sat 8:00–20:00 · Sun 9:00–13:00 (TODO: translate)",
+    "emergency": "ህጹጽ ሕክምና",
+    "hours": "ሰኑይ–ቅዳሜ 2:00–14:00 · ሰንበት 3:00–7:00",
     "languageLabel": "Language (TODO: translate)"
   },
   "header": {
-    "home": "Home (TODO: translate)",
-    "departments": "Departments (TODO: translate)",
-    "doctors": "Doctors (TODO: translate)",
-    "services": "Services (TODO: translate)",
-    "contact": "Contact (TODO: translate)",
-    "patientPortal": "Patient Portal (TODO: translate)",
-    "bookAppointment": "Book Appointment (TODO: translate)"
+    "home": "መእተዊ",
+    "departments": "ክፍሊታት",
+    "doctors": "ሓካይም",
+    "services": "ኣገልግሎታት",
+    "contact": "ርክብ",
+    "patientPortal": "ፖርታል ሕሙም",
+    "bookAppointment": "ቀጠሮ ሐዙ",
+    "notifications": "መዘኻኸሪታት"
   },
   "hero": {
-    "headline": "Trusted care for Addis Ababa families. (TODO: translate)",
+    "headline": "እሙን ክንክን ንስድራቤታት ኣዲስ ኣበባ።",
     "subhead": "Modern medicine, delivered by experienced physicians in the heart of the city. (TODO: translate)",
-    "ctaPrimary": "Book Appointment (TODO: translate)",
-    "ctaSecondary": "Explore Departments (TODO: translate)",
+    "ctaPrimary": "ቀጠሮ ሐዙ",
+    "ctaSecondary": "ክፍሊታት ርኣዩ",
     "booking": {
-      "title": "Book an appointment (TODO: translate)",
-      "date": "Preferred date (TODO: translate)",
-      "datePlaceholder": "Select a date (TODO: translate)",
-      "department": "Department (TODO: translate)",
-      "departmentPlaceholder": "Choose a department (TODO: translate)",
-      "check": "Check availability (TODO: translate)",
-      "success": "We'll confirm your appointment by phone within 2 hours. (TODO: translate)"
-    }
+      "title": "ቀጠሮ ሐዙ",
+      "date": "ዝመረጽክዎ ዕለት",
+      "datePlaceholder": "ዕለት ምረጹ",
+      "department": "ክፍሊ",
+      "departmentPlaceholder": "ክፍሊ ምረጹ",
+      "check": "ድሉውነት ኣረጋግፁ",
+      "success": "ቀጠሮኹም ኣብ ውሽጢ 2 ሰዓት ብስልኪ ክነረጋግጸልኩም ኢና።"
+    },
+    "eyebrow": "ክሊኒክ በርስቤህ · ኣዲስ ኣበባ"
   },
   "trust": {
-    "licensed": "MoH licensed (TODO: translate)",
+    "licensed": "ብሚኒስቴር ጥዕና ፍቓድ ዝረኸበ",
     "doctors": "Experienced specialists (TODO: translate)",
-    "years": "Since 2009 (TODO: translate)",
-    "emergency": "24/7 emergency line (TODO: translate)",
-    "license": "License (TODO: translate)"
+    "years": "ንኣዲስ ኣበባ ን16 ዓመታት ዝኣገገለ",
+    "emergency": "የ24/7 ህጹጽ መስመር",
+    "license": "License (TODO: translate)",
+    "licenseLabel": "ፍቓድ",
+    "experts": "ተሞክሮ ዘለዎም ፍሉያት ሰብ ሞያ",
+    "specialties": "ውሽጣዊ ሕማማት · መጥለቂ · ልቢ · ጨጓራ"
   },
   "departments": {
-    "title": "Departments (TODO: translate)",
-    "subtitle": "Specialist care across the medical spectrum. (TODO: translate)",
+    "title": "ክፍሊታትና",
+    "subtitle": "ኣብ ዝተፈላለዩ ዓውድታት ሕክምና ፍሉይ ክንክን",
     "viewDoctors": "View doctors (TODO: translate)",
     "empty": "Departments coming soon. (TODO: translate)"
   },
   "doctors": {
-    "title": "Our doctors (TODO: translate)",
-    "subtitle": "Specialists you can trust. (TODO: translate)",
-    "bookWith": "Book with (TODO: translate)",
-    "yearsShort": "yrs (TODO: translate)",
+    "title": "ሓካይምና",
+    "subtitle": "ተሞክሮ ዘለዎም ፍሉያት ሰብ ሞያ",
+    "bookWith": "ምስ... ቀጠሮ ሐዙ",
+    "yearsShort": "ዓመታት",
     "empty": "Doctor profiles coming soon. (TODO: translate)"
   },
   "howItWorks": {
-    "title": "How it works (TODO: translate)",
+    "title": "ከመይ ከም ዝሰርሕ",
     "step1Title": "Register (TODO: translate)",
     "step1Body": "Create your patient account in under 2 minutes. (TODO: translate)",
     "step2Title": "Verify (TODO: translate)",
@@ -62,39 +67,382 @@
     "step3Body": "Pick a doctor and time. Get reminders by phone. (TODO: translate)"
   },
   "services": {
-    "title": "Services & pricing (TODO: translate)",
+    "title": "ኣገልግሎታትና",
     "subtitle": "Transparent pricing in Ethiopian Birr. (TODO: translate)",
     "rangePrefix": "From (TODO: translate)"
   },
   "location": {
-    "title": "Find us (TODO: translate)",
-    "hoursTitle": "Opening hours (TODO: translate)",
-    "weekdays": "Mon–Sat (TODO: translate)",
-    "weekdaysHours": "08:00 – 20:00 (TODO: translate)",
-    "weekend": "Sunday (TODO: translate)",
-    "weekendHours": "09:00 – 13:00 (TODO: translate)",
+    "title": "ድለዩና",
+    "hoursTitle": "ሰዓታት ስራሕ",
+    "weekdays": "ካብ ሰኑይ – ቅዳሜ",
+    "weekdaysHours": "2:00 – 14:00",
+    "weekend": "ሰንበት",
+    "weekendHours": "3:00 – 7:00",
     "parking": "Parking (TODO: translate)",
-    "directions": "Get directions (TODO: translate)"
+    "directions": "መርሒ መንገዲ ረኸቡ",
+    "emergencyPhone": "ስልኪ ህጹጽ ሕክምና"
   },
   "portal": {
-    "title": "Already a patient? (TODO: translate)",
-    "body": "Access your appointments, prescriptions, and lab results in the patient portal. (TODO: translate)",
-    "cta": "Open Patient Portal (TODO: translate)"
+    "title": "ቅድሚ ሕጂ ሕሙም ዲኹም?",
+    "body": "ቀጠሮታትኩም፣ ናይ ሕክምና ትእዛዛትኩም፣ ከምኡ ውን ውጽኢት ላቦራቶሪታትኩም ኣብ ፖርታል ሕሙም ረኸቡ።",
+    "cta": "ፖርታል ሕሙም ክፈት"
   },
   "footer": {
-    "tagline": "Trusted care for Addis Ababa since 2009. (TODO: translate)",
-    "quickLinks": "Quick links (TODO: translate)",
-    "contact": "Contact (TODO: translate)",
-    "followUs": "Follow us (TODO: translate)",
-    "rights": "All rights reserved. (TODO: translate)",
-    "license": "License (TODO: translate)"
+    "tagline": "ካብ 2009 ጀምሮ ንኣዲስ ኣበባ እሙን ክንክን",
+    "quickLinks": "ቅልጡፍ መላግቦታት",
+    "contact": "ርክብ",
+    "followUs": "ስዕቡና",
+    "rights": "ኩሉ መሰል ዝተሓለወ እዩ።",
+    "license": "ፍቓድ",
+    "madeIn": "ኣብ ኣዲስ ኣበባ ዝተሰርሐ"
   },
   "common": {
-    "retry": "Retry (TODO: translate)",
-    "loading": "Loading… (TODO: translate)",
-    "error": "Something went wrong. (TODO: translate)",
+    "retry": "እንደገና ፈትን",
+    "loading": "ይጽዕን ኣሎ...",
+    "error": "ጌጋ",
     "seeAll": "See all (TODO: translate)",
-    "cancel": "Cancel (TODO: translate)",
-    "confirm": "Confirm (TODO: translate)"
+    "cancel": "ሰርዝ",
+    "confirm": "ኣረጋግጽ",
+    "downloadPdf": "ፒዲኤፍ ኣውርድ",
+    "save": "ኣቐምጥ",
+    "close": "ዕጸው",
+    "back": "ተመለስ",
+    "next": "ቀጽል",
+    "previous": "ዝሓለፈ",
+    "tryAgain": "እንደገና ፈትን",
+    "yes": "እወ",
+    "no": "ኣይኮነን",
+    "ok": "ሕጂ",
+    "areYouSure": "ርግጸኛ ዲኹም?",
+    "search": "ድለ",
+    "filter": "ኣጣር",
+    "sort": "ደርድር",
+    "apply": "ተግባራዊ ግበር",
+    "clear": "ኣጽሪ",
+    "download": "ኣውርድ",
+    "print": "ሕተም",
+    "share": "ኣካፈል",
+    "copy": "ቅዳሕ",
+    "edit": "ኣመሓይሽ",
+    "delete": "ሰርዝ",
+    "view": "ርአ",
+    "add": "ወስኽ",
+    "remove": "ኣልዕል",
+    "create": "ፈጠር",
+    "update": "ኣሐድስ",
+    "submit": "ኣእቱ",
+    "viewAll": "ኩሉ ርኣዩ",
+    "seeMore": "ተወሳኺ ርአ",
+    "showLess": "ንእሽቶ ኣርኢ",
+    "noResults": "ዝኾነ ውጽኢት የልን",
+    "empty": "ባዶ",
+    "readMore": "ተወሳኺ ኣንብቡ"
+  },
+  "medical": {
+    "instructions": {
+      "with_food": "ምስ ምግቢ ውሰዱ",
+      "empty_stomach": "ብባዶ ከብዲ ውሰዱ",
+      "before_meals": "ቅድሚ ምግቢ ውሰዱ",
+      "after_meals": "ድሕሪ ምግቢ ውሰዱ",
+      "bedtime": "ቅድሚ ምድቃስኩም ውሰዱ",
+      "as_needed": "ከም ዘድልየኩም መጠን ውሰዱ",
+      "once_daily": "ኣብ መዓልቲ ሓደ ጊዜ ውሰዱ",
+      "twice_daily": "ኣብ መዓልቲ ክልተ ጊዜ ውሰዱ",
+      "three_times_daily": "ኣብ መዓልቲ ሰለስተ ጊዜ ውሰዱ",
+      "max_3g_daily": "ኣብ መዓልቲ ካብ 3 ግራም ንላዕሊ ኣይትውሰዱ"
+    },
+    "prescription": {
+      "medication": "መድኃኒት",
+      "dose": "መጠን",
+      "frequency": "ምድግጋም",
+      "duration": "ዝወስዶ ግዜ",
+      "days": "መዓልትታት",
+      "instructions": "መመርሒታት",
+      "prescription": "ናይ ሐኪም ትእዛዝ",
+      "prescribed_by": "ዝኣዘዞ ዶክተር",
+      "follow_up_date": "ናይ ቆፀሮ መዓልቲ"
+    },
+    "lab": {
+      "result": "ውጽኢት",
+      "reference_range": "መወከሲ መጠን",
+      "units": "መለክዒታት",
+      "interpretation": "ትርጉም",
+      "normal": "ኣብ ንቡር መጠን ዘሎ",
+      "lab_report": "ናይ ላቦራቶሪ ሪፖርት"
+    },
+    "appointment": {
+      "appointment": "ቆፀሮ",
+      "scheduled_for": "እተመደበሉ ግዜ",
+      "reason": "ናይ ምብጻሕ ምኽንያት"
+    },
+    "billing": {
+      "total": "ጠቕላላ",
+      "paid": "ዝተከፈለ"
+    }
+  },
+  "patient": {
+    "nav": {
+      "overview": "ሓፈሻዊ ትርኢት",
+      "appointments": "ቆፀሮታት",
+      "prescriptions": "ናይ ሕክምና ትእዛዛት",
+      "labs": "ውጽኢታት ላቦራቶሪ",
+      "bills": "ቢላት",
+      "messages": "መልእክትታት"
+    },
+    "prescriptions": {
+      "status": {
+        "active": "ኣብ ምስራሕ",
+        "completed": "ተዛዚሙ",
+        "cancelled": "ተሰሪዙ"
+      },
+      "yourMedications": "መድሃኒታትኩም",
+      "doctorNotes": "መዘኻኸሪ ካብ ሓኪምኩም",
+      "yourDoctor": "ሓኪምኩም",
+      "loadError": "ናይ ሕክምና ትእዛዝ ክጽዕን ኣይተኻኣለን",
+      "listTitle": "ትእዛዛት",
+      "noPrescriptions": "ክሳብ ሕጂ ዝተዋህበ መድሃኒት የልን",
+      "title": "ናይ ሕክምና ትእዛዝ",
+      "titlePlural": "ናይ ሕክምና ትእዛዛት",
+      "details": "ዝርዝር ናይ ሕክምና ትእዛዝ",
+      "followUp": "ክትትል",
+      "prescribedBy": "ዝኣዘዞ ሓኪም",
+      "medication": "መድሃኒት",
+      "dose": "መጠን",
+      "frequency": "ድግግሞሽ",
+      "duration": "ቆይታ",
+      "days": "መዓልትታት",
+      "instructions": "መመርሒታት"
+    },
+    "dashboard": {
+      "greeting": "ሰላም፣ {{name}}",
+      "careSummary": "መሕጸሪ ክንክንኩም እዚ እነሆ",
+      "nextAppointment": "ዝቕጽል ቀጠሮ",
+      "noUpcoming": "ዝመጽእ ቀጠሮ የልን",
+      "myPrescriptions": "ዝተዋህቡኒ መድሃኒታት",
+      "myLabResults": "ውጽኢት ላቦራቶሪተይ",
+      "billing": "ክፍያ",
+      "outstanding": "ዝተርፈ ክፍያ",
+      "allPaid": "ኩሉ ቢል ተኸፊሉዩ",
+      "bill": "ቢል",
+      "bills": "ቢላት",
+      "needToTalk": "ምስ ሓኪምኩም ክትዛረቡ ትደልዩዶ?",
+      "openMessages": "መልእክት ክፈት",
+      "askQuestions": "ኣብ መንጎ ምብጻሓት ሕቶታት ሕተት",
+      "seeAll": "ኩሉ ርአ"
+    },
+    "appointments": {
+      "appointment": "ቀጠሮ",
+      "appointments": "ቀጠሮታት",
+      "noRecords": "ዝተመዝገበ ቀጠሮ የልን",
+      "noToday": "ሎሚ ዝኾነ ቀጠሮ የልን",
+      "reason": "ምኽንያት ምብጻሕ",
+      "whatToBring": "እንታይ ክትሕዙ ኣለኩም",
+      "bringId": "መለለዪ ሓበሬታኹምን ካርድ ሕሙምንኩም ሒዙ ንዓ",
+      "listMedications": "እወስድዎ ዘለኹም መድሃኒታት ዘርዝሩ",
+      "time": "ሰዓት",
+      "duration": "ግዜ",
+      "room": "ክፍሊ",
+      "specialty": "ፍሉይ ሞያ"
+    },
+    "labs": {
+      "result": "ውጽኢት",
+      "results": "ውጽኢታት ላቦራቶሪ",
+      "report": "ናይ ላቦራቶሪ ሪፖርት",
+      "testName": "ስም መርመራ",
+      "orderedBy": "ዝኣዘዞ",
+      "orderedOn": "ዝተኣዘዘሉ ዕለት",
+      "resultedBy": "ውጽኢት ዝሃቦ",
+      "resultedAt": "ውጽኢት ዝወጸሉ ግዜ",
+      "referenceRange": "መወከሲ መጠን",
+      "units": "መለክዒታት",
+      "interpretation": "ትርጉም",
+      "withinNormal": "ኣብ ንቡር መጠን ዘሎ",
+      "notes": "ናይ ላቦራቶሪ መዘኻኸሪታት",
+      "sampleQuality": "ጽሬት ናሙና ተቐባይነት ኣለዎ",
+      "noResults": "ክሳብ ሕጂ ውጽኢት ላቦራቶሪ የልን",
+      "pending": "ውጽኢት ይጽበ ኣሎ",
+      "willNotify": "ድሉው ምስ ኮነ ክንሕብረኩም ኢና"
+    },
+    "bills": {
+      "bill": "ቢል",
+      "bills": "ቢላት",
+      "billing": "ቢሊንግ",
+      "lineItems": "ዝርዝር ንብረታት",
+      "description": "መግለጺ",
+      "quantity": "መጠን",
+      "unitPrice": "ዋጋ ሓደ",
+      "subtotal": "ንኡስ ድምር",
+      "total": "ጠቕላላ",
+      "method": "ሜላ",
+      "paidVia": "ዝተኸፍለሉ መንገዲ",
+      "paidOn": "ዝተኸፍለሉ ዕለት",
+      "paymentMethod": "ሜላ ክፍያ",
+      "cash": "ጥረ ገንዘብ",
+      "telebirr": "ተለብር",
+      "cbeBirr": "ንግዲ ባንክ ብር",
+      "chapa": "ቻፓ",
+      "card": "ካርድ",
+      "amountDue": "ዝኸፈል መጠን",
+      "settled": "ዝተወድአ",
+      "noBills": "ዝተመዝገበ ቢል የልን"
+    },
+    "messages": {
+      "messages": "መልእክትታት",
+      "newMessage": "ሓዲሽ መልእክት",
+      "typeMessage": "መልእክት ጽሐፍ...",
+      "send": "ሰድድ",
+      "noMessages": "ክሳብ ሕጂ ዝኾነ መልእክት የልን",
+      "noThreads": "ክሳብ ሕጂ ዝኾነ ክርር መልእክት የልን",
+      "caseDiscussion": "ዘተ ጉዳይ",
+      "lastUpdate": "ዳሕረዎት ምዕሩይ",
+      "today": "ሎሚ",
+      "yesterday": "ትማሊ",
+      "earlier": "ቅድሚ ሕጂ"
+    }
+  },
+  "topbar": {
+    "searchPlaceholder": "ሕሙማት፣ ቀጠሮታት ድለ...",
+    "notifications": "መዘኻኸሪታት",
+    "logOut": "ውጻእ",
+    "profile": "መግለጺ",
+    "settings": "ኣቀማምጣታት",
+    "language": "ቋንቋ",
+    "english": "እንግሊዝኛ",
+    "amharic": "አማርኛ",
+    "tigrigna": "ትግርኛ"
+  },
+  "roles": {
+    "superAdmin": "ላዕለዋይ ኣመሓዳሪ",
+    "admin": "ኣመሓዳሪ",
+    "doctor": "ሓኪም",
+    "nurse": "ነርሲ",
+    "reception": "መቐበሊ",
+    "lab": "ላቦራቶሪ",
+    "patient": "ሕሙም"
+  },
+  "status": {
+    "active": "ንጡፍ",
+    "inactive": "ዘይንጡፍ",
+    "pending": "ዝጽበ ዘሎ",
+    "approved": "ዝጸደቐ",
+    "rejected": "ዝተነጸገ",
+    "completed": "ዝተዛዘመ",
+    "cancelled": "ዝተሰረዘ",
+    "scheduled": "ዝተቀጸረ",
+    "checkedIn": "ኣቲዩ",
+    "inRoom": "ኣብ ክፍሊ",
+    "ready": "ዳሉው",
+    "inProgress": "ኣብ መስርሕ ዘሎ",
+    "paid": "ዝተከፍለ",
+    "unpaid": "ዘይተከፍለ",
+    "partial": "ክፋል",
+    "deleted": "ዝተሰረዘ",
+    "draft": "ረቂቕ",
+    "sent": "ዝተላእከ",
+    "viewed": "ዝተራእየ"
+  },
+  "auth": {
+    "welcomeBack": "እንኳዕ ብደሓን መጻእኩም",
+    "signInSubtitle": "ናብ መለያኹም እተው",
+    "email": "ኢሜይል",
+    "password": "ቃል መሕለፊ",
+    "signIn": "እተው",
+    "newPatient": "ሓዲሽ ሕሙም ዲኹም?",
+    "createAccount": "ኣካውንት ፍጠር",
+    "createYourAccount": "ኣካውንትኩም ፍጠሩ",
+    "fullName": "ምሉእ ስም",
+    "phoneOptional": "ቁጽሪ ስልኪ (ብፍቓድ)",
+    "confirmPassword": "ቃል መሕለፊ ኣረጋግጽ",
+    "alreadyHaveAccount": "ኣካውንት ኣለኩምዶ?",
+    "registrationReceived": "ምዝገባ በጺሑዩ",
+    "pendingApproval": "ኣካውንትኩም ሕጂ ፍቓድ ኣመሓዳሪ ይጽበ ኣሎ",
+    "backToSignIn": "ናብ መእተዊ ተመለስ",
+    "invalidEmail": "ቅኑዕ ኢሜይል ኣእቱ",
+    "passwordRequired": "ቃል መሕለፊ የድሊ",
+    "passwordsDoNotMatch": "ቃል መሕለፊታት አይሰማምዑን",
+    "minChars": "ብውሕዱ 8 ፊደላት",
+    "mustContainLetter": "ፊደል ክሕዝ ኣለዎ",
+    "mustContainDigit": "ቁጽሪ ክሕዝ ኣለዎ",
+    "enterFullName": "ንበይኑ ምሉእ ስምኩም ኣእቱ",
+    "unableToSignIn": "ምእታው ኣይተኻኣለን",
+    "couldNotRegister": "ምዝገባ ከካይድ ኣይተኻኣለን",
+    "forPatientsOnly": "ንሕሙማት። ኣካውንት ሰራሕተኛታት ብኣመሓዳሪ ክሊኒክ ይፍጠሩ።",
+    "tempPassword": "ግዝያዊ ቃል መሕለፊ",
+    "changePassword": "ቃል መሕለፊ ቀየር",
+    "forgotPassword": "ቃል መሕለፊ ረሲዒኹም?",
+    "signOut": "ውጻእ"
+  },
+  "pdf": {
+    "prescription": "ናይ ሕክምና ትእዛዝ",
+    "labReport": "ናይ ላቦራቶሪ ሪፖርት",
+    "bill": "ቢል",
+    "invoice": "ንውኢት",
+    "issued": "ዝተዋህበ",
+    "license": "ፍቓድ",
+    "patient": "ሕሙም",
+    "name": "ስም",
+    "phone": "ቁጽሪ ስልኪ",
+    "prescriber": "ዝኣዘዘ ሓኪም",
+    "prescriberSignature": "ፊርማ ሓኪም",
+    "labSignature": "ፊርማ ሰብ ሞያ ላቦራቶሪ",
+    "scanToVerify": "ንምርግጋጽ ስካን ግበር",
+    "electronic": "እዚ ሰነድ በኤሌክትሮኒክስ ዝተዳለወ እዩ",
+    "verifyAt": "ኣብዚ ኣረጋግጽ",
+    "medications": "መድሃኒታት",
+    "total": "ጠቕላላ",
+    "subtotal": "ንኡስ ድምር",
+    "tax": "ግብሪ",
+    "paid": "ዝተከፍለ",
+    "balanceDue": "ዝተረፈ ክፍያ"
+  },
+  "reception": {
+    "nav": {
+      "checkin": "ምዝገባ መእተዊ",
+      "book": "ቀጠሮ ሐዝ",
+      "walkin": "ብዘይ ቀጠሮ ዝመጹ",
+      "billing": "ክፍያ",
+      "messages": "መልእክትታት"
+    }
+  },
+  "doctor": {
+    "nav": {
+      "today": "ሎሚ",
+      "queue": "ሰለፍ ሕሙማት",
+      "prescribe": "አዘዝ",
+      "labs": "ትእዛዛት ላቦራቶሪ",
+      "messages": "መልእክትታት"
+    }
+  },
+  "nurse": {
+    "nav": {
+      "wards": "ክፍሊ ሕሙማት",
+      "vitals": "ምልክታት ህይወት መዝግብ",
+      "medications": "መድሃኒታት",
+      "handover": "ርክክብ",
+      "messages": "መልእክትታት"
+    }
+  },
+  "lab": {
+    "nav": {
+      "pending": "ዝጽበ ዘሎ",
+      "results": "ውጽኢታት"
+    }
+  },
+  "admin": {
+    "nav": {
+      "overview": "ጠቕላላ ትዕዝብቲ",
+      "content": "ይዞታ ኣመሓዳሪ",
+      "staff": "ሰራሕተኛታት",
+      "patients": "ሕሙማት",
+      "reports": "ሪፖርታት"
+    }
+  },
+  "superAdmin": {
+    "nav": {
+      "overview": "ጠቕላላ ትዕዝብቲ",
+      "admins": "ኣመሓደርቲ",
+      "audit": "መዝገብ ኦዲት",
+      "clinic": "ኣቀማምጣ ክሊኒክ"
+    }
   }
 }

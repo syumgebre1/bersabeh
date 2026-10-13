@@ -92,8 +92,18 @@ class PrescriptionRead(BaseModel):
     updated_at: datetime
 
 
+class PrescriptionItemBrief(BaseModel):
+    """Slim representation of a prescription item for lists."""
+    model_config = ConfigDict(from_attributes=True)
+
+    medication_name: str
+    dose: str
+    frequency: str
+    duration_days: int | None = None
+
+
 class PrescriptionBrief(BaseModel):
-    """Slim representation for list views."""
+    """Slim representation for list views (includes items for preview)."""
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
@@ -103,3 +113,4 @@ class PrescriptionBrief(BaseModel):
     status: PrescriptionStatus
     follow_up_date: date | None = None
     created_at: datetime
+    items: list[PrescriptionItemBrief] = []

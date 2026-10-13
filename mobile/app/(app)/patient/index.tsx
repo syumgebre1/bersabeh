@@ -1,153 +1,195 @@
 /**
- * Patient dashboard — the first role dashboard.
- *
- * Layout:
- *   - Greeting banner
- *   - Next appointment card (with mock data)
- *   - Two-column grid: prescriptions | lab results
- *   - Bills strip
+ * Patient dashboard — fully translated (EN / አማ / ትግ).
  */
 
 import {
-  ArrowRight,
-  CalendarClock,
-  FlaskConical,
-  Pill,
-  Receipt,
-  Video,
+  ArrowRight, CalendarClock, FlaskConical, MessageSquare, Pill, Receipt,
 } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
+import {
+  ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View,
+} from "react-native";
 
+import {
+  useAppointments, useBills, useLabOrders, usePrescriptions,
+} from "@/lib/admin";
 import { theme } from "@/constants/theme";
 import { useAppStore } from "@/store/app";
 
 
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+
 export default function PatientDashboard() {
+  const { t } = useTranslation();
+  const router = useRouter();
   const user = useAppStore((s) => s.user);
   const { width } = useWindowDimensions();
   const isWide = width >= 1000;
 
+  const { data: appts, isLoading: aLoad } = useAppointments({ limit: 10 });
+  const { data: rxs } = usePrescriptions({ limit: 5 });
+  const { data: labs } = useLabOrders({ limit: 5 });
+  const { data: bills } = useBills({ limit: 5 });
+
   const firstName = (user?.full_name ?? "there").split(" ")[0];
+  const nextAppt = (appts ?? [])[0];
+  const firstRx = (rxs ?? [])[0];
+  const firstLab = (labs ?? [])[0];
+  const outstanding = (bills ?? [])
+    .filter((b) => b.status !== "paid" && b.status !== "cancelled")
+    .reduce((sum, b) => sum + (Number(b.amount_etb) - Number(b.paid_amount_etb)), 0);
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      {/* Greeting */}
       <View style={styles.greeting}>
-        <Text style={styles.hello}>Hello, {firstName}.</Text>
-        <Text style={styles.sub}>Here's your care summary.</Text>
+        <Text style={styles.hello}>
+          {t("patient.dashboard.greeting", { name: firstName })}
+        </Text>
+        <Text style={styles.sub}>{t("patient.dashboard.careSummary")}</Text>
       </View>
 
       {/* Next appointment */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Next appointment</Text>
-        </View>
-        <View style={styles.apptCard}>
-          <View style={styles.apptLeft}>
-            <View style={styles.apptDateBadge}>
-              <Text style={styles.apptDateMonth}>OCT</Text>
-              <Text style={styles.apptDateDay}>26</Text>
-            </View>
-            <View style={styles.apptMeta}>
-              <Text style={styles.apptTitle}>Dr. Selam Tesfaye</Text>
-              <Text style={styles.apptSub}>Internal Medicine · 10:00 AM</Text>
-              <Text style={styles.apptSub}>Bole · Room 204</Text>
-            </View>
+        <Text style={styles.sectionTitle}>{t("patient.dashboard.nextAppointment")}</Text>
+        {aLoad ? (
+          <View style={styles.emptyCard}>
+            <ActivityIndicator size="small" color={theme.colors.primary} />
           </View>
-          <View style={styles.apptActions}>
-            <Pressable style={[styles.actionBtn, styles.actionBtnOutline]}>
-              <Video size={14} color={theme.colors.primary} strokeWidth={2.2} />
-              <Text style={styles.actionBtnText}>Video</Text>
-            </Pressable>
-            <Pressable style={[styles.actionBtn, styles.actionBtnPrimary]}>
-              <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Details</Text>
-              <ArrowRight size={14} color={theme.colors.textInverse} strokeWidth={2.4} />
-            </Pressable>
+        ) : nextAppt ? (
+          <Pressable
+            onPress={() => router.push(`/(app)/patient/appointments/${nextAppt.id}` as any)}
+            style={({ hovered }: any) => [styles.apptCard, hovered && styles.hovered]}
+          >
+            <View style={styles.apptLeft}>
+              <View style={styles.apptDateBadge}>
+                <Text style={styles.apptDateMonth}>
+                  {new Date(nextAppt.scheduled_at).toLocaleDateString([], { month: "short" }).toUpperCase()}
+                </Text>
+                <Text style={styles.apptDateDay}>{new Date(nextAppt.scheduled_at).getDate()}</Text>
+              </View>
+              <View style={styles.apptMeta}>
+                <Text style={styles.apptTitle}>{nextAppt.doctor?.full_name ?? t("patient.prescriptions.yourDoctor")}</Text>
+                <Text style={styles.apptSub}>
+                  {new Date(nextAppt.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {nextAppt.doctor?.specialty ? ` · ${nextAppt.doctor.specialty}` : ""}
+                </Text>
+              </View>
+            </View>
+            <ArrowRight size={16} color={theme.colors.muted} strokeWidth={2} />
+          </Pressable>
+        ) : (
+          <View style={styles.emptyCard}>
+            <CalendarClock size={22} color={theme.colors.muted} strokeWidth={1.8} />
+            <Text style={styles.emptyText}>{t("patient.dashboard.noUpcoming")}</Text>
           </View>
-        </View>
+        )}
       </View>
 
-      {/* Prescriptions + Labs grid */}
+      {/* Prescriptions + Labs */}
       <View style={[styles.grid, !isWide && styles.gridStack]}>
-        {/* Prescriptions */}
         <View style={styles.panel}>
           <View style={styles.panelHeader}>
             <Pill size={16} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.panelTitle}>My prescriptions</Text>
-            <Pressable style={styles.panelLink}>
-              <Text style={styles.panelLinkText}>See all</Text>
-            </Pressable>
+            <Text style={styles.panelTitle}>{t("patient.dashboard.myPrescriptions")}</Text>
           </View>
           <View style={styles.panelBody}>
-            <View style={styles.listRow}>
-              <View style={styles.listIcon}>
-                <Pill size={14} color={theme.colors.secondary} strokeWidth={2.4} />
+            {firstRx ? (
+              <Pressable
+                onPress={() => router.push(`/(app)/patient/prescriptions/${firstRx.id}` as any)}
+                style={({ hovered }: any) => [styles.listRow, hovered && styles.hovered]}
+              >
+                <View style={styles.listIcon}>
+                  <Pill size={14} color={theme.colors.secondary} strokeWidth={2.4} />
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle}>{firstRx.items?.[0]?.medication_name ?? t("patient.prescriptions.medication")}</Text>
+                  <Text style={styles.listSub}>
+                    {firstRx.items?.[0]?.dose ?? ""} · {fmtDate(firstRx.created_at)}
+                  </Text>
+                </View>
+                <ArrowRight size={14} color={theme.colors.muted} strokeWidth={2} />
+              </Pressable>
+            ) : (
+              <View style={styles.emptyRow}>
+                <Text style={styles.emptyText}>{t("patient.prescriptions.noPrescriptions")}</Text>
               </View>
-              <View style={styles.listContent}>
-                <Text style={styles.listTitle}>Amoxicillin 500mg</Text>
-                <Text style={styles.listSub}>3x daily · 7 days · Active</Text>
-              </View>
-              <View style={[styles.chip, { backgroundColor: theme.colors.successBg }]}>
-                <Text style={[styles.chipText, { color: theme.colors.success }]}>Active</Text>
-              </View>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.listRow}>
-              <View style={styles.listIcon}>
-                <Pill size={14} color={theme.colors.secondary} strokeWidth={2.4} />
-              </View>
-              <View style={styles.listContent}>
-                <Text style={styles.listTitle}>Ibuprofen 400mg</Text>
-                <Text style={styles.listSub}>2x daily · 5 days · Completed</Text>
-              </View>
-              <View style={[styles.chip, { backgroundColor: theme.colors.bgSunken }]}>
-                <Text style={[styles.chipText, { color: theme.colors.muted }]}>Done</Text>
-              </View>
-            </View>
+            )}
           </View>
         </View>
 
-        {/* Labs */}
         <View style={styles.panel}>
           <View style={styles.panelHeader}>
             <FlaskConical size={16} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.panelTitle}>Lab results</Text>
-            <Pressable style={styles.panelLink}>
-              <Text style={styles.panelLinkText}>See all</Text>
-            </Pressable>
+            <Text style={styles.panelTitle}>{t("patient.dashboard.myLabResults")}</Text>
           </View>
           <View style={styles.panelBody}>
-            <View style={styles.listRow}>
-              <View style={styles.listIcon}>
-                <FlaskConical size={14} color={theme.colors.secondary} strokeWidth={2.4} />
+            {firstLab ? (
+              <Pressable
+                onPress={() => router.push(`/(app)/patient/labs/${firstLab.id}` as any)}
+                style={({ hovered }: any) => [styles.listRow, hovered && styles.hovered]}
+              >
+                <View style={styles.listIcon}>
+                  <FlaskConical size={14} color={theme.colors.secondary} strokeWidth={2.4} />
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle}>{firstLab.test_name}</Text>
+                  <Text style={styles.listSub}>{fmtDate(firstLab.ordered_at)}</Text>
+                </View>
+                <ArrowRight size={14} color={theme.colors.muted} strokeWidth={2} />
+              </Pressable>
+            ) : (
+              <View style={styles.emptyRow}>
+                <Text style={styles.emptyText}>{t("patient.labs.noResults")}</Text>
               </View>
-              <View style={styles.listContent}>
-                <Text style={styles.listTitle}>Complete Blood Count</Text>
-                <Text style={styles.listSub}>7.8 10³/µL · Within range</Text>
-              </View>
-              <View style={[styles.chip, { backgroundColor: theme.colors.successBg }]}>
-                <Text style={[styles.chipText, { color: theme.colors.success }]}>Ready</Text>
-              </View>
-            </View>
+            )}
           </View>
         </View>
       </View>
 
-      {/* Bills strip */}
+      {/* Billing */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Billing</Text>
-        </View>
-        <View style={styles.billStrip}>
+        <Text style={styles.sectionTitle}>{t("patient.dashboard.billing")}</Text>
+        <Pressable
+          onPress={() => bills && bills[0] ? router.push(`/(app)/patient/bills/${bills[0].id}` as any) : null}
+          style={({ hovered }: any) => [styles.billStrip, hovered && styles.hovered]}
+        >
           <View style={styles.billLeft}>
             <Receipt size={18} color={theme.colors.primary} strokeWidth={2.2} />
             <View>
-              <Text style={styles.billTitle}>Outstanding balance</Text>
-              <Text style={styles.billSub}>Last bill: 2026-10-12 · 1 item</Text>
+              <Text style={styles.billTitle}>
+                {outstanding > 0 ? t("patient.dashboard.outstanding") : t("patient.dashboard.allPaid")}
+              </Text>
+              <Text style={styles.billSub}>
+                {bills?.length ?? 0} {bills?.length === 1 ? t("patient.dashboard.bill") : t("patient.dashboard.bills")}
+              </Text>
             </View>
           </View>
-          <Text style={styles.billAmount}>0.00 ETB</Text>
-        </View>
+          <Text style={[styles.billAmount, outstanding > 0 && styles.billAmountDue]}>
+            {outstanding.toLocaleString()} ETB
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* Messages */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("patient.dashboard.needToTalk")}</Text>
+        <Pressable
+          onPress={() => router.push("/(app)/patient/messages" as any)}
+          style={({ hovered }: any) => [styles.messageCta, hovered && styles.hovered]}
+        >
+          <View style={styles.messageLeft}>
+            <MessageSquare size={18} color={theme.colors.textInverse} strokeWidth={2.2} />
+            <View>
+              <Text style={styles.messageTitle}>{t("patient.dashboard.openMessages")}</Text>
+              <Text style={styles.messageSub}>{t("patient.dashboard.askQuestions")}</Text>
+            </View>
+          </View>
+          <ArrowRight size={16} color={theme.colors.textInverse} strokeWidth={2} />
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -156,228 +198,43 @@ export default function PatientDashboard() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: theme.colors.bg },
-  content: {
-    padding: theme.spacing.xxl,
-    gap: theme.spacing.xl,
-    maxWidth: 1200,
-    width: "100%",
-    alignSelf: "center",
-  },
+  content: { padding: theme.spacing.xxl, gap: theme.spacing.xl, maxWidth: 1200, width: "100%", alignSelf: "center" },
   greeting: { gap: 4 },
-  hello: {
-    fontFamily: theme.fontFamily.heading,
-    fontSize: 32,
-    lineHeight: 38,
-    letterSpacing: -0.6,
-    color: theme.colors.text,
-  },
-  sub: {
-    fontFamily: theme.fontFamily.body,
-    fontSize: 15,
-    color: theme.colors.muted,
-  },
+  hello: { fontFamily: theme.fontFamily.heading, fontSize: 32, lineHeight: 38, letterSpacing: -0.6, color: theme.colors.text },
+  sub: { fontFamily: theme.fontFamily.body, fontSize: 15, color: theme.colors.muted },
   section: { gap: theme.spacing.md },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-  },
-  sectionTitle: {
-    fontFamily: theme.fontFamily.headingMedium,
-    fontSize: 14,
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
-    color: theme.colors.muted,
-  },
-
-  // Appointment card
-  apptCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    padding: theme.spacing.lg,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: theme.spacing.lg,
-    flexWrap: "wrap",
-  },
-  apptLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.lg,
-    flexShrink: 1,
-  },
-  apptDateBadge: {
-    width: 60, height: 60,
-    borderRadius: theme.radius.sm,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center", justifyContent: "center",
-  },
-  apptDateMonth: {
-    fontFamily: theme.fontFamily.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1,
-    color: theme.colors.accent,
-  },
-  apptDateDay: {
-    fontFamily: theme.fontFamily.heading,
-    fontSize: 22,
-    color: theme.colors.textInverse,
-    letterSpacing: -0.5,
-  },
+  sectionTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: theme.colors.muted },
+  hovered: { opacity: 0.92 },
+  emptyCard: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg, justifyContent: "center" },
+  emptyRow: { alignItems: "center", paddingVertical: theme.spacing.lg },
+  emptyText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.muted },
+  apptCard: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: theme.spacing.lg, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg },
+  apptLeft: { flexDirection: "row", alignItems: "center", gap: theme.spacing.lg, flexShrink: 1 },
+  apptDateBadge: { width: 60, height: 60, borderRadius: theme.radius.sm, backgroundColor: theme.colors.primary, alignItems: "center", justifyContent: "center" },
+  apptDateMonth: { fontFamily: theme.fontFamily.bodyBold, fontSize: 10, letterSpacing: 1, color: theme.colors.accent },
+  apptDateDay: { fontFamily: theme.fontFamily.heading, fontSize: 22, color: theme.colors.textInverse, letterSpacing: -0.5 },
   apptMeta: { gap: 2 },
-  apptTitle: {
-    fontFamily: theme.fontFamily.headingMedium,
-    fontSize: 17,
-    color: theme.colors.text,
-  },
-  apptSub: {
-    fontFamily: theme.fontFamily.body,
-    fontSize: 13,
-    color: theme.colors.muted,
-  },
-  apptActions: {
-    flexDirection: "row",
-    gap: theme.spacing.sm,
-  },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.xs,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radius.sm,
-  },
-  actionBtnOutline: {
-    borderWidth: 1.5,
-    borderColor: theme.colors.primary,
-  },
-  actionBtnPrimary: {
-    backgroundColor: theme.colors.primary,
-  },
-  actionBtnText: {
-    fontFamily: theme.fontFamily.bodyMedium,
-    fontSize: 13,
-    color: theme.colors.primary,
-  },
-  actionBtnTextPrimary: {
-    color: theme.colors.textInverse,
-    fontFamily: theme.fontFamily.bodyBold,
-  },
-
-  // Grid
-  grid: {
-    flexDirection: "row",
-    gap: theme.spacing.lg,
-  },
-  gridStack: {
-    flexDirection: "column",
-  },
-  panel: {
-    flex: 1,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    overflow: "hidden",
-  },
-  panelHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  panelTitle: {
-    fontFamily: theme.fontFamily.headingMedium,
-    fontSize: 14,
-    color: theme.colors.text,
-    flex: 1,
-  },
-  panelLink: {},
-  panelLinkText: {
-    fontFamily: theme.fontFamily.bodyMedium,
-    fontSize: 12.5,
-    color: theme.colors.primary,
-  },
-  panelBody: { paddingVertical: theme.spacing.xs },
-  listRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.md,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-  },
-  listIcon: {
-    width: 32, height: 32,
-    borderRadius: theme.radius.sm,
-    backgroundColor: "rgba(199, 91, 57, 0.08)",
-    alignItems: "center", justifyContent: "center",
-  },
+  apptTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 17, color: theme.colors.text },
+  apptSub: { fontFamily: theme.fontFamily.body, fontSize: 13, color: theme.colors.muted },
+  grid: { flexDirection: "row", gap: theme.spacing.lg },
+  gridStack: { flexDirection: "column" },
+  panel: { flex: 1, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, overflow: "hidden" },
+  panelHeader: { flexDirection: "row", alignItems: "center", gap: theme.spacing.sm, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  panelTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 14, color: theme.colors.text, flex: 1 },
+  panelBody: { paddingVertical: 4 },
+  listRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  listIcon: { width: 32, height: 32, borderRadius: theme.radius.sm, backgroundColor: "rgba(199,91,57,0.08)", alignItems: "center", justifyContent: "center" },
   listContent: { flex: 1 },
-  listTitle: {
-    fontFamily: theme.fontFamily.bodyMedium,
-    fontSize: 14,
-    color: theme.colors.text,
-  },
-  listSub: {
-    fontFamily: theme.fontFamily.body,
-    fontSize: 12.5,
-    color: theme.colors.muted,
-    marginTop: 2,
-  },
-  chip: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: 3,
-    borderRadius: theme.radius.full,
-  },
-  chipText: {
-    fontFamily: theme.fontFamily.bodyMedium,
-    fontSize: 11,
-    letterSpacing: 0.3,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: theme.colors.border,
-    marginHorizontal: theme.spacing.lg,
-  },
-
-  // Bills
-  billStrip: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    padding: theme.spacing.lg,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: theme.spacing.lg,
-  },
-  billLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.md,
-  },
-  billTitle: {
-    fontFamily: theme.fontFamily.bodyMedium,
-    fontSize: 14,
-    color: theme.colors.text,
-  },
-  billSub: {
-    fontFamily: theme.fontFamily.body,
-    fontSize: 12.5,
-    color: theme.colors.muted,
-    marginTop: 2,
-  },
-  billAmount: {
-    fontFamily: theme.fontFamily.heading,
-    fontSize: 22,
-    color: theme.colors.success,
-    letterSpacing: -0.3,
-  },
+  listTitle: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 14, color: theme.colors.text },
+  listSub: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, marginTop: 2 },
+  billStrip: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: theme.spacing.lg, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg },
+  billLeft: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md },
+  billTitle: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 14, color: theme.colors.text },
+  billSub: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, marginTop: 2 },
+  billAmount: { fontFamily: theme.fontFamily.heading, fontSize: 22, color: theme.colors.success, letterSpacing: -0.3 },
+  billAmountDue: { color: theme.colors.danger },
+  messageCta: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: theme.spacing.lg, backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, padding: theme.spacing.lg },
+  messageLeft: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md },
+  messageTitle: { fontFamily: theme.fontFamily.bodyBold, fontSize: 15, color: theme.colors.textInverse },
+  messageSub: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: "rgba(255,255,255,0.75)", marginTop: 2 },
 });

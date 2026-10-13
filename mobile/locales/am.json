@@ -4,56 +4,61 @@
     "note": "TODO: translate all values to Amharic. Currently English placeholders."
   },
   "utility": {
-    "emergency": "Emergency (TODO: translate)",
-    "hours": "Mon–Sat 8:00–20:00 · Sun 9:00–13:00 (TODO: translate)",
+    "emergency": "ድንገተኛ",
+    "hours": "ሰኞ–ቅዳሜ 2:00–14:00 · እሁድ 3:00–7:00",
     "languageLabel": "Language (TODO: translate)"
   },
   "header": {
-    "home": "Home (TODO: translate)",
-    "departments": "Departments (TODO: translate)",
-    "doctors": "Doctors (TODO: translate)",
-    "services": "Services (TODO: translate)",
-    "contact": "Contact (TODO: translate)",
-    "patientPortal": "Patient Portal (TODO: translate)",
-    "bookAppointment": "Book Appointment (TODO: translate)"
+    "home": "መነሻ",
+    "departments": "ክፍሎች",
+    "doctors": "ሐኪሞች",
+    "services": "አገልግሎቶች",
+    "contact": "አግኙን",
+    "patientPortal": "የታካሚ ፖርታል",
+    "bookAppointment": "ቀጠሮ ይያዙ",
+    "notifications": "ማሳወቂያዎች"
   },
   "hero": {
-    "headline": "Trusted care for Addis Ababa families. (TODO: translate)",
+    "headline": "ለአዲስ አበባ ቤተሰቦች የታመነ እንክብካቤ።",
     "subhead": "Modern medicine, delivered by experienced physicians in the heart of the city. (TODO: translate)",
-    "ctaPrimary": "Book Appointment (TODO: translate)",
-    "ctaSecondary": "Explore Departments (TODO: translate)",
+    "ctaPrimary": "ቀጠሮ ይያዙ",
+    "ctaSecondary": "ክፍሎችን ይጎብኙ",
     "booking": {
-      "title": "Book an appointment (TODO: translate)",
-      "date": "Preferred date (TODO: translate)",
-      "datePlaceholder": "Select a date (TODO: translate)",
-      "department": "Department (TODO: translate)",
-      "departmentPlaceholder": "Choose a department (TODO: translate)",
-      "check": "Check availability (TODO: translate)",
-      "success": "We'll confirm your appointment by phone within 2 hours. (TODO: translate)"
-    }
+      "title": "ቀጠሮ ይያዙ",
+      "date": "የሚመርጡት ቀን",
+      "datePlaceholder": "ቀን ይምረጡ",
+      "department": "ክፍል",
+      "departmentPlaceholder": "ክፍል ይምረጡ",
+      "check": "ክፍት ቦታ ያረጋግጡ",
+      "success": "ቀጠሮዎን በ2 ሰዓት ውስጥ በስልክ እናረጋግጣለን።"
+    },
+    "eyebrow": "በርስቤህ ክሊኒክ · አዲስ አበባ"
   },
   "trust": {
-    "licensed": "MoH licensed (TODO: translate)",
+    "licensed": "በጤና ሚኒስቴር ፈቃድ ያለው",
     "doctors": "Experienced specialists (TODO: translate)",
-    "years": "Since 2009 (TODO: translate)",
-    "emergency": "24/7 emergency line (TODO: translate)",
-    "license": "License (TODO: translate)"
+    "years": "አዲስ አበባን 16 ዓመታት ያገለገለ",
+    "emergency": "የ24/7 አስቸኳይ መስመር",
+    "license": "License (TODO: translate)",
+    "licenseLabel": "ፈቃድ",
+    "experts": "ልምድ ያላቸው ልዩ ባለሙያዎች",
+    "specialties": "የውስጥ ደዌ · ቀዶ ሕክምና · የልብ · የጨጓራ"
   },
   "departments": {
-    "title": "Departments (TODO: translate)",
-    "subtitle": "Specialist care across the medical spectrum. (TODO: translate)",
+    "title": "ክፍሎቻችን",
+    "subtitle": "በተለያዩ የሕክምና ዘርፎች ልዩ እንክብካቤ",
     "viewDoctors": "View doctors (TODO: translate)",
     "empty": "Departments coming soon. (TODO: translate)"
   },
   "doctors": {
-    "title": "Our doctors (TODO: translate)",
-    "subtitle": "Specialists you can trust. (TODO: translate)",
-    "bookWith": "Book with (TODO: translate)",
-    "yearsShort": "yrs (TODO: translate)",
+    "title": "ሐኪሞቻችን",
+    "subtitle": "ልምድ ያላቸው ልዩ ባለሙያዎች",
+    "bookWith": "ከ... ጋር ቀጠሮ ይያዙ",
+    "yearsShort": "ዓመታት",
     "empty": "Doctor profiles coming soon. (TODO: translate)"
   },
   "howItWorks": {
-    "title": "How it works (TODO: translate)",
+    "title": "እንዴት እንደሚሰራ",
     "step1Title": "Register (TODO: translate)",
     "step1Body": "Create your patient account in under 2 minutes. (TODO: translate)",
     "step2Title": "Verify (TODO: translate)",
@@ -62,39 +67,382 @@
     "step3Body": "Pick a doctor and time. Get reminders by phone. (TODO: translate)"
   },
   "services": {
-    "title": "Services & pricing (TODO: translate)",
+    "title": "አገልግሎቶቻችን",
     "subtitle": "Transparent pricing in Ethiopian Birr. (TODO: translate)",
     "rangePrefix": "From (TODO: translate)"
   },
   "location": {
-    "title": "Find us (TODO: translate)",
-    "hoursTitle": "Opening hours (TODO: translate)",
-    "weekdays": "Mon–Sat (TODO: translate)",
-    "weekdaysHours": "08:00 – 20:00 (TODO: translate)",
-    "weekend": "Sunday (TODO: translate)",
-    "weekendHours": "09:00 – 13:00 (TODO: translate)",
+    "title": "ያገኙን",
+    "hoursTitle": "የሥራ ሰዓታት",
+    "weekdays": "ከሰኞ – ቅዳሜ",
+    "weekdaysHours": "2:00 – 14:00",
+    "weekend": "እሁድ",
+    "weekendHours": "3:00 – 7:00",
     "parking": "Parking (TODO: translate)",
-    "directions": "Get directions (TODO: translate)"
+    "directions": "አቅጣጫ ያግኙ",
+    "emergencyPhone": "የአደጋ ጊዜ ስልክ"
   },
   "portal": {
-    "title": "Already a patient? (TODO: translate)",
-    "body": "Access your appointments, prescriptions, and lab results in the patient portal. (TODO: translate)",
-    "cta": "Open Patient Portal (TODO: translate)"
+    "title": "አስቀድመው ታካሚ ነዎት?",
+    "body": "ቀጠሮዎችዎን፣ የሕክምና ማዘዣዎችዎን እና የላቦራቶሪ ውጤቶችዎን በታካሚው ፖርታል ውስጥ ያግኙ።",
+    "cta": "የታካሚ ፖርታል ይክፈቱ"
   },
   "footer": {
-    "tagline": "Trusted care for Addis Ababa since 2009. (TODO: translate)",
-    "quickLinks": "Quick links (TODO: translate)",
-    "contact": "Contact (TODO: translate)",
-    "followUs": "Follow us (TODO: translate)",
-    "rights": "All rights reserved. (TODO: translate)",
-    "license": "License (TODO: translate)"
+    "tagline": "ከ2009 ጀምሮ ለአዲስ አበባ የታመነ እንክብካቤ",
+    "quickLinks": "ፈጣን አገናኞች",
+    "contact": "አግኙን",
+    "followUs": "ይከተሉን",
+    "rights": "መብቱ በህግ የተጠበቀ ነው።",
+    "license": "ፈቃድ",
+    "madeIn": "በአዲስ አበባ የተሰራ"
   },
   "common": {
-    "retry": "Retry (TODO: translate)",
-    "loading": "Loading… (TODO: translate)",
-    "error": "Something went wrong. (TODO: translate)",
+    "retry": "እንደገና ሞክር",
+    "loading": "በመጫን ላይ...",
+    "error": "ስህተት",
     "seeAll": "See all (TODO: translate)",
-    "cancel": "Cancel (TODO: translate)",
-    "confirm": "Confirm (TODO: translate)"
+    "cancel": "ሰርዝ",
+    "confirm": "አረጋግጥ",
+    "downloadPdf": "ፒዲኤፍ አውርድ",
+    "save": "አስቀምጥ",
+    "close": "ዝጋ",
+    "back": "ተመለስ",
+    "next": "ቀጥል",
+    "previous": "ያለፈ",
+    "tryAgain": "እንደገና ሞክር",
+    "yes": "አዎ",
+    "no": "አይደለም",
+    "ok": "እሺ",
+    "areYouSure": "እርግጠኛ ነዎት?",
+    "search": "ፈልግ",
+    "filter": "አጣራ",
+    "sort": "ደርድር",
+    "apply": "ተግብር",
+    "clear": "አጽዳ",
+    "download": "አውርድ",
+    "print": "አትም",
+    "share": "አጋራ",
+    "copy": "ቅዳሕ",
+    "edit": "አርም",
+    "delete": "አጥፋ",
+    "view": "ተመልከት",
+    "add": "ጨምር",
+    "remove": "አስወግድ",
+    "create": "ፍጠር",
+    "update": "አዘምን",
+    "submit": "አስገባ",
+    "viewAll": "ሁሉንም ይመልከቱ",
+    "seeMore": "ተጨማሪ ይመልከቱ",
+    "showLess": "ጥቂት አሳይ",
+    "noResults": "ምንም ውጤት የለም",
+    "empty": "ባዶ",
+    "readMore": "ተጨማሪ ያንብቡ"
+  },
+  "medical": {
+    "instructions": {
+      "with_food": "ከምግብ ጋር ይውሰዱ",
+      "empty_stomach": "በባዶ ሆድ ይውሰዱ",
+      "before_meals": "ከምግብ በፊት ይውሰዱ",
+      "after_meals": "ከምግብ በኋላ ይውሰዱ",
+      "bedtime": "ከመተኛትዎ በፊት ይውሰዱ",
+      "as_needed": "እንደ አስፈላጊነቱ ይውሰዱ",
+      "once_daily": "በቀን አንድ ጊዜ ይውሰዱ",
+      "twice_daily": "በቀን ሁለት ጊዜ ይውሰዱ",
+      "three_times_daily": "በቀን ሦስት ጊዜ ይውሰዱ",
+      "max_3g_daily": "በቀን ከ3 ግራም በላይ አይውሰዱ"
+    },
+    "prescription": {
+      "medication": "መድኃኒት",
+      "dose": "መጠን",
+      "frequency": "የድግግሞሽ መጠን",
+      "duration": "የጊዜ ርዝማኔ",
+      "days": "ቀናት",
+      "instructions": "መመሪያዎች",
+      "prescription": "የሕክምና ማዘዣ",
+      "prescribed_by": "ያዘዘው ባለሙያ",
+      "follow_up_date": "የቀጠሮ ቀን"
+    },
+    "lab": {
+      "result": "ውጤት",
+      "reference_range": "መደበኛ ክልል",
+      "units": "መለኪያዎች",
+      "interpretation": "ትርጉም",
+      "normal": "በመደበኛ መጠን ውስጥ",
+      "lab_report": "የላቦራቶሪ ሪፖርት"
+    },
+    "appointment": {
+      "appointment": "ቀጠሮ",
+      "scheduled_for": "የተቀጠረበት ጊዜ",
+      "reason": "የጉብኝቱ ምክንያት"
+    },
+    "billing": {
+      "total": "ጠቅላላ",
+      "paid": "የተከፈለ"
+    }
+  },
+  "patient": {
+    "nav": {
+      "overview": "አጠቃላይ እይታ",
+      "appointments": "ቀጠሮዎች",
+      "prescriptions": "የሕክምና ማዘዣዎች",
+      "labs": "የላቦራቶሪ ውጤቶች",
+      "bills": "ሂሳቦች",
+      "messages": "መልዕክቶች"
+    },
+    "prescriptions": {
+      "status": {
+        "active": "በሂደት ላይ",
+        "completed": "ተጠናቋል",
+        "cancelled": "ተሰርዟል"
+      },
+      "yourMedications": "የእርስዎ መድኃኒቶች",
+      "doctorNotes": "ከሐኪምዎ የተሰጡ ማስታወሻዎች",
+      "yourDoctor": "ሐኪምዎ",
+      "loadError": "የሕክምና ማዘዣውን መጫን አልተቻለም",
+      "listTitle": "ማዘዣዎች",
+      "noPrescriptions": "እስካሁን የታዘዘ መድኃኒት የለም",
+      "title": "የሕክምና ማዘዣ",
+      "titlePlural": "የህክምና ማዘዣዎች",
+      "details": "የሕክምና ማዘዣ ዝርዝር",
+      "followUp": "ክትትል",
+      "prescribedBy": "ያዘዘው ሐኪም",
+      "medication": "መድኃኒት",
+      "dose": "መጠን",
+      "frequency": "የድግግሞሽ መጠን",
+      "duration": "የቆይታ ጊዜ",
+      "days": "ቀናት",
+      "instructions": "መመሪያዎች"
+    },
+    "dashboard": {
+      "greeting": "ሰላም፣ {{name}}",
+      "careSummary": "የህክምና ማጠቃለያዎ ይህ ነው",
+      "nextAppointment": "የሚቀጥለው ቀጠሮ",
+      "noUpcoming": "የሚመጣ ቀጠሮ የለም",
+      "myPrescriptions": "የታዘዙልኝ መድኃኒቶች",
+      "myLabResults": "የላቦራቶሪ ውጤቶቼ",
+      "billing": "ክፍያ",
+      "outstanding": "የሚከፈል ቀሪ ሂሳብ",
+      "allPaid": "ሁሉም ሂሳቦች ተከፍለዋል",
+      "bill": "ሂሳብ",
+      "bills": "ሂሳቦች",
+      "needToTalk": "ከሐኪምዎ ጋር መነጋገር ይፈልጋሉ?",
+      "openMessages": "መልዕክቶችን ይክፈቱ",
+      "askQuestions": "በጉብኝቶች መካከል ጥያቄዎችን ይጠይቁ",
+      "seeAll": "ሁሉንም ይመልከቱ"
+    },
+    "appointments": {
+      "appointment": "ቀጠሮ",
+      "appointments": "ቀጠሮዎች",
+      "noRecords": "የተመዘገበ ቀጠሮ የለም",
+      "noToday": "ዛሬ ምንም ቀጠሮ የለም",
+      "reason": "የጉብኝቱ ምክንያት",
+      "whatToBring": "ምን መያዝ ይኖርብዎታል",
+      "bringId": "መታወቂያዎን እና የታካሚ ካርድዎን ይያዙ",
+      "listMedications": "የሚወስዷቸውን መድኃኒቶች ይዘርዝሩ",
+      "time": "ሰዓት",
+      "duration": "ቆይታ",
+      "room": "ክፍል",
+      "specialty": "የልዩ ሙያ ዘርፍ"
+    },
+    "labs": {
+      "result": "ውጤት",
+      "results": "የላቦራቶሪ ውጤቶች",
+      "report": "የላቦራቶሪ ሪፖርት",
+      "testName": "የፈተና ስም",
+      "orderedBy": "ያዘዘው",
+      "orderedOn": "የታዘዘበት ቀን",
+      "resultedBy": "ውጤቱን የሰጠው",
+      "resultedAt": "ውጤት የተሰጠበት ሰዓት",
+      "referenceRange": "መደበኛ ክልል",
+      "units": "መለኪያዎች",
+      "interpretation": "ትርጉም",
+      "withinNormal": "በመደበኛ መጠን ውስጥ",
+      "notes": "የላቦራቶሪ ማስታወሻዎች",
+      "sampleQuality": "የናሙና ጥራት ተቀባይነት አለው",
+      "noResults": "እስካሁን የላቦራቶሪ ውጤት የለም",
+      "pending": "ውጤት በመጠበቅ ላይ",
+      "willNotify": "ዝግጁ ሲሆን እናሳውቅዎታለን"
+    },
+    "bills": {
+      "bill": "ሂሳብ",
+      "bills": "ሂሳቦች",
+      "billing": "የሂሳብ አከፋፈል",
+      "lineItems": "የዝርዝር እቃዎች",
+      "description": "መግለጫ",
+      "quantity": "ብዛት",
+      "unitPrice": "የአንድ እቃ ዋጋ",
+      "subtotal": "ንዑስ ድምር",
+      "total": "ጠቅላላ",
+      "method": "ዘዴ",
+      "paidVia": "የተከፈለበት መንገድ",
+      "paidOn": "የተከፈለበት ቀን",
+      "paymentMethod": "የክፍያ ዘዴ",
+      "cash": "ጥሬ ገንዘብ",
+      "telebirr": "ቴሌብር",
+      "cbeBirr": "የንግድ ባንክ ብር",
+      "chapa": "ቻፓ",
+      "card": "ካርድ",
+      "amountDue": "የሚከፈል መጠን",
+      "settled": "የተጠናቀቀ",
+      "noBills": "የተመዘገበ ሂሳብ የለም"
+    },
+    "messages": {
+      "messages": "መልዕክቶች",
+      "newMessage": "አዲስ መልዕክት",
+      "typeMessage": "መልዕክት ይጻፉ...",
+      "send": "ላክ",
+      "noMessages": "እስካሁን ምንም መልዕክት የለም",
+      "noThreads": "እስካሁን ምንም የመልዕክት ክርክር የለም",
+      "caseDiscussion": "የጉዳይ ውይይት",
+      "lastUpdate": "የመጨረሻ ማሻሻያ",
+      "today": "ዛሬ",
+      "yesterday": "ትናንት",
+      "earlier": "ቀደም ብሎ"
+    }
+  },
+  "topbar": {
+    "searchPlaceholder": "ታካሚዎችን፣ ቀጠሮዎችን ይፈልጉ...",
+    "notifications": "ማሳወቂያዎች",
+    "logOut": "ውጣ",
+    "profile": "መገለጫ",
+    "settings": "ቅንብሮች",
+    "language": "ቋንቋ",
+    "english": "እንግሊዝኛ",
+    "amharic": "አማርኛ",
+    "tigrigna": "ትግርኛ"
+  },
+  "roles": {
+    "superAdmin": "ዋና አስተዳዳሪ",
+    "admin": "አስተዳዳሪ",
+    "doctor": "ሐኪም",
+    "nurse": "ነርስ",
+    "reception": "መቀበያ",
+    "lab": "ላቦራቶሪ",
+    "patient": "ታካሚ"
+  },
+  "status": {
+    "active": "ንቁ",
+    "inactive": "ሕያው ያልሆነ",
+    "pending": "በመጠበቅ ላይ",
+    "approved": "የጸደቀ",
+    "rejected": "ያልተቀበለ",
+    "completed": "የተጠናቀቀ",
+    "cancelled": "የተሰረዘ",
+    "scheduled": "የተቀጠረ",
+    "checkedIn": "ገብቷል",
+    "inRoom": "ክፍል ውስጥ",
+    "ready": "ዝግጁ",
+    "inProgress": "በሂደት ላይ",
+    "paid": "የተከፈለ",
+    "unpaid": "ያልተከፈለ",
+    "partial": "ከፊል",
+    "deleted": "የተሰረዘ",
+    "draft": "ረቂቅ",
+    "sent": "የተላከ",
+    "viewed": "የታየ"
+  },
+  "auth": {
+    "welcomeBack": "እንኳን ደህና መጡ",
+    "signInSubtitle": "ወደ መለያዎ ይግቡ",
+    "email": "ኢሜይል",
+    "password": "የይለፍ ቃል",
+    "signIn": "ግባ",
+    "newPatient": "አዲስ ታካሚ ነዎት?",
+    "createAccount": "መለያ ይፍጠሩ",
+    "createYourAccount": "መለያዎን ይፍጠሩ",
+    "fullName": "ሙሉ ስም",
+    "phoneOptional": "ስልክ (አማራጭ)",
+    "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
+    "alreadyHaveAccount": "መለያ አለዎት?",
+    "registrationReceived": "ምዝገባው ደርሷል",
+    "pendingApproval": "መለያዎ አሁን የአስተዳዳሪ ማጽደቅ ይጠብቃል",
+    "backToSignIn": "ወደ መግቢያ ይመለሱ",
+    "invalidEmail": "ትክክለኛ ኢሜይል ያስገቡ",
+    "passwordRequired": "የይለፍ ቃል ያስፈልጋል",
+    "passwordsDoNotMatch": "የይለፍ ቃላት አይዛመዱም",
+    "minChars": "ቢያንስ 8 ፊደላት/ቁጥሮች",
+    "mustContainLetter": "ፊደል መያዝ አለበት",
+    "mustContainDigit": "ቁጥር መያዝ አለበት",
+    "enterFullName": "እባክዎ ሙሉ ስምዎን ያስገቡ",
+    "unableToSignIn": "መግባት አልተቻለም",
+    "couldNotRegister": "መመዝገብ አልተቻለም",
+    "forPatientsOnly": "ለታካሚዎች። የሰራተኞች መለያዎች በክሊኒኩ አስተዳዳሪ ይፈጠራሉ።",
+    "tempPassword": "ጊዜያዊ የይለፍ ቃል",
+    "changePassword": "የይለፍ ቃል ይቀይሩ",
+    "forgotPassword": "የይለፍ ቃል ረስተዋል?",
+    "signOut": "ውጣ"
+  },
+  "pdf": {
+    "prescription": "የሕክምና ማዘዣ",
+    "labReport": "የላቦራቶሪ ሪፖርት",
+    "bill": "የሂሳብ መጠየቂያ",
+    "invoice": "ደረሰኝ",
+    "issued": "የተሰጠበት",
+    "license": "ፍቃድ",
+    "patient": "ታካሚ",
+    "name": "ስም",
+    "phone": "ስልክ",
+    "prescriber": "አዛዥ ሐኪም",
+    "prescriberSignature": "የሐኪሙ ፊርማ",
+    "labSignature": "የላቦራቶሪ ባለሙያ ፊርማ",
+    "scanToVerify": "ለማረጋገጥ ይቃኙ",
+    "electronic": "ይህ ሰነድ በኤሌክትሮኒክስ መንገድ የተዘጋጀ ነው",
+    "verifyAt": "በሚከተለው አድራሻ ያረጋግጡ",
+    "medications": "መድኃኒቶች",
+    "total": "ጠቅላላ",
+    "subtotal": "ንዑስ ድምር",
+    "tax": "ግብር",
+    "paid": "የተከፈለ",
+    "balanceDue": "የሚቀረው ቀሪ ሂሳብ"
+  },
+  "reception": {
+    "nav": {
+      "checkin": "መግቢያ ምዝገባ",
+      "book": "ቀጠሮ ያዙ",
+      "walkin": "ያለቀጠሮ የሚመጡ",
+      "billing": "ክፍያ",
+      "messages": "መልዕክቶች"
+    }
+  },
+  "doctor": {
+    "nav": {
+      "today": "ዛሬ",
+      "queue": "የታካሚዎች ተራ",
+      "prescribe": "ማዘዝ",
+      "labs": "የላቦራቶሪ ትዕዛዞች",
+      "messages": "መልዕክቶች"
+    }
+  },
+  "nurse": {
+    "nav": {
+      "wards": "ዋርዶች",
+      "vitals": "የህክምና መለኪያዎች መዝግብ",
+      "medications": "መድኃኒቶች",
+      "handover": "ኃላፊነት ማስተላለፍ",
+      "messages": "መልዕክቶች"
+    }
+  },
+  "lab": {
+    "nav": {
+      "pending": "በመጠበቅ ላይ",
+      "results": "ውጤቶች"
+    }
+  },
+  "admin": {
+    "nav": {
+      "overview": "አጠቃላይ እይታ",
+      "content": "የይዘት አስተዳደር",
+      "staff": "ሰራተኞች",
+      "patients": "ታካሚዎች",
+      "reports": "ሪፖርቶች"
+    }
+  },
+  "superAdmin": {
+    "nav": {
+      "overview": "አጠቃላይ እይታ",
+      "admins": "አስተዳዳሪዎች",
+      "audit": "የኦዲት መዝገብ",
+      "clinic": "የክሊኒክ ማዋቀሪያ"
+    }
   }
 }

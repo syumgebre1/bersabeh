@@ -30,6 +30,7 @@ from jinja2 import Environment, select_autoescape
 from weasyprint import HTML
 
 from app.core.clinic_config import CLINIC
+from app.core.pdf_translations import get_pdf_translations, get_medical_translations
 
 
 # ------------------------------------------------------------
@@ -244,32 +245,32 @@ PRESCRIPTION_TEMPLATE = """
 {{ header | safe }}
 
 <div class="section">
-  <div class="section-title">Patient</div>
+  <div class="section-title">{{ t.patient }}</div>
   <div class="kv-grid">
-    <div class="kv-key">Name</div><div class="kv-val">{{ patient.full_name }}</div>
-    <div class="kv-key">Phone</div><div class="kv-val">{{ patient.phone or "—" }}</div>
+    <div class="kv-key">{{ t.name }}</div><div class="kv-val">{{ patient.full_name }}</div>
+    <div class="kv-key">{{ t.phone }}</div><div class="kv-val">{{ patient.phone or "—" }}</div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">Prescriber</div>
+  <div class="section-title">{{ t.prescriber }}</div>
   <div class="kv-grid">
-    <div class="kv-key">Doctor</div><div class="kv-val">{{ doctor.full_name }}</div>
-    <div class="kv-key">Specialty</div><div class="kv-val">{{ doctor.specialty or "—" }}</div>
-    <div class="kv-key">License</div><div class="kv-val">{{ doctor.license_number or "—" }}</div>
+    <div class="kv-key">{{ t.prescriber }}</div><div class="kv-val">{{ doctor.full_name }}</div>
+    <div class="kv-key">{{ t.frequency }}</div><div class="kv-val">{{ doctor.specialty or "—" }}</div>
+    <div class="kv-key">{{ t.license }}</div><div class="kv-val">{{ doctor.license_number or "—" }}</div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">Medications</div>
+  <div class="section-title">{{ t.medications }}</div>
   <table>
     <thead>
       <tr>
-        <th style="width: 32%">Medication</th>
-        <th style="width: 18%">Dose</th>
-        <th style="width: 22%">Frequency</th>
-        <th style="width: 12%">Duration</th>
-        <th style="width: 16%">Instructions</th>
+        <th style="width: 32%">{{ t.medication }}</th>
+        <th style="width: 18%">{{ t.dose }}</th>
+        <th style="width: 22%">{{ t.frequency }}</th>
+        <th style="width: 12%">{{ t.duration }}</th>
+        <th style="width: 16%">{{ t.instructions }}</th>
       </tr>
     </thead>
     <tbody>
@@ -288,27 +289,27 @@ PRESCRIPTION_TEMPLATE = """
 
 {% if notes %}
 <div class="section">
-  <div class="section-title">Doctor's Notes</div>
+  <div class="section-title">{{ t.notes }}</div>
   <div class="notes">{{ notes }}</div>
 </div>
 {% endif %}
 
 {% if follow_up_date %}
 <div class="section">
-  <div class="section-title">Follow-up</div>
+  <div class="section-title">{{ t.followUp }}</div>
   <div class="kv-grid">
-    <div class="kv-key">Date</div><div class="kv-val">{{ follow_up_date }}</div>
+    <div class="kv-key">{{ t.date }}</div><div class="kv-val">{{ follow_up_date }}</div>
   </div>
 </div>
 {% endif %}
 
 <div class="signature">
   <div class="signature-block">
-    <div class="signature-line">Prescriber signature</div>
+    <div class="signature-line">{{ t.prescriberSignature }}</div>
   </div>
   <div class="qr-block">
     <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR">
-    <div class="qr-caption">Scan to verify</div>
+    <div class="qr-caption">{{ t.scanToVerify }}</div>
   </div>
 </div>
 
@@ -327,32 +328,32 @@ LAB_REPORT_TEMPLATE = """
 {{ header | safe }}
 
 <div class="section">
-  <div class="section-title">Patient</div>
+  <div class="section-title">{{ t.patient }}</div>
   <div class="kv-grid">
-    <div class="kv-key">Name</div><div class="kv-val">{{ patient.full_name }}</div>
-    <div class="kv-key">Phone</div><div class="kv-val">{{ patient.phone or "—" }}</div>
+    <div class="kv-key">{{ t.name }}</div><div class="kv-val">{{ patient.full_name }}</div>
+    <div class="kv-key">{{ t.phone }}</div><div class="kv-val">{{ patient.phone or "—" }}</div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">Test Ordered</div>
+  <div class="section-title">{{ t.testOrdered }}</div>
   <div class="kv-grid">
-    <div class="kv-key">Test</div><div class="kv-val">{{ test_name }}</div>
-    <div class="kv-key">Ordered by</div><div class="kv-val">{{ doctor.full_name }}</div>
-    <div class="kv-key">Priority</div><div class="kv-val">{{ priority|upper }}</div>
-    <div class="kv-key">Ordered at</div><div class="kv-val">{{ ordered_at }}</div>
+    <div class="kv-key">{{ t.test }}</div><div class="kv-val">{{ test_name }}</div>
+    <div class="kv-key">{{ t.orderedBy }}</div><div class="kv-val">{{ doctor.full_name }}</div>
+    <div class="kv-key">{{ t.priority }}</div><div class="kv-val">{{ priority|upper }}</div>
+    <div class="kv-key">{{ t.orderedAt }}</div><div class="kv-val">{{ ordered_at }}</div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">Result</div>
+  <div class="section-title">{{ t.result }}</div>
   <table>
     <thead>
       <tr>
-        <th style="width: 25%">Result</th>
-        <th style="width: 20%">Units</th>
-        <th style="width: 25%">Reference Range</th>
-        <th style="width: 30%">Interpretation</th>
+        <th style="width: 25%">{{ t.result }}</th>
+        <th style="width: 20%">{{ t.units }}</th>
+        <th style="width: 25%">{{ t.referenceRange }}</th>
+        <th style="width: 30%">{{ t.interpretation }}</th>
       </tr>
     </thead>
     <tbody>
@@ -368,18 +369,18 @@ LAB_REPORT_TEMPLATE = """
 
 {% if lab_notes %}
 <div class="section">
-  <div class="section-title">Lab Notes</div>
+  <div class="section-title">{{ t.labNotes }}</div>
   <div class="notes">{{ lab_notes }}</div>
 </div>
 {% endif %}
 
 <div class="signature">
   <div class="signature-block">
-    <div class="signature-line">Lab technologist signature</div>
+    <div class="signature-line">{{ t.labSignature }}</div>
   </div>
   <div class="qr-block">
     <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR">
-    <div class="qr-caption">Scan to verify</div>
+    <div class="qr-caption">{{ t.scanToVerify }}</div>
   </div>
 </div>
 
@@ -403,7 +404,11 @@ def _make_qr_base64(text: str) -> str:
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
-def _build_common_context(ref_id: str, doc_title: str) -> dict[str, Any]:
+def _build_common_context(
+    ref_id: str,
+    doc_title: str,
+    locale: str = "en",
+) -> dict[str, Any]:
     verify_url = f"https://bersabehclinic.com/verify/{ref_id}"
     return {
         "clinic": CLINIC,
@@ -413,6 +418,8 @@ def _build_common_context(ref_id: str, doc_title: str) -> dict[str, Any]:
         "issued_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "css": BASE_CSS,
         "qr_b64": _make_qr_base64(verify_url),
+        "t": get_pdf_translations(locale),
+        "locale": locale,
     }
 
 
@@ -424,12 +431,16 @@ def _render_html_to_pdf(html: str) -> bytes:
 # ------------------------------------------------------------
 # Public API — one function per document
 # ------------------------------------------------------------
-def render_prescription_pdf(data: dict[str, Any]) -> bytes:
+def render_prescription_pdf(data: dict[str, Any], locale: str = "en") -> bytes:
     """
     data keys:
       ref_id, patient, doctor, items, notes, follow_up_date
     """
-    ctx = _build_common_context(ref_id=str(data["ref_id"]), doc_title="Prescription")
+    ctx = _build_common_context(
+        ref_id=str(data["ref_id"]),
+        doc_title=get_pdf_translations(locale)["prescription"],
+        locale=locale,
+    )
     ctx.update({
         "patient": data["patient"],
         "doctor": data["doctor"],
@@ -443,13 +454,17 @@ def render_prescription_pdf(data: dict[str, Any]) -> bytes:
     return _render_html_to_pdf(html)
 
 
-def render_lab_report_pdf(data: dict[str, Any]) -> bytes:
+def render_lab_report_pdf(data: dict[str, Any], locale: str = "en") -> bytes:
     """
     data keys:
       ref_id, patient, doctor, test_name, priority, ordered_at,
       result_display, units, reference_range, interpretation, lab_notes
     """
-    ctx = _build_common_context(ref_id=str(data["ref_id"]), doc_title="Lab Report")
+    ctx = _build_common_context(
+        ref_id=str(data["ref_id"]),
+        doc_title=get_pdf_translations(locale)["labReport"],
+        locale=locale,
+    )
     ctx.update({
         "patient": data["patient"],
         "doctor": data["doctor"],

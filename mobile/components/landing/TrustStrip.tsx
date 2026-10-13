@@ -1,11 +1,8 @@
 /**
- * TrustStrip — the dark indigo band of trust signals below the hero.
- *
- * Layout (wide):    [🛡 MoH]  [👥 4 specialists]  [📅 Since 2009]  [🚨 24/7]
- * Layout (narrow):  two rows of two
+ * TrustStrip — 4 trust badges below the hero.
  */
 
-import { CalendarClock, PhoneCall, ShieldCheck, Users } from "lucide-react-native";
+import { Award, Heart, Phone, Users } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
@@ -13,62 +10,48 @@ import { CLINIC } from "@/constants/clinic";
 import { theme } from "@/constants/theme";
 
 
-interface ItemProps {
-  Icon: typeof ShieldCheck;
-  title: string;
-  subtitle: string;
-  narrow: boolean;
-}
-
-function TrustItem({ Icon, title, subtitle, narrow }: ItemProps) {
-  return (
-    <View style={[styles.item, narrow && styles.itemNarrow]}>
-      <View style={styles.iconCircle}>
-        <Icon size={18} color={theme.colors.accent} strokeWidth={2.2} />
-      </View>
-      <View style={styles.textCol}>
-        <Text style={styles.itemTitle}>{title}</Text>
-        <Text style={styles.itemSubtitle} numberOfLines={1}>
-          {subtitle}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-
 export function TrustStrip() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  const isNarrow = width < 720;
+  const isWide = width >= 900;
+
+  const items = [
+    {
+      Icon: Award,
+      title: t("trust.licensed"),
+      sub: `${t("trust.licenseLabel")}: ${CLINIC.licenseNumber}`,
+    },
+    {
+      Icon: Users,
+      title: t("trust.experts"),
+      sub: t("trust.specialties"),
+    },
+    {
+      Icon: Heart,
+      title: t("trust.years"),
+      sub: t("footer.tagline"),
+    },
+    {
+      Icon: Phone,
+      title: t("trust.emergency"),
+      sub: CLINIC.emergencyPhone,
+    },
+  ];
 
   return (
-    <View style={styles.band}>
-      <View style={[styles.inner, isNarrow && styles.innerNarrow]}>
-        <TrustItem
-          Icon={ShieldCheck}
-          title={t("trust.licensed")}
-          subtitle={`${t("trust.license")}: ${CLINIC.licenseNumber}`}
-          narrow={isNarrow}
-        />
-        <TrustItem
-          Icon={Users}
-          title={t("trust.doctors")}
-          subtitle="Internal · Surgery · Cardio · Gastro"
-          narrow={isNarrow}
-        />
-        <TrustItem
-          Icon={CalendarClock}
-          title={t("trust.years")}
-          subtitle="16 years serving Addis"
-          narrow={isNarrow}
-        />
-        <TrustItem
-          Icon={PhoneCall}
-          title={t("trust.emergency")}
-          subtitle={CLINIC.emergencyPhone}
-          narrow={isNarrow}
-        />
+    <View style={styles.wrap}>
+      <View style={[styles.row, !isWide && styles.rowStack]}>
+        {items.map((item, idx) => (
+          <View key={idx} style={styles.cell}>
+            <View style={styles.iconWrap}>
+              <item.Icon size={18} color={theme.colors.accent} strokeWidth={2.2} />
+            </View>
+            <View style={styles.text}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.sub}>{item.sub}</Text>
+            </View>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -76,61 +59,38 @@ export function TrustStrip() {
 
 
 const styles = StyleSheet.create({
-  band: {
+  wrap: {
     backgroundColor: theme.colors.primaryDark,
-    paddingVertical: theme.spacing.xl,
+    paddingVertical: theme.spacing.lg,
     paddingHorizontal: theme.spacing.lg,
   },
-  inner: {
+  row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: theme.spacing.lg,
+    gap: theme.spacing.xl,
     maxWidth: theme.layout.maxContentWidth,
     width: "100%",
     alignSelf: "center",
   },
-  innerNarrow: {
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-  },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.md,
-    flexBasis: "auto",
-    flexGrow: 1,
-  },
-  itemNarrow: {
-    flexBasis: "45%",
-    flexGrow: 0,
-    marginBottom: theme.spacing.md,
-  },
-  iconCircle: {
+  rowStack: { flexDirection: "column" },
+  cell: { flex: 1, flexDirection: "row", alignItems: "center", gap: theme.spacing.md },
+  iconWrap: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(232, 178, 58, 0.12)",
+    backgroundColor: "rgba(232,178,58,0.12)",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(232, 178, 58, 0.3)",
   },
-  textCol: {
-    flex: 1,
-    minWidth: 0,
-  },
-  itemTitle: {
-    fontFamily: theme.fontFamily.headingMedium,
-    fontSize: 15,
+  text: { flex: 1, gap: 2 },
+  title: {
+    fontFamily: theme.fontFamily.bodyBold,
+    fontSize: 13.5,
     color: theme.colors.textInverse,
-    letterSpacing: -0.1,
   },
-  itemSubtitle: {
+  sub: {
     fontFamily: theme.fontFamily.body,
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.6)",
-    marginTop: 2,
+    fontSize: 11.5,
+    color: "rgba(255,255,255,0.65)",
   },
 });
 

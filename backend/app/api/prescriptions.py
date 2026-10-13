@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import CurrentUser
@@ -33,6 +34,7 @@ from app.schemas.prescription import (
     PrescriptionRead,
     PrescriptionUpdate,
 )
+from app.core.pdf_translations import get_medical_translations
 from app.services.pdf import render_prescription_pdf
 
 
@@ -141,7 +143,7 @@ async def list_prescriptions(
     if current_user.role == UserRole.LAB:
         raise HTTPException(status_code=403, detail="Lab staff cannot view prescriptions")
 
-    stmt = select(Prescription)
+    stmt = select(Prescription).options(selectinload(Prescription.items))
     if current_user.role == UserRole.PATIENT:
         stmt = stmt.where(Prescription.patient_id == current_user.id)
     elif current_user.role == UserRole.DOCTOR:
@@ -242,35 +244,47 @@ async def download_prescription_pdf(
     prescription_id: uuid.UUID,
     current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
+    locale: str = Query("en", description="PDF language: en | am | ti"),
 ):
     p = await _get_prescription_or_404(db, prescription_id)
     if not _can_view(current_user, p):
         raise HTTPException(status_code=403, detail="Not allowed to view this prescription")
 
-    pdf_bytes = render_prescription_pdf({
-        "ref_id": str(p.id),
-        "patient": {
-            "full_name": p.patient.full_name if p.patient else "—",
-            "phone": p.patient.phone if p.patient else None,
+    # Translate medical values (frequency, instructions) for the PDF locale
+    med_map = get_medical_translations(locale)
+
+    def _med(v: str | None) -> str | None:
+        if not v:
+            return v
+        return med_map.get(v, v)
+
+    pdf_bytes = render_prescription_pdf(
+        {
+            "ref_id": str(p.id),
+            "patient": {
+                "full_name": p.patient.full_name if p.patient else "—",
+                "phone": p.patient.phone if p.patient else None,
+            },
+            "doctor": {
+                "full_name": p.doctor.full_name if p.doctor else "—",
+                "specialty": p.doctor.specialty if p.doctor else None,
+                "license_number": p.doctor.license_number if p.doctor else None,
+            },
+            "items": [
+                {
+                    "medication_name": i.medication_name,
+                    "dose": i.dose,
+                    "frequency": _med(i.frequency),
+                    "duration_days": i.duration_days,
+                    "instructions": _med(i.instructions),
+                }
+                for i in p.items
+            ],
+            "notes": p.notes,
+            "follow_up_date": p.follow_up_date.isoformat() if p.follow_up_date else None,
         },
-        "doctor": {
-            "full_name": p.doctor.full_name if p.doctor else "—",
-            "specialty": p.doctor.specialty if p.doctor else None,
-            "license_number": p.doctor.license_number if p.doctor else None,
-        },
-        "items": [
-            {
-                "medication_name": i.medication_name,
-                "dose": i.dose,
-                "frequency": i.frequency,
-                "duration_days": i.duration_days,
-                "instructions": i.instructions,
-            }
-            for i in p.items
-        ],
-        "notes": p.notes,
-        "follow_up_date": p.follow_up_date.isoformat() if p.follow_up_date else None,
-    })
+        locale=locale,
+    )
 
     return Response(
         content=pdf_bytes,

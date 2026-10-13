@@ -1,259 +1,174 @@
 /**
- * Hero — asymmetric hero + booking widget.
- *
- * Layout:
- *   [  eyebrow label                        ]
- *   [  BIG HEADLINE (Space Grotesk)         ]  [  ┌──────────────┐ ]
- *   [  subhead (Inter)                       ]  [  │ Booking      │ ]
- *   [  [CTA1]  [CTA2]                        ]  [  │ widget       │ ]
- *                                               [  │ card         │ ]
- *                                               [  └──────────────┘ ]
- *
- * Responsive: stacks vertically below ~860px.
+ * Hero — big headline + CTA + booking widget with real date/dept pickers.
  */
 
-import { Calendar, ChevronDown, Sparkles } from "lucide-react-native";
+import { ArrowRight, Calendar, ChevronDown } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
-import { Button } from "@/components/ui/Button";
+import { DatePickerModal } from "@/components/ui/DatePickerModal";
+import { DepartmentPicker } from "@/components/ui/DepartmentPicker";
 import { theme } from "@/constants/theme";
+import { scrollToSection } from "@/lib/scroll";
+
+
+const DEPARTMENT_LABELS: Record<string, string> = {
+  internal_medicine: "Internal Medicine",
+  general_surgery: "General Surgery",
+  gastroenterology: "Gastroenterology",
+  cardiology: "Cardiology",
+  nephrology: "Nephrology",
+  pulmonology: "Pulmonology",
+  post_op_care: "Post-op Care",
+  wound_care: "Wound Care",
+};
 
 
 export function Hero() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { width } = useWindowDimensions();
-  const isWide = width >= 860;
+  const isWide = width >= 900;
+
+  const [date, setDate] = useState<string>("");
+  const [department, setDepartment] = useState<string>("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDeptPicker, setShowDeptPicker] = useState(false);
+
+  const handleCheck = () => {
+    const params = new URLSearchParams();
+    if (department) params.set("department", department);
+    if (date) params.set("date", date);
+    const query = params.toString();
+    router.push(`/(auth)/register${query ? `?${query}` : ""}` as any);
+  };
+
+  const displayDate = date
+    ? new Date(date).toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" })
+    : t("hero.booking.datePlaceholder");
+
+  const displayDept = department
+    ? DEPARTMENT_LABELS[department] ?? department
+    : t("hero.booking.departmentPlaceholder");
 
   return (
-    <View style={styles.wrap}>
-      <View style={[styles.inner, isWide ? styles.innerWide : styles.innerNarrow]}>
-        {/* Left — copy */}
-        <View style={[styles.copy, isWide ? styles.copyWide : styles.copyNarrow]}>
-          <View style={styles.eyebrowRow}>
-            <Sparkles size={14} color={theme.colors.secondary} strokeWidth={2.2} />
-            <Text style={styles.eyebrow}>Bersabeh Clinic · Addis Ababa</Text>
-          </View>
-
+    <View style={styles.hero}>
+      <View style={[styles.cols, !isWide && styles.colsStack]}>
+        <View style={styles.left}>
+          <Text style={styles.eyebrow}>{t("hero.eyebrow")}</Text>
           <Text style={[styles.headline, !isWide && styles.headlineNarrow]}>
             {t("hero.headline")}
           </Text>
 
-          <Text style={styles.subhead}>{t("hero.subhead")}</Text>
-
-          <View style={styles.ctas}>
-            <Button
-              label={t("hero.ctaPrimary")}
-              variant="primary"
-              size="lg"
-              onPress={() => {}}
-            />
-            <Button
-              label={t("hero.ctaSecondary")}
-              variant="outline"
-              size="lg"
-              onPress={() => {}}
-            />
+          <View style={styles.ctaRow}>
+            <Pressable
+              onPress={() => router.push("/(auth)/register" as any)}
+              style={({ hovered }: any) => [styles.cta, styles.ctaPrimary, hovered && styles.ctaHover]}
+            >
+              <Text style={styles.ctaTextPrimary}>{t("hero.ctaPrimary")}</Text>
+              <ArrowRight size={16} color={theme.colors.textInverse} strokeWidth={2.4} />
+            </Pressable>
+            <Pressable
+              onPress={() => scrollToSection("departments")}
+              style={({ hovered }: any) => [styles.cta, styles.ctaOutline, hovered && styles.ctaOutlineHover]}
+            >
+              <Text style={styles.ctaTextOutline}>{t("hero.ctaSecondary")}</Text>
+            </Pressable>
           </View>
         </View>
 
-        {/* Right — booking widget */}
-        <View style={[styles.widgetWrap, isWide ? styles.widgetWrapWide : styles.widgetWrapNarrow]}>
-          {/* Decorative gold band behind the card — Urban Ethio accent */}
-          <View style={styles.accentBand} />
+        <View style={styles.right}>
+          <View style={styles.bookingCard}>
+            <Text style={styles.bookingTitle}>{t("hero.booking.title")}</Text>
 
-          <View style={styles.widget}>
-            <View style={styles.widgetTop}>
-              <Text style={styles.widgetEyebrow}>{t("hero.booking.title")}</Text>
-            </View>
-
-            <View style={styles.fieldRow}>
-              <Calendar size={16} color={theme.colors.primary} strokeWidth={2} />
-              <View style={styles.fieldText}>
-                <Text style={styles.fieldLabel}>{t("hero.booking.date")}</Text>
-                <Text style={styles.fieldValue}>
-                  {t("hero.booking.datePlaceholder")}
+            {/* Date field — opens DatePickerModal */}
+            <View style={styles.field}>
+              <Text style={styles.label}>{t("hero.booking.date")}</Text>
+              <Pressable
+                onPress={() => setShowDatePicker(true)}
+                style={({ hovered }: any) => [styles.input, hovered && styles.inputHover]}
+              >
+                <Calendar size={14} color={theme.colors.muted} strokeWidth={2} />
+                <Text style={[styles.inputText, date ? styles.inputTextActive : null]}>
+                  {displayDate}
                 </Text>
-              </View>
-              <ChevronDown size={16} color={theme.colors.muted} strokeWidth={2} />
+              </Pressable>
             </View>
 
-            <View style={styles.fieldRow}>
-              <View style={styles.fieldIconSpacer} />
-              <View style={styles.fieldText}>
-                <Text style={styles.fieldLabel}>{t("hero.booking.department")}</Text>
-                <Text style={styles.fieldValue}>
-                  {t("hero.booking.departmentPlaceholder")}
+            {/* Department field — opens DepartmentPicker */}
+            <View style={styles.field}>
+              <Text style={styles.label}>{t("hero.booking.department")}</Text>
+              <Pressable
+                onPress={() => setShowDeptPicker(true)}
+                style={({ hovered }: any) => [styles.input, hovered && styles.inputHover]}
+              >
+                <Text style={[styles.inputText, department ? styles.inputTextActive : null]}>
+                  {displayDept}
                 </Text>
-              </View>
-              <ChevronDown size={16} color={theme.colors.muted} strokeWidth={2} />
+                <ChevronDown size={14} color={theme.colors.muted} strokeWidth={2} />
+              </Pressable>
             </View>
 
-            <View style={styles.widgetCta}>
-              <Button
-                label={t("hero.booking.check")}
-                variant="secondary"
-                size="md"
-                fullWidth
-                onPress={() => {}}
-              />
-            </View>
+            <Pressable
+              onPress={handleCheck}
+              style={({ hovered }: any) => [styles.checkBtn, hovered && styles.checkBtnHover]}
+            >
+              <Text style={styles.checkBtnText}>{t("hero.booking.check")}</Text>
+            </Pressable>
 
-            <Text style={styles.widgetFootnote}>{t("hero.booking.success")}</Text>
+            <Text style={styles.bookingNote}>{t("hero.booking.success")}</Text>
           </View>
         </View>
       </View>
+
+      {/* Modals */}
+      <DatePickerModal
+        visible={showDatePicker}
+        initialDate={date ? new Date(date) : undefined}
+        onSelect={setDate}
+        onClose={() => setShowDatePicker(false)}
+      />
+      <DepartmentPicker
+        visible={showDeptPicker}
+        onSelect={setDepartment}
+        onClose={() => setShowDeptPicker(false)}
+      />
     </View>
   );
 }
 
 
 const styles = StyleSheet.create({
-  wrap: {
-    backgroundColor: theme.colors.bg,
-    paddingVertical: theme.spacing.huge,
-    paddingHorizontal: theme.spacing.lg,
-  },
-  inner: {
-    width: "100%",
-    maxWidth: theme.layout.maxContentWidth,
-    alignSelf: "center",
-    gap: theme.spacing.xxl,
-  },
-  innerWide: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  innerNarrow: {
-    flexDirection: "column",
-  },
-  copy: {
-    gap: theme.spacing.lg,
-  },
-  copyWide: {
-    flexBasis: "55%",
-    paddingRight: theme.spacing.xxl,
-  },
-  copyNarrow: {
-    flexBasis: "auto",
-  },
-  eyebrowRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.xs + 2,
-  },
-  eyebrow: {
-    fontFamily: theme.fontFamily.bodyMedium,
-    fontSize: 12,
-    letterSpacing: 1.4,
-    textTransform: "uppercase",
-    color: theme.colors.secondary,
-  },
-  headline: {
-    fontFamily: theme.fontFamily.heading,
-    fontSize: 56,
-    lineHeight: 62,
-    letterSpacing: -1.2,
-    color: theme.colors.text,
-    maxWidth: 620,
-  },
-  headlineNarrow: {
-    fontSize: 40,
-    lineHeight: 46,
-    letterSpacing: -0.8,
-  },
-  subhead: {
-    fontFamily: theme.fontFamily.body,
-    fontSize: 17,
-    lineHeight: 26,
-    color: theme.colors.muted,
-    maxWidth: 560,
-  },
-  ctas: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.spacing.md,
-    marginTop: theme.spacing.sm,
-  },
-  widgetWrap: {
-    position: "relative",
-  },
-  widgetWrapWide: {
-    flexBasis: "45%",
-    alignItems: "flex-end",
-  },
-  widgetWrapNarrow: {
-    flexBasis: "auto",
-    alignItems: "stretch",
-  },
-  accentBand: {
-    position: "absolute",
-    top: 16,
-    bottom: -16,
-    right: 16,
-    left: 32,
-    backgroundColor: "rgba(232, 178, 58, 0.18)",
-    borderRadius: theme.radius.md,
-  },
-  widget: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.xl,
-    gap: theme.spacing.base,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    ...theme.shadow.lg,
-  },
-  widgetTop: {
-    marginBottom: theme.spacing.xs,
-  },
-  widgetEyebrow: {
-    fontFamily: theme.fontFamily.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.4,
-    textTransform: "uppercase",
-    color: theme.colors.primary,
-  },
-  fieldRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.sm,
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.base,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.bg,
-  },
-  fieldIconSpacer: {
-    width: 16,
-  },
-  fieldText: {
-    flex: 1,
-  },
-  fieldLabel: {
-    fontFamily: theme.fontFamily.bodyMedium,
-    fontSize: 11,
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-    color: theme.colors.muted,
-  },
-  fieldValue: {
-    fontFamily: theme.fontFamily.body,
-    fontSize: 15,
-    color: theme.colors.text,
-    marginTop: 2,
-  },
-  widgetCta: {
-    marginTop: theme.spacing.xs,
-  },
-  widgetFootnote: {
-    fontFamily: theme.fontFamily.body,
-    fontSize: 12,
-    color: theme.colors.muted,
-    lineHeight: 17,
-    marginTop: theme.spacing.xs,
-  },
+  hero: { backgroundColor: theme.colors.bg, paddingVertical: theme.spacing.huge, paddingHorizontal: theme.spacing.lg },
+  cols: { flexDirection: "row", gap: theme.spacing.xxl, maxWidth: theme.layout.maxContentWidth, width: "100%", alignSelf: "center", alignItems: "center" },
+  colsStack: { flexDirection: "column", alignItems: "stretch" },
+  left: { flex: 1, gap: theme.spacing.lg },
+  eyebrow: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12, letterSpacing: 1.4, textTransform: "uppercase", color: theme.colors.secondary },
+  headline: { fontFamily: theme.fontFamily.heading, fontSize: 56, lineHeight: 62, letterSpacing: -1.6, color: theme.colors.text },
+  headlineNarrow: { fontSize: 36, lineHeight: 42, letterSpacing: -0.8 },
+  ctaRow: { flexDirection: "row", gap: theme.spacing.md, flexWrap: "wrap", marginTop: theme.spacing.md },
+  cta: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs + 2, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.base, borderRadius: theme.radius.md, cursor: "pointer" as any },
+  ctaPrimary: { backgroundColor: theme.colors.primary },
+  ctaHover: { opacity: 0.9, transform: [{ translateY: -1 }] },
+  ctaOutline: { borderWidth: 1.5, borderColor: theme.colors.primary },
+  ctaOutlineHover: { backgroundColor: "rgba(42,42,114,0.05)" },
+  ctaTextPrimary: { fontFamily: theme.fontFamily.bodyBold, fontSize: 15, color: theme.colors.textInverse },
+  ctaTextOutline: { fontFamily: theme.fontFamily.bodyBold, fontSize: 15, color: theme.colors.primary },
+  right: { flex: 1, minWidth: 320 },
+  bookingCard: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.xl, gap: theme.spacing.md, borderWidth: 1, borderColor: theme.colors.border, ...theme.shadow.md },
+  bookingTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 15, letterSpacing: 1, textTransform: "uppercase", color: theme.colors.primary, marginBottom: theme.spacing.xs },
+  field: { gap: theme.spacing.xs },
+  label: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", color: theme.colors.muted },
+  input: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: theme.spacing.sm, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.sm, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, cursor: "pointer" as any },
+  inputHover: { borderColor: theme.colors.primary },
+  inputText: { flex: 1, fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.muted },
+  inputTextActive: { color: theme.colors.text },
+  checkBtn: { backgroundColor: theme.colors.secondary, borderRadius: theme.radius.md, paddingVertical: theme.spacing.base, alignItems: "center", marginTop: theme.spacing.sm, cursor: "pointer" as any },
+  checkBtnHover: { opacity: 0.9 },
+  checkBtnText: { fontFamily: theme.fontFamily.bodyBold, fontSize: 15, color: theme.colors.textInverse },
+  bookingNote: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, textAlign: "center" },
 });
 
 

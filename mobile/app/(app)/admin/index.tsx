@@ -1,170 +1,195 @@
 /**
- * Admin dashboard — KPIs + approvals queue + staff + recent activity.
+ * Admin dashboard — real KPIs, real pending queue, real audit preview.
+ * All cards are clickable and navigate to their sub-route.
  */
 
 import {
-  Activity,
   ArrowRight,
-  BadgeCheck,
-  BedDouble,
-  CalendarDays,
-  CircleDollarSign,
+  CalendarCheck,
+  CheckCircle2,
+  FlaskConical,
+  Pill,
+  Receipt,
+  TrendingUp,
   UserCheck,
-  UserCog,
   Users,
+  Wallet,
   X,
 } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { useRouter } from "expo-router";
+import {
+  ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View,
+} from "react-native";
 
+import {
+  useAppointments,
+  useApprovePatient,
+  useAuditLogs,
+  useBills,
+  usePendingPatients,
+  usePrescriptions,
+  useStaffList,
+} from "@/lib/admin";
+import type { SessionUser } from "@/store/app";
 import { theme } from "@/constants/theme";
-import { useAppStore } from "@/store/app";
-
-
-interface KPI {
-  label: string;
-  value: string;
-  hint: string;
-  Icon: typeof Activity;
-  tone: "primary" | "secondary" | "accent" | "success";
-}
-
-const KPIS: KPI[] = [
-  { label: "Today's appointments", value: "24",  hint: "8 completed · 16 pending", Icon: CalendarDays,       tone: "primary"   },
-  { label: "Registered patients",  value: "847", hint: "+12 this week",           Icon: Users,              tone: "secondary" },
-  { label: "Staff on duty",        value: "11",  hint: "4 doctors · 3 nurses",    Icon: UserCheck,          tone: "accent"    },
-  { label: "Revenue today",        value: "4,250", hint: "ETB · 12 payments",     Icon: CircleDollarSign,   tone: "success"   },
-];
-
-
-function kpiTone(tone: KPI["tone"]) {
-  switch (tone) {
-    case "secondary": return { bg: theme.colors.secondary, fg: theme.colors.textInverse };
-    case "accent":    return { bg: theme.colors.accent,    fg: theme.colors.text };
-    case "success":   return { bg: theme.colors.success,   fg: theme.colors.textInverse };
-    default:          return { bg: theme.colors.primary,   fg: theme.colors.textInverse };
-  }
-}
 
 
 export default function AdminDashboard() {
-  const user = useAppStore((s) => s.user);
+  const router = useRouter();
   const { width } = useWindowDimensions();
-  const isWide = width >= 1100;
+  const isWide = width >= 1000;
 
-  const firstName = (user?.full_name ?? "Admin").split(" ")[0];
+  const { data: staff } = useStaffList();
+  const { data: appts, isLoading: aLoad }  = useAppointments({ limit: 500 });
+  const { data: rxs }                      = usePrescriptions({ limit: 500 });
+  const { data: bills }                    = useBills({ limit: 500 });
+  const { data: logs }                     = useAuditLogs({ limit: 5 });
+  const { data: pending, refetch: refetchPending } = usePendingPatients();
+  const approve = useApprovePatient();
+
+  const staffCount    = (staff ?? []).filter((u: SessionUser) => u.role !== "patient").length;
+  const patientsCount = (staff ?? []).filter((u: SessionUser) => u.role === "patient").length;
+  const apptsCount    = appts?.length ?? 0;
+  const rxsCount      = rxs?.length ?? 0;
+  const paidTotal     = (bills ?? [])
+    .filter((b) => b.status === "paid")
+    .reduce((sum, b) => sum + Number(b.amount_etb ?? 0), 0);
+
+  const handleApprove = async (userId: string) => {
+    try {
+      await approve.mutateAsync(userId);
+      await refetchPending();
+    } catch {
+      // Silently fail — the pending page has proper error UI
+    }
+  };
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      {/* Greeting */}
       <View style={styles.greeting}>
-        <Text style={styles.hello}>Hi {firstName}.</Text>
+        <Text style={styles.hello}>Hi {(staff?.find((u: SessionUser) => u.role === "admin")?.full_name ?? "there").split(" ")[0]}.</Text>
         <Text style={styles.sub}>Here's your clinic at a glance.</Text>
       </View>
 
-      {/* KPI row */}
-      <View style={styles.kpiRow}>
-        {KPIS.map((k) => {
-          const t = kpiTone(k.tone);
-          return (
-            <View key={k.label} style={[styles.kpiCard, { backgroundColor: t.bg }]}>
-              <View style={styles.kpiTop}>
-                <k.Icon size={16} color={t.fg} strokeWidth={2.2} />
-                <Text style={[styles.kpiLabel, { color: t.fg, opacity: 0.8 }]}>
-                  {k.label.toUpperCase()}
-                </Text>
-              </View>
-              <Text style={[styles.kpiValue, { color: t.fg }]}>{k.value}</Text>
-              <Text style={[styles.kpiHint, { color: t.fg, opacity: 0.75 }]}>{k.hint}</Text>
-            </View>
-          );
-        })}
+      {/* KPI cards — clickable */}
+      <View style={[styles.kpiRow, !isWide && styles.kpiStack]}>
+        <Pressable
+          onPress={() => router.push("/(app)/admin/reports" as any)}
+          style={({ hovered }: any) => [styles.kpiCard, { backgroundColor: theme.colors.primary }, hovered && styles.kpiHover]}
+        >
+          <CalendarCheck size={20} color={theme.colors.textInverse} strokeWidth={2.2} />
+          <Text style={styles.kpiLabelLight}>APPOINTMENTS</Text>
+          <Text style={styles.kpiValueLight}>{aLoad ? "…" : apptsCount}</Text>
+          <Text style={styles.kpiSubLight}>Total in system</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.push("/(app)/admin/staff" as any)}
+          style={({ hovered }: any) => [styles.kpiCard, { backgroundColor: theme.colors.secondary }, hovered && styles.kpiHover]}
+        >
+          <Users size={20} color={theme.colors.textInverse} strokeWidth={2.2} />
+          <Text style={styles.kpiLabelLight}>REGISTERED PATIENTS</Text>
+          <Text style={styles.kpiValueLight}>{patientsCount}</Text>
+          <Text style={styles.kpiSubLight}>+{staffCount} staff</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.push("/(app)/admin/reports" as any)}
+          style={({ hovered }: any) => [styles.kpiCard, { backgroundColor: theme.colors.accent }, hovered && styles.kpiHover]}
+        >
+          <Pill size={20} color={theme.colors.text} strokeWidth={2.2} />
+          <Text style={styles.kpiLabelDark}>PRESCRIPTIONS</Text>
+          <Text style={styles.kpiValueDark}>{rxsCount}</Text>
+          <Text style={styles.kpiSubDark}>Written</Text>
+        </Pressable>
       </View>
 
-      {/* Two-column: approvals + activity */}
-      <View style={[styles.cols, !isWide && styles.colsStack]}>
-        {/* Pending approvals */}
-        <View style={styles.panel}>
-          <View style={styles.panelHeader}>
-            <BadgeCheck size={14} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.panelTitle}>Pending patient approvals</Text>
-            <Text style={styles.panelMeta}>3 in queue</Text>
-          </View>
-          <View style={styles.panelBody}>
-            {[
-              { name: "Aster Tesfaye",  phone: "+251 911 234 567", when: "2h ago" },
-              { name: "Getachew Alemu", phone: "+251 911 876 543", when: "5h ago" },
-              { name: "Mulu Demissie",  phone: "+251 911 111 222", when: "1d ago" },
-            ].map((a, i) => (
-              <View key={i}>
-                <View style={styles.approvalRow}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                      {a.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
-                    </Text>
-                  </View>
-                  <View style={styles.approvalContent}>
-                    <Text style={styles.approvalName}>{a.name}</Text>
-                    <Text style={styles.approvalMeta}>{a.phone} · {a.when}</Text>
-                  </View>
-                  <Pressable style={[styles.actionSmall, styles.actionApprove]}>
-                    <BadgeCheck size={13} color={theme.colors.textInverse} strokeWidth={2.6} />
-                    <Text style={styles.actionApproveText}>Approve</Text>
-                  </Pressable>
-                  <Pressable style={[styles.actionSmall, styles.actionReject]}>
-                    <X size={13} color={theme.colors.danger} strokeWidth={2.6} />
-                  </Pressable>
-                </View>
-                {i < 2 && <View style={styles.divider} />}
-              </View>
-            ))}
+      {/* Revenue strip */}
+      <Pressable
+        onPress={() => router.push("/(app)/admin/reports" as any)}
+        style={({ hovered }: any) => [styles.revenueStrip, hovered && styles.kpiHover]}
+      >
+        <View style={styles.revenueLeft}>
+          <Wallet size={20} color={theme.colors.textInverse} strokeWidth={2.2} />
+          <View>
+            <Text style={styles.revenueLabel}>REVENUE COLLECTED</Text>
+            <Text style={styles.revenueValue}>{paidTotal.toLocaleString()} ETB</Text>
           </View>
         </View>
+        <ArrowRight size={18} color="rgba(255,255,255,0.7)" strokeWidth={2.2} />
+      </Pressable>
 
-        {/* Recent activity */}
-        <View style={styles.panel}>
-          <View style={styles.panelHeader}>
-            <Activity size={14} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.panelTitle}>Recent activity</Text>
-            <Pressable><Text style={styles.panelLink}>See all</Text></Pressable>
-          </View>
-          <View style={styles.panelBody}>
-            {[
-              { who: "Dr. Selam", did: "wrote a prescription for Abebe Kebede", when: "5m ago" },
-              { who: "Hana Bekele", did: "logged vitals for Room 205", when: "12m ago" },
-              { who: "Meron Tadesse", did: "checked in Yohannes Getu", when: "28m ago" },
-              { who: "Dr. Yonas", did: "ordered Troponin (STAT)", when: "1h ago" },
-              { who: "Admin", did: "approved patient Aster Tesfaye", when: "2h ago" },
-            ].map((a, i) => (
-              <View key={i} style={styles.activityRow}>
-                <View style={styles.activityDot} />
-                <Text style={styles.activityText}>
-                  <Text style={styles.activityWho}>{a.who}</Text> {a.did}
-                </Text>
-                <Text style={styles.activityTime}>{a.when}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      </View>
-
-      {/* Quick links */}
-      <View style={styles.quickRow}>
-        {[
-          { Icon: UserCog,   label: "Manage staff",     hint: "Add/edit staff accounts" },
-          { Icon: Users,     label: "Patient records",  hint: "Search + view history" },
-          { Icon: BedDouble, label: "Bed occupancy",    hint: "6 of 8 rooms in use" },
-          { Icon: CalendarDays, label: "Appointments",  hint: "Schedule + reschedule" },
-        ].map((q) => (
-          <Pressable key={q.label} style={({ hovered }: any) => [styles.quickCard, hovered && styles.quickCardHover]}>
-            <View style={styles.quickIcon}>
-              <q.Icon size={18} color={theme.colors.primary} strokeWidth={2.2} />
-            </View>
-            <View style={styles.quickContent}>
-              <Text style={styles.quickLabel}>{q.label}</Text>
-              <Text style={styles.quickHint}>{q.hint}</Text>
-            </View>
-            <ArrowRight size={14} color={theme.colors.muted} strokeWidth={2} />
+      {/* Pending approvals — real data + working buttons */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Pending patient approvals</Text>
+          <Pressable onPress={() => router.push("/(app)/admin/patients" as any)}>
+            <Text style={styles.sectionLink}>
+              {(pending?.length ?? 0)} in queue → view all
+            </Text>
           </Pressable>
-        ))}
+        </View>
+
+        {(!pending || pending.length === 0) ? (
+          <View style={styles.emptyCard}>
+            <CheckCircle2 size={22} color={theme.colors.success} strokeWidth={2} />
+            <Text style={styles.emptyText}>All caught up — no pending patients.</Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {pending.slice(0, 3).map((p: any) => (
+              <View key={p.id} style={styles.pendingRow}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {p.full_name.split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.pendingContent}>
+                  <Text style={styles.pendingName}>{p.full_name}</Text>
+                  <Text style={styles.pendingMeta}>{p.phone ?? p.email}</Text>
+                </View>
+                <Pressable
+                  onPress={() => handleApprove(p.id)}
+                  disabled={approve.isPending}
+                  style={[styles.approveBtn, approve.isPending && styles.btnDisabled]}
+                >
+                  <CheckCircle2 size={14} color={theme.colors.textInverse} strokeWidth={2.4} />
+                  <Text style={styles.approveBtnText}>Approve</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => router.push("/(app)/admin/patients" as any)}
+                  style={styles.rejectIconBtn}
+                >
+                  <X size={14} color={theme.colors.danger} strokeWidth={2.4} />
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+
+      {/* Recent audit */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent activity</Text>
+          <Pressable onPress={() => router.push("/(app)/super-admin/audit" as any)}>
+            <Text style={styles.sectionLink}>Full log →</Text>
+          </Pressable>
+        </View>
+        <View style={styles.list}>
+          {(logs ?? []).slice(0, 5).map((e, idx, arr) => (
+            <View key={e.id} style={[styles.auditRow, idx < arr.length - 1 && styles.auditBorder]}>
+              <View style={styles.auditBadge}>
+                <Text style={styles.auditBadgeText}>{e.action.slice(0, 6).toUpperCase()}</Text>
+              </View>
+              <Text style={styles.auditDesc} numberOfLines={1}>{e.description}</Text>
+              <Text style={styles.auditTime}>
+                {new Date(e.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </Text>
+            </View>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
@@ -173,135 +198,50 @@ export default function AdminDashboard() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: theme.colors.bg },
-  content: {
-    padding: theme.spacing.xxl,
-    gap: theme.spacing.xl,
-    maxWidth: 1400,
-    width: "100%",
-    alignSelf: "center",
-  },
+  content: { padding: theme.spacing.xxl, gap: theme.spacing.xl, maxWidth: 1300, width: "100%", alignSelf: "center" },
   greeting: { gap: 4 },
-  hello: {
-    fontFamily: theme.fontFamily.heading,
-    fontSize: 32, lineHeight: 38, letterSpacing: -0.6,
-    color: theme.colors.text,
-  },
+  hello: { fontFamily: theme.fontFamily.heading, fontSize: 32, lineHeight: 38, letterSpacing: -0.6, color: theme.colors.text },
   sub: { fontFamily: theme.fontFamily.body, fontSize: 15, color: theme.colors.muted },
 
-  kpiRow: { flexDirection: "row", gap: theme.spacing.md, flexWrap: "wrap" },
-  kpiCard: {
-    flex: 1, minWidth: 200, borderRadius: theme.radius.md,
-    padding: theme.spacing.lg, gap: 6,
-  },
-  kpiTop: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs },
-  kpiLabel: {
-    fontFamily: theme.fontFamily.bodyMedium, fontSize: 11,
-    letterSpacing: 1, textTransform: "uppercase",
-  },
-  kpiValue: {
-    fontFamily: theme.fontFamily.heading, fontSize: 32, letterSpacing: -0.8,
-  },
-  kpiHint: { fontFamily: theme.fontFamily.body, fontSize: 12.5 },
+  kpiRow: { flexDirection: "row", gap: theme.spacing.md },
+  kpiStack: { flexDirection: "column" },
+  kpiCard: { flex: 1, padding: theme.spacing.lg, borderRadius: theme.radius.md, gap: 6 },
+  kpiHover: { opacity: 0.94 },
+  kpiLabelLight: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 1.4, color: "rgba(255,255,255,0.75)", marginTop: 4 },
+  kpiValueLight: { fontFamily: theme.fontFamily.heading, fontSize: 40, color: theme.colors.textInverse, letterSpacing: -1 },
+  kpiSubLight: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: "rgba(255,255,255,0.7)" },
+  kpiLabelDark: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 1.4, color: "rgba(20,20,31,0.65)", marginTop: 4 },
+  kpiValueDark: { fontFamily: theme.fontFamily.heading, fontSize: 40, color: theme.colors.text, letterSpacing: -1 },
+  kpiSubDark: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: "rgba(20,20,31,0.65)" },
 
-  cols: { flexDirection: "row", gap: theme.spacing.lg, alignItems: "flex-start" },
-  colsStack: { flexDirection: "column" },
-  panel: {
-    flex: 1, backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md, borderWidth: 1,
-    borderColor: theme.colors.border, overflow: "hidden",
-  },
-  panelHeader: {
-    flexDirection: "row", alignItems: "center", gap: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md,
-    borderBottomWidth: 1, borderBottomColor: theme.colors.border,
-  },
-  panelTitle: {
-    fontFamily: theme.fontFamily.headingMedium, fontSize: 14,
-    color: theme.colors.text, flex: 1,
-  },
-  panelMeta: { fontFamily: theme.fontFamily.body, fontSize: 12, color: theme.colors.muted },
-  panelLink: {
-    fontFamily: theme.fontFamily.bodyMedium, fontSize: 12.5, color: theme.colors.primary,
-  },
-  panelBody: { paddingVertical: 4 },
+  revenueStrip: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: theme.colors.success, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  revenueLeft: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md },
+  revenueLabel: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 1.4, color: "rgba(255,255,255,0.75)" },
+  revenueValue: { fontFamily: theme.fontFamily.heading, fontSize: 28, color: theme.colors.textInverse, letterSpacing: -0.6, marginTop: 2 },
 
-  approvalRow: {
-    flexDirection: "row", alignItems: "center", gap: theme.spacing.md,
-    paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md,
-  },
-  avatar: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center", justifyContent: "center",
-  },
-  avatarText: {
-    fontFamily: theme.fontFamily.bodyBold, fontSize: 12,
-    color: theme.colors.textInverse, letterSpacing: 0.3,
-  },
-  approvalContent: { flex: 1, minWidth: 0 },
-  approvalName: {
-    fontFamily: theme.fontFamily.bodyMedium, fontSize: 14, color: theme.colors.text,
-  },
-  approvalMeta: {
-    fontFamily: theme.fontFamily.body, fontSize: 12.5,
-    color: theme.colors.muted, marginTop: 2,
-  },
-  actionSmall: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    paddingHorizontal: theme.spacing.md, paddingVertical: 6,
-    borderRadius: theme.radius.sm,
-  },
-  actionApprove: { backgroundColor: theme.colors.primary },
-  actionApproveText: {
-    fontFamily: theme.fontFamily.bodyMedium, fontSize: 12,
-    color: theme.colors.textInverse,
-  },
-  actionReject: {
-    borderWidth: 1, borderColor: theme.colors.dangerBg,
-    paddingHorizontal: 8,
-  },
-  divider: {
-    height: 1, backgroundColor: theme.colors.border,
-    marginHorizontal: theme.spacing.lg,
-  },
+  section: { gap: theme.spacing.md },
+  sectionHeader: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" },
+  sectionTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 14, letterSpacing: 1.2, textTransform: "uppercase", color: theme.colors.muted },
+  sectionLink: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12.5, color: theme.colors.primary },
+  list: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, overflow: "hidden" },
+  emptyCard: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg },
+  emptyText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.muted },
 
-  activityRow: {
-    flexDirection: "row", alignItems: "center", gap: theme.spacing.md,
-    paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md,
-  },
-  activityDot: {
-    width: 6, height: 6, borderRadius: 3, backgroundColor: theme.colors.secondary,
-  },
-  activityText: {
-    fontFamily: theme.fontFamily.body, fontSize: 13.5,
-    color: theme.colors.text, flex: 1, flexShrink: 1,
-  },
-  activityWho: { fontFamily: theme.fontFamily.bodyBold },
-  activityTime: {
-    fontFamily: theme.fontFamily.body, fontSize: 12, color: theme.colors.muted,
-  },
+  pendingRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.colors.primary, alignItems: "center", justifyContent: "center" },
+  avatarText: { fontFamily: theme.fontFamily.bodyBold, fontSize: 13, color: theme.colors.textInverse, letterSpacing: 0.3 },
+  pendingContent: { flex: 1, minWidth: 0 },
+  pendingName: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 14.5, color: theme.colors.text },
+  pendingMeta: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, marginTop: 2 },
+  approveBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: theme.spacing.md, paddingVertical: 7, backgroundColor: theme.colors.primary, borderRadius: theme.radius.sm },
+  approveBtnText: { fontFamily: theme.fontFamily.bodyBold, fontSize: 12.5, color: theme.colors.textInverse },
+  btnDisabled: { opacity: 0.5 },
+  rejectIconBtn: { width: 30, height: 30, borderRadius: theme.radius.sm, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: theme.colors.border },
 
-  quickRow: { flexDirection: "row", gap: theme.spacing.md, flexWrap: "wrap" },
-  quickCard: {
-    flex: 1, minWidth: 260, flexDirection: "row", alignItems: "center",
-    gap: theme.spacing.md,
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
-    borderWidth: 1, borderColor: theme.colors.border,
-  },
-  quickCardHover: { borderColor: theme.colors.primary },
-  quickIcon: {
-    width: 40, height: 40, borderRadius: theme.radius.sm,
-    backgroundColor: "rgba(42,42,114,0.06)",
-    alignItems: "center", justifyContent: "center",
-  },
-  quickContent: { flex: 1, minWidth: 0 },
-  quickLabel: {
-    fontFamily: theme.fontFamily.headingMedium, fontSize: 14.5, color: theme.colors.text,
-  },
-  quickHint: {
-    fontFamily: theme.fontFamily.body, fontSize: 12.5,
-    color: theme.colors.muted, marginTop: 2,
-  },
+  auditRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  auditBorder: { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  auditBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: theme.radius.sm, backgroundColor: theme.colors.bgSunken },
+  auditBadgeText: { fontFamily: theme.fontFamily.bodyBold, fontSize: 10, letterSpacing: 0.5, color: theme.colors.muted },
+  auditDesc: { flex: 1, fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.text },
+  auditTime: { fontFamily: theme.fontFamily.body, fontSize: 11.5, color: theme.colors.mutedLight },
 });

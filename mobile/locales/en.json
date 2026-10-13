@@ -1,7 +1,7 @@
 {
   "utility": {
     "emergency": "Emergency",
-    "hours": "Mon–Sat 8:00–20:00 · Sun 9:00–13:00",
+    "hours": "Mon–Sat 08:00–20:00 · Sun 09:00–13:00",
     "languageLabel": "Language"
   },
   "header": {
@@ -11,7 +11,8 @@
     "services": "Services",
     "contact": "Contact",
     "patientPortal": "Patient Portal",
-    "bookAppointment": "Book Appointment"
+    "bookAppointment": "Book Appointment",
+    "notifications": "Notifications"
   },
   "hero": {
     "headline": "Trusted care for Addis Ababa families.",
@@ -26,30 +27,34 @@
       "departmentPlaceholder": "Choose a department",
       "check": "Check availability",
       "success": "We'll confirm your appointment by phone within 2 hours."
-    }
+    },
+    "eyebrow": "Bersabeh Clinic · Addis Ababa"
   },
   "trust": {
     "licensed": "MoH licensed",
     "doctors": "Experienced specialists",
-    "years": "Since 2009",
+    "years": "16 years serving Addis",
     "emergency": "24/7 emergency line",
-    "license": "License"
+    "license": "License",
+    "licenseLabel": "License",
+    "experts": "Experienced specialists",
+    "specialties": "Internal · Surgery · Cardio · Gastro"
   },
   "departments": {
-    "title": "Departments",
-    "subtitle": "Specialist care across the medical spectrum.",
+    "title": "Our Departments",
+    "subtitle": "Specialized care across multiple disciplines",
     "viewDoctors": "View doctors",
     "empty": "Departments coming soon."
   },
   "doctors": {
-    "title": "Our doctors",
-    "subtitle": "Specialists you can trust.",
+    "title": "Our Doctors",
+    "subtitle": "Experienced specialists",
     "bookWith": "Book with",
-    "yearsShort": "yrs",
+    "yearsShort": "years",
     "empty": "Doctor profiles coming soon."
   },
   "howItWorks": {
-    "title": "How it works",
+    "title": "How It Works",
     "step1Title": "Register",
     "step1Body": "Create your patient account in under 2 minutes.",
     "step2Title": "Verify",
@@ -58,19 +63,20 @@
     "step3Body": "Pick a doctor and time. Get reminders by phone."
   },
   "services": {
-    "title": "Services & pricing",
+    "title": "Our Services",
     "subtitle": "Transparent pricing in Ethiopian Birr.",
     "rangePrefix": "From"
   },
   "location": {
-    "title": "Find us",
+    "title": "Find Us",
     "hoursTitle": "Opening hours",
-    "weekdays": "Mon–Sat",
+    "weekdays": "Monday – Saturday",
     "weekdaysHours": "08:00 – 20:00",
     "weekend": "Sunday",
     "weekendHours": "09:00 – 13:00",
     "parking": "Parking",
-    "directions": "Get directions"
+    "directions": "Get directions",
+    "emergencyPhone": "Emergency phone"
   },
   "portal": {
     "title": "Already a patient?",
@@ -78,19 +84,361 @@
     "cta": "Open Patient Portal"
   },
   "footer": {
-    "tagline": "Trusted care for Addis Ababa since 2009.",
-    "quickLinks": "Quick links",
+    "tagline": "Trusted care for Addis Ababa since 2009",
+    "quickLinks": "Quick Links",
     "contact": "Contact",
-    "followUs": "Follow us",
+    "followUs": "Follow Us",
     "rights": "All rights reserved.",
-    "license": "License"
+    "license": "License",
+    "madeIn": "Made in Addis"
   },
   "common": {
     "retry": "Retry",
-    "loading": "Loading…",
-    "error": "Something went wrong.",
+    "loading": "Loading...",
+    "error": "Error",
     "seeAll": "See all",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "downloadPdf": "Download PDF",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "tryAgain": "Try again",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "areYouSure": "Are you sure?",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "apply": "Apply",
+    "clear": "Clear",
+    "download": "Download",
+    "print": "Print",
+    "share": "Share",
+    "copy": "Copy",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "add": "Add",
+    "remove": "Remove",
+    "create": "Create",
+    "update": "Update",
+    "submit": "Submit",
+    "viewAll": "View All",
+    "seeMore": "See more",
+    "showLess": "Show less",
+    "noResults": "No results",
+    "empty": "Empty",
+    "readMore": "Read more"
+  },
+  "medical": {
+    "instructions": {
+      "with_food": "Take with food",
+      "empty_stomach": "Take on an empty stomach",
+      "before_meals": "Take before meals",
+      "after_meals": "Take after meals",
+      "bedtime": "Take at bedtime",
+      "as_needed": "Take as needed",
+      "once_daily": "Take once daily",
+      "twice_daily": "Take twice daily",
+      "three_times_daily": "Take three times daily",
+      "max_3g_daily": "Do not exceed 3g per day"
+    },
+    "prescription": {
+      "medication": "Medication",
+      "dose": "Dose",
+      "frequency": "Frequency",
+      "duration": "Duration",
+      "days": "Days",
+      "instructions": "Instructions",
+      "prescription": "Prescription",
+      "prescribed_by": "Prescribed by",
+      "follow_up_date": "Follow-up date"
+    },
+    "lab": {
+      "result": "Result",
+      "reference_range": "Reference range",
+      "units": "Units",
+      "interpretation": "Interpretation",
+      "normal": "Within normal limits",
+      "lab_report": "Lab report"
+    },
+    "appointment": {
+      "appointment": "Appointment",
+      "scheduled_for": "Scheduled for",
+      "reason": "Reason for visit"
+    },
+    "billing": {
+      "total": "Total",
+      "paid": "Paid"
+    }
+  },
+  "patient": {
+    "nav": {
+      "overview": "Overview",
+      "appointments": "Appointments",
+      "prescriptions": "Prescriptions",
+      "labs": "Lab results",
+      "bills": "Bills",
+      "messages": "Messages"
+    },
+    "prescriptions": {
+      "status": {
+        "active": "Active",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "yourMedications": "Your medications",
+      "doctorNotes": "Notes from your doctor",
+      "yourDoctor": "Your doctor",
+      "loadError": "Could not load prescription",
+      "listTitle": "Prescriptions",
+      "noPrescriptions": "No prescriptions yet",
+      "title": "Prescription",
+      "titlePlural": "Prescriptions",
+      "details": "Prescription details",
+      "followUp": "Follow-up",
+      "prescribedBy": "Prescribed by",
+      "medication": "Medication",
+      "dose": "Dose",
+      "frequency": "Frequency",
+      "duration": "Duration",
+      "days": "Days",
+      "instructions": "Instructions"
+    },
+    "dashboard": {
+      "greeting": "Hello, {{name}}",
+      "careSummary": "Here's your care summary",
+      "nextAppointment": "Next appointment",
+      "noUpcoming": "No upcoming appointments",
+      "myPrescriptions": "My prescriptions",
+      "myLabResults": "My lab results",
+      "billing": "Billing",
+      "outstanding": "Outstanding balance",
+      "allPaid": "All bills paid",
+      "bill": "bill",
+      "bills": "bills",
+      "needToTalk": "Need to talk to your doctor?",
+      "openMessages": "Open messages",
+      "askQuestions": "Ask questions between visits",
+      "seeAll": "See all"
+    },
+    "appointments": {
+      "appointment": "Appointment",
+      "appointments": "Appointments",
+      "noRecords": "No appointments on record",
+      "noToday": "No appointments today",
+      "reason": "Reason for visit",
+      "whatToBring": "What to bring",
+      "bringId": "Bring your ID and patient card",
+      "listMedications": "List any medications you're taking",
+      "time": "Time",
+      "duration": "Duration",
+      "room": "Room",
+      "specialty": "Specialty"
+    },
+    "labs": {
+      "result": "Result",
+      "results": "Lab results",
+      "report": "Lab report",
+      "testName": "Test name",
+      "orderedBy": "Ordered by",
+      "orderedOn": "Ordered on",
+      "resultedBy": "Resulted by",
+      "resultedAt": "Resulted at",
+      "referenceRange": "Reference range",
+      "units": "Units",
+      "interpretation": "Interpretation",
+      "withinNormal": "Within normal limits",
+      "notes": "Lab notes",
+      "sampleQuality": "Sample quality acceptable",
+      "noResults": "No lab results yet",
+      "pending": "Result pending",
+      "willNotify": "We'll notify you when it's ready"
+    },
+    "bills": {
+      "bill": "Bill",
+      "bills": "Bills",
+      "billing": "Billing",
+      "lineItems": "Line items",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "method": "Method",
+      "paidVia": "Paid via",
+      "paidOn": "Paid on",
+      "paymentMethod": "Payment method",
+      "cash": "Cash",
+      "telebirr": "Telebirr",
+      "cbeBirr": "CBE Birr",
+      "chapa": "Chapa",
+      "card": "Card",
+      "amountDue": "Amount due",
+      "settled": "Settled",
+      "noBills": "No bills on record"
+    },
+    "messages": {
+      "messages": "Messages",
+      "newMessage": "New message",
+      "typeMessage": "Type a message...",
+      "send": "Send",
+      "noMessages": "No messages yet",
+      "noThreads": "No message threads yet",
+      "caseDiscussion": "Case discussion",
+      "lastUpdate": "Last update",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    }
+  },
+  "topbar": {
+    "searchPlaceholder": "Search patients, appointments...",
+    "notifications": "Notifications",
+    "logOut": "Log out",
+    "profile": "Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "english": "English",
+    "amharic": "Amharic",
+    "tigrigna": "Tigrigna"
+  },
+  "roles": {
+    "superAdmin": "Super Admin",
+    "admin": "Admin",
+    "doctor": "Doctor",
+    "nurse": "Nurse",
+    "reception": "Reception",
+    "lab": "Lab",
+    "patient": "Patient"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "scheduled": "Scheduled",
+    "checkedIn": "Checked in",
+    "inRoom": "In room",
+    "ready": "Ready",
+    "inProgress": "In progress",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "partial": "Partial",
+    "deleted": "Deleted",
+    "draft": "Draft",
+    "sent": "Sent",
+    "viewed": "Viewed"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to your account",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "newPatient": "New patient?",
+    "createAccount": "Create an account",
+    "createYourAccount": "Create your account",
+    "fullName": "Full name",
+    "phoneOptional": "Phone (optional)",
+    "confirmPassword": "Confirm password",
+    "alreadyHaveAccount": "Already have an account?",
+    "registrationReceived": "Registration received",
+    "pendingApproval": "Your account is now pending admin approval",
+    "backToSignIn": "Back to sign in",
+    "invalidEmail": "Enter a valid email",
+    "passwordRequired": "Password is required",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "minChars": "At least 8 characters",
+    "mustContainLetter": "Must contain a letter",
+    "mustContainDigit": "Must contain a digit",
+    "enterFullName": "Please enter your full name",
+    "unableToSignIn": "Unable to sign in",
+    "couldNotRegister": "Could not register",
+    "forPatientsOnly": "For patients. Staff accounts are created by the clinic admin.",
+    "tempPassword": "Temporary password",
+    "changePassword": "Change password",
+    "forgotPassword": "Forgot password?",
+    "signOut": "Sign out"
+  },
+  "pdf": {
+    "prescription": "Prescription",
+    "labReport": "Lab Report",
+    "bill": "Bill",
+    "invoice": "Invoice",
+    "issued": "Issued",
+    "license": "License",
+    "patient": "Patient",
+    "name": "Name",
+    "phone": "Phone",
+    "prescriber": "Prescriber",
+    "prescriberSignature": "Prescriber signature",
+    "labSignature": "Lab technologist signature",
+    "scanToVerify": "Scan to verify",
+    "electronic": "This document was generated electronically",
+    "verifyAt": "Verify at",
+    "medications": "Medications",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "paid": "Paid",
+    "balanceDue": "Balance due"
+  },
+  "reception": {
+    "nav": {
+      "checkin": "Check-in",
+      "book": "Book",
+      "walkin": "Walk-in",
+      "billing": "Billing",
+      "messages": "Messages"
+    }
+  },
+  "doctor": {
+    "nav": {
+      "today": "Today",
+      "queue": "Patient queue",
+      "prescribe": "Prescribe",
+      "labs": "Lab orders",
+      "messages": "Messages"
+    }
+  },
+  "nurse": {
+    "nav": {
+      "wards": "Wards",
+      "vitals": "Log vitals",
+      "medications": "Medications",
+      "handover": "Handover",
+      "messages": "Messages"
+    }
+  },
+  "lab": {
+    "nav": {
+      "pending": "Pending",
+      "results": "Results"
+    }
+  },
+  "admin": {
+    "nav": {
+      "overview": "Overview",
+      "content": "Content CMS",
+      "staff": "Staff",
+      "patients": "Patients",
+      "reports": "Reports"
+    }
+  },
+  "superAdmin": {
+    "nav": {
+      "overview": "Overview",
+      "admins": "Admins",
+      "audit": "Audit log",
+      "clinic": "Clinic config"
+    }
   }
 }
