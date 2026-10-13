@@ -1,14 +1,11 @@
 /**
  * Public landing page — composed section by section.
- *
- * Note: wrapped in a ScrollView so the page scrolls on web AND native.
- * A plain <View flex:1> clips overflow on web, which is why scrolling
- * was impossible before.
  */
 
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { DepartmentsGrid } from "@/components/landing/DepartmentsGrid";
+import { DoctorsGrid } from "@/components/landing/DoctorsGrid";
 import { Header } from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
 import { TrustStrip } from "@/components/landing/TrustStrip";
@@ -23,13 +20,14 @@ export default function LandingPage() {
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator
     >
-      <View style={styles.sticky}>
+      <View>
         <UtilityBar />
         <Header />
       </View>
       <Hero />
       <TrustStrip />
       <DepartmentsGrid />
+      <DoctorsGrid />
       {/* More sections will be added below */}
     </ScrollView>
   );
@@ -37,16 +35,6 @@ export default function LandingPage() {
 
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: theme.colors.bg,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  sticky: {
-    // UtilityBar + Header stay at top of the scroll container.
-    // For a truly sticky header we'd use position:sticky on web;
-    // that's a polish step for later.
-  },
+  scroll: { flex: 1, backgroundColor: theme.colors.bg },
+  scrollContent: { flexGrow: 1 },
 });
