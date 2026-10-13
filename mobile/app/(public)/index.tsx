@@ -8,6 +8,7 @@ import { DepartmentsGrid } from "@/components/landing/DepartmentsGrid";
 import { DoctorsGrid } from "@/components/landing/DoctorsGrid";
 import { Header } from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
+import { HowItWorks } from "@/components/landing/HowItWorks";
 import { TrustStrip } from "@/components/landing/TrustStrip";
 import { UtilityBar } from "@/components/landing/UtilityBar";
 import { theme } from "@/constants/theme";
@@ -28,6 +29,7 @@ export default function LandingPage() {
       <TrustStrip />
       <DepartmentsGrid />
       <DoctorsGrid />
+      <HowItWorks />
       {/* More sections will be added below */}
     </ScrollView>
   );
