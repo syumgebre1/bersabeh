@@ -114,3 +114,10 @@ new empty migration (4ca1fd4f1c17) that reflects the current schema, then
 `alembic stamp head` to mark it as applied. The DB schema is unchanged.
 From now on: one migration per change, no re-runs, clean immediately if a
 no-op appears.
+
+## D024 — safe_migration.sh prevents no-op migrations going forward
+After multiple no-op migrations accumulated (D020-D023), we added
+`backend/scripts/safe_migration.sh` — a wrapper around
+`alembic revision --autogenerate` that inspects the newly-created migration,
+detects no-ops (0 real `op.*` calls), and deletes them before they enter the
+chain. From M7 onward, all migrations are created via this script.
