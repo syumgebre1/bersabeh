@@ -26,6 +26,7 @@ from app.api import (
     auth,
     bills,
     calls,
+    content,
     encounters,
     health,
     labs,
@@ -126,6 +127,7 @@ app.include_router(calls.router, prefix=API_PREFIX)
 app.include_router(messages.router, prefix=API_PREFIX)
 app.include_router(bills.router, prefix=API_PREFIX)
 app.include_router(audit_logs.router, prefix=API_PREFIX)
+app.include_router(content.router, prefix=API_PREFIX)
 app.include_router(uploads.router, prefix=API_PREFIX)
 # WebSocket router has its own path (/ws/notifications) — mount under /api/v1
 app.include_router(ws.router, prefix=API_PREFIX)

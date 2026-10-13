@@ -9,6 +9,7 @@ from app.models.appointment import Appointment, AppointmentStatus
 from app.models.audit_log import AuditAction, AuditLog
 from app.models.billing import Bill, BillItem, BillStatus, PaymentMethod
 from app.models.call import CallStatus, VideoCall
+from app.models.content import ContentBlock, ContentCategory
 from app.models.encounter import Encounter, EncounterStatus, EncounterType
 from app.models.lab import (
     LabOrder,
@@ -79,4 +80,7 @@ __all__ = [
     # Audit
     "AuditLog",
     "AuditAction",
+    # Content
+    "ContentBlock",
+    "ContentCategory",
 ]
