@@ -1,10 +1,10 @@
 /**
- * Lab dashboard — pending orders + completed results.
- * Rows are clickable → open /lab/orders/{id}.
+ * Lab dashboard — trilingual.
  */
 
 import { ArrowRight, FlaskConical } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View,
 } from "react-native";
@@ -14,26 +14,26 @@ import { useLabOrders } from "@/lib/admin";
 import { theme } from "@/constants/theme";
 
 
-function statusChip(s: string) {
-  switch (s) {
-    case "completed":   return { bg: theme.colors.successBg, fg: theme.colors.success, label: "Ready" };
-    case "in_progress": return { bg: theme.colors.infoBg,    fg: theme.colors.info,    label: "In progress" };
-    case "cancelled":   return { bg: theme.colors.dangerBg,  fg: theme.colors.danger,  label: "Cancelled" };
-    default:            return { bg: theme.colors.warningBg, fg: theme.colors.warning, label: "Pending" };
+function statusChip(status: string, t: (k: string) => string) {
+  switch (status) {
+    case "completed":   return { bg: theme.colors.successBg, fg: theme.colors.success, label: t("status.ready") };
+    case "in_progress": return { bg: theme.colors.infoBg,    fg: theme.colors.info,    label: t("status.inProgress") };
+    case "cancelled":   return { bg: theme.colors.dangerBg,  fg: theme.colors.danger,  label: t("status.cancelled") };
+    default:            return { bg: theme.colors.warningBg, fg: theme.colors.warning, label: t("status.pending") };
   }
 }
 
-
-function priorityColor(p: string) {
+function priorityLabel(p: string, t: (k: string) => string) {
   switch (p) {
-    case "stat":   return theme.colors.danger;
-    case "urgent": return theme.colors.warning;
-    default:       return theme.colors.muted;
+    case "stat":   return { color: theme.colors.danger,  label: t("doctor.priorityStat") };
+    case "urgent": return { color: theme.colors.warning, label: t("doctor.priorityUrgent") };
+    default:       return { color: theme.colors.muted,   label: t("doctor.priorityRoutine") };
   }
 }
 
 
 export default function LabDashboard() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data: labs, isLoading, isError, refetch } = useLabOrders({ limit: 100 });
 
@@ -42,39 +42,37 @@ export default function LabDashboard() {
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>Laboratory</Text>
-        <Text style={styles.title}>Lab dashboard</Text>
+        <Text style={styles.eyebrow}>{t("lab.roleName")}</Text>
+        <Text style={styles.title}>{t("lab.dashboardTitle")}</Text>
         <Text style={styles.subtitle}>
-          {pending.length} pending · {ready.length} ready
+          {pending.length} {t("lab.pending")} · {ready.length} {t("lab.ready")}
         </Text>
       </View>
 
       {isLoading ? (
         <View style={styles.center}>
           <ActivityIndicator size="small" color={theme.colors.primary} />
-          <Text style={styles.mutedText}>Loading orders...</Text>
         </View>
       ) : isError ? (
         <View style={styles.center}>
-          <Text style={styles.errorText}>Could not load orders.</Text>
-          <Button label="Retry" variant="outline" size="sm" onPress={() => refetch()} />
+          <Text style={styles.errorText}>{t("common.error")}</Text>
+          <Button label={t("common.retry")} variant="outline" size="sm" onPress={() => refetch()} />
         </View>
       ) : (
         <>
           {/* Pending */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Pending orders</Text>
+            <Text style={styles.sectionTitle}>{t("lab.pendingOrders")}</Text>
             {pending.length === 0 ? (
               <View style={styles.emptyCard}>
-                <Text style={styles.mutedText}>No pending orders. All caught up.</Text>
+                <Text style={styles.mutedText}>{t("lab.noPendingOrders")}</Text>
               </View>
             ) : (
               <View style={styles.list}>
                 {pending.map((o, idx) => {
-                  const c = statusChip(o.status);
-                  const pc = priorityColor(o.priority);
+                  const c = statusChip(o.status, t);
+                  const pc = priorityLabel(o.priority, t);
                   return (
                     <Pressable
                       key={o.id}
@@ -91,13 +89,11 @@ export default function LabDashboard() {
                       <View style={styles.rowContent}>
                         <View style={styles.titleRow}>
                           <Text style={styles.testName}>{o.test_name}</Text>
-                          <View style={[styles.priorityDot, { backgroundColor: pc }]} />
-                          <Text style={[styles.priorityText, { color: pc }]}>
-                            {o.priority.toUpperCase()}
-                          </Text>
+                          <View style={[styles.priorityDot, { backgroundColor: pc.color }]} />
+                          <Text style={[styles.priorityText, { color: pc.color }]}>{pc.label}</Text>
                         </View>
                         <Text style={styles.date}>
-                          Ordered {new Date(o.ordered_at).toLocaleDateString([], { month: "short", day: "numeric" })}
+                          {t("doctor.ordered")} {new Date(o.ordered_at).toLocaleDateString([], { month: "short", day: "numeric" })}
                         </Text>
                       </View>
                       <View style={[styles.chip, { backgroundColor: c.bg }]}>
@@ -113,15 +109,15 @@ export default function LabDashboard() {
 
           {/* Ready */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Completed results</Text>
+            <Text style={styles.sectionTitle}>{t("lab.completedResults")}</Text>
             {ready.length === 0 ? (
               <View style={styles.emptyCard}>
-                <Text style={styles.mutedText}>No completed results yet.</Text>
+                <Text style={styles.mutedText}>{t("lab.noCompletedResults")}</Text>
               </View>
             ) : (
               <View style={styles.list}>
                 {ready.map((o, idx) => {
-                  const c = statusChip(o.status);
+                  const c = statusChip(o.status, t);
                   return (
                     <Pressable
                       key={o.id}
@@ -142,7 +138,7 @@ export default function LabDashboard() {
                         </Text>
                       </View>
                       <View style={[styles.chip, { backgroundColor: c.bg }]}>
-                        <Text style={[styles.chipText, { color: c.fg }]}>Ready</Text>
+                        <Text style={[styles.chipText, { color: c.fg }]}>{c.label}</Text>
                       </View>
                       <ArrowRight size={14} color={theme.colors.muted} strokeWidth={2} />
                     </Pressable>
@@ -172,7 +168,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: theme.colors.muted },
   list: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, overflow: "hidden" },
   emptyCard: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg, alignItems: "center" },
-  row: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  row: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, cursor: "pointer" as any },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   rowHover: { backgroundColor: "rgba(42,42,114,0.02)" },
   iconCol: { width: 36, height: 36, borderRadius: theme.radius.sm, alignItems: "center", justifyContent: "center" },
