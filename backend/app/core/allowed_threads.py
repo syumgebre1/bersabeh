@@ -1,23 +1,24 @@
 """
-Allowed messaging matrix — the single source of truth for who can talk to whom.
+Messaging permission matrix.
 
-This module is imported by the messaging API and consulted on every
-thread creation. It is NOT consulted on message sends — if a thread exists,
-its participants are already valid.
+Defines WHO can message WHO, and WHICH KINDS of threads are allowed for
+each pair of roles.
 
-If you ever need to change who can message whom, you change ONE tuple below.
-No API code changes required.
+Two layers of control:
+  1. ALLOWED_PAIRS          — can these two roles message each other at all?
+  2. KIND_REQUIRED_ROLES    — for a specific thread "kind", which role pairs
+                              are permitted to participate?
 
-Design:
-  - `ALLOWED_PAIRS` is a set of frozensets — direction-agnostic.
-    Each frozenset contains two UserRole values.
-  - Symmetric rule for all pairs (if A can message B, B can message A).
-  - If a future feature requires asymmetric rules (e.g., "anyone can message
-    admin, but admin can only reply"), add an `ASYMMETRIC_ALLOWED` set and
-    check it in `can_send`.
+`is_pair_allowed(a, b)` is direction-agnostic (symmetric).
+`validate_thread_participants` enforces kind-specific rules on thread creation.
+
+Design notes:
+  - Patients CANNOT message other patients (privacy + clinical safety).
+  - Patients CAN message: their doctor, nurse, reception (Option 1).
+  - Patients CANNOT message lab directly — lab results are discussed by doctor.
+  - Admin/Super Admin can message anyone (operational necessity).
+  - Nurses can message doctors, other nurses, patients, reception, lab.
 """
-
-from __future__ import annotations
 
 from itertools import combinations
 
@@ -25,56 +26,67 @@ from app.models.user import UserRole
 
 
 # ============================================================
-# The matrix
+# Layer 1 — Who can message whom at all
 # ============================================================
-# Each frozenset = one allowed pair. Symmetric.
-# ============================================================
-
 ALLOWED_PAIRS: set[frozenset[UserRole]] = {
-    # ── Clinical ──
-    frozenset({UserRole.DOCTOR, UserRole.PATIENT}),      # case-specific
-    frozenset({UserRole.DOCTOR, UserRole.NURSE}),        # care instructions
-    frozenset({UserRole.DOCTOR, UserRole.DOCTOR}),       # referral / 2nd opinion
-    frozenset({UserRole.DOCTOR, UserRole.RECEPTION}),    # patient X arrived
-    frozenset({UserRole.DOCTOR, UserRole.LAB}),          # follow-up on results
+    # ── Patient ↔ (doctor, nurse, reception) ──
+    frozenset({UserRole.DOCTOR, UserRole.PATIENT}),
+    frozenset({UserRole.NURSE, UserRole.PATIENT}),       # Option 1: nurse directly messages patient
+    frozenset({UserRole.RECEPTION, UserRole.PATIENT}),
 
-    # ── Reception ──
-    frozenset({UserRole.RECEPTION, UserRole.PATIENT}),   # appointment confirmations
+    # ── Patient CANNOT message lab, admin, or other patients ──
+    # (intentionally absent)
 
-    # ── Nurse ──
-    frozenset({UserRole.NURSE, UserRole.RECEPTION}),     # ward coordination
-    frozenset({UserRole.NURSE, UserRole.NURSE}),         # shift handover
+    # ── Clinical staff internal ──
+    frozenset({UserRole.DOCTOR, UserRole.DOCTOR}),
+    frozenset({UserRole.DOCTOR, UserRole.NURSE}),
+    frozenset({UserRole.DOCTOR, UserRole.RECEPTION}),
+    frozenset({UserRole.DOCTOR, UserRole.LAB}),
+    frozenset({UserRole.DOCTOR, UserRole.ADMIN}),
+    frozenset({UserRole.DOCTOR, UserRole.SUPER_ADMIN}),
 
-    # ── Lab ──
-    frozenset({UserRole.LAB, UserRole.NURSE}),           # sample collection
+    frozenset({UserRole.NURSE, UserRole.NURSE}),
+    frozenset({UserRole.NURSE, UserRole.RECEPTION}),
+    frozenset({UserRole.NURSE, UserRole.LAB}),
+    frozenset({UserRole.NURSE, UserRole.ADMIN}),
+    frozenset({UserRole.NURSE, UserRole.SUPER_ADMIN}),
 
-    # ── Admin broadcasts ──
+    frozenset({UserRole.RECEPTION, UserRole.RECEPTION}),
+    frozenset({UserRole.RECEPTION, UserRole.LAB}),
+    frozenset({UserRole.RECEPTION, UserRole.ADMIN}),
+    frozenset({UserRole.RECEPTION, UserRole.SUPER_ADMIN}),
+
+    frozenset({UserRole.LAB, UserRole.LAB}),
+    frozenset({UserRole.LAB, UserRole.ADMIN}),
+    frozenset({UserRole.LAB, UserRole.SUPER_ADMIN}),
+
+    frozenset({UserRole.ADMIN, UserRole.ADMIN}),
     frozenset({UserRole.ADMIN, UserRole.SUPER_ADMIN}),
-    frozenset({UserRole.ADMIN, UserRole.DOCTOR}),
-    frozenset({UserRole.ADMIN, UserRole.NURSE}),
-    frozenset({UserRole.ADMIN, UserRole.RECEPTION}),
-    frozenset({UserRole.ADMIN, UserRole.LAB}),
     frozenset({UserRole.ADMIN, UserRole.PATIENT}),       # appointment / account notices
-
-    frozenset({UserRole.SUPER_ADMIN, UserRole.DOCTOR}),
-    frozenset({UserRole.SUPER_ADMIN, UserRole.NURSE}),
-    frozenset({UserRole.SUPER_ADMIN, UserRole.RECEPTION}),
-    frozenset({UserRole.SUPER_ADMIN, UserRole.LAB}),
-    frozenset({UserRole.SUPER_ADMIN, UserRole.PATIENT}),
+    frozenset({UserRole.SUPER_ADMIN, UserRole.SUPER_ADMIN}),
 }
 
 
-# ============================================================
-# Convenience — thread "kind" constraints
-# ============================================================
-# Some kinds are only valid for certain role combinations.
+def is_pair_allowed(role_a: UserRole, role_b: UserRole) -> bool:
+    """Direction-agnostic: can A and B be in a thread together?"""
+    return frozenset({role_a, role_b}) in ALLOWED_PAIRS
 
+
+def can_send(from_role: UserRole, to_role: UserRole) -> bool:
+    """Direction-aware. For now, all rules are symmetric."""
+    return is_pair_allowed(from_role, to_role)
+
+
+# ============================================================
+# Layer 2 — Which role pairs are allowed per thread kind
+# ============================================================
 KIND_REQUIRED_ROLES: dict[str, set[frozenset[UserRole]]] = {
     "case": {
-        frozenset({UserRole.DOCTOR, UserRole.PATIENT}),
-        frozenset({UserRole.DOCTOR, UserRole.NURSE}),
-        frozenset({UserRole.DOCTOR, UserRole.DOCTOR}),
-        frozenset({UserRole.RECEPTION, UserRole.PATIENT}),
+        frozenset({UserRole.DOCTOR, UserRole.PATIENT}),      # classic: patient sees doctor
+        frozenset({UserRole.DOCTOR, UserRole.NURSE}),        # doctor + nurse coordination
+        frozenset({UserRole.DOCTOR, UserRole.DOCTOR}),       # doctor ↔ doctor consultation
+        frozenset({UserRole.RECEPTION, UserRole.PATIENT}),   # reception flagged a case
+        frozenset({UserRole.NURSE, UserRole.PATIENT}),       # Option 1: nurse ↔ patient case
     },
     "appointment": {
         frozenset({UserRole.RECEPTION, UserRole.PATIENT}),
@@ -83,6 +95,14 @@ KIND_REQUIRED_ROLES: dict[str, set[frozenset[UserRole]]] = {
     "referral": {
         frozenset({UserRole.DOCTOR, UserRole.DOCTOR}),
     },
+    "logistics": {
+        # Nurse ↔ Patient: room assignment, medication time, general coordination
+        frozenset({UserRole.NURSE, UserRole.PATIENT}),
+        # Nurse ↔ Reception: bed assignment, admissions, discharge
+        frozenset({UserRole.NURSE, UserRole.RECEPTION}),
+        # Reception ↔ Patient: bed-related updates, check-in logistics
+        frozenset({UserRole.RECEPTION, UserRole.PATIENT}),
+    },
     "broadcast": {
         # Only admins can originate broadcasts; we handle creator check separately.
         frozenset({UserRole.ADMIN, UserRole.DOCTOR}),
@@ -90,31 +110,15 @@ KIND_REQUIRED_ROLES: dict[str, set[frozenset[UserRole]]] = {
         frozenset({UserRole.ADMIN, UserRole.RECEPTION}),
         frozenset({UserRole.ADMIN, UserRole.LAB}),
         frozenset({UserRole.ADMIN, UserRole.PATIENT}),
-        frozenset({UserRole.SUPER_ADMIN, UserRole.DOCTOR}),
-        frozenset({UserRole.SUPER_ADMIN, UserRole.NURSE}),
-        frozenset({UserRole.SUPER_ADMIN, UserRole.RECEPTION}),
-        frozenset({UserRole.SUPER_ADMIN, UserRole.LAB}),
-        frozenset({UserRole.SUPER_ADMIN, UserRole.PATIENT}),
     },
-    # "general" has no extra restriction beyond ALLOWED_PAIRS.
 }
 
 
 # ============================================================
-# Public API
+# Validation
 # ============================================================
-
-def is_pair_allowed(role_a: UserRole, role_b: UserRole) -> bool:
-    """Direction-agnostic: can A and B be in a thread together?"""
-    return frozenset({role_a, role_b}) in ALLOWED_PAIRS
-
-
-def can_send(from_role: UserRole, to_role: UserRole) -> bool:
-    """Direction-aware. For now, all rules are symmetric — same as is_pair_allowed."""
-    return is_pair_allowed(from_role, to_role)
-
-
 def validate_thread_participants(
+    *,
     kind: str,
     creator_role: UserRole,
     participant_roles: list[UserRole],
@@ -132,7 +136,7 @@ def validate_thread_participants(
     for a, b in combinations(participant_roles, 2):
         if not is_pair_allowed(a, b):
             raise ValueError(
-                f"Roles {a.value!r} and {b.value!r} are not allowed to message each other"
+                f"Roles '{a.value}' and '{b.value}' are not allowed to message each other"
             )
 
     # Kind-specific checks.
@@ -142,7 +146,7 @@ def validate_thread_participants(
         for a, b in combinations(participant_roles, 2):
             if frozenset({a, b}) not in allowed_kinds:
                 raise ValueError(
-                    f"Thread kind {kind!r} does not permit {a.value!r} ↔ {b.value!r}"
+                    f"Thread kind '{kind}' does not permit {a.value!r} ↔ {b.value!r}"
                 )
 
     # Broadcasts must be created by admin-level roles.
