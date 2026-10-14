@@ -21,7 +21,7 @@ from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 
 from app.api import (
-    appointments,
+appointments,
     audit_logs,
     auth,
     bills,
@@ -32,6 +32,7 @@ from app.api import (
     labs,
     messages,
     prescriptions,
+    rooms,
     uploads,
     users,
     vitals,
@@ -120,6 +121,7 @@ app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(users.router, prefix=API_PREFIX)
 app.include_router(appointments.router, prefix=API_PREFIX)
 app.include_router(encounters.router, prefix=API_PREFIX)
+app.include_router(rooms.router, prefix=API_PREFIX)
 app.include_router(prescriptions.router, prefix=API_PREFIX)
 app.include_router(vitals.router, prefix=API_PREFIX)
 app.include_router(labs.router, prefix=API_PREFIX)
