@@ -36,6 +36,7 @@ from app.models.prescription import (
     PrescriptionStatus,
 )
 from app.models.refresh_token import RefreshToken
+from app.models.room import BedAssignment, Room, RoomType
 from app.models.user import User, UserRole, UserStatus
 from app.models.vital import Vital
 
@@ -83,4 +84,8 @@ __all__ = [
     # Content
     "ContentBlock",
     "ContentCategory",
+    # Rooms & assignments
+    "Room",
+    "RoomType",
+    "BedAssignment",
 ]
