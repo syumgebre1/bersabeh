@@ -539,7 +539,11 @@
     "dischargeReason": "የመልቀቂያ ምክንያት (አማራጭ)",
     "roomEmpty": "ክፍሉ ባዶ ነው",
     "assignPatient": "ታካሚ ይመድቡ",
-    "notesOptional": "ማስታወሻ (አማራጭ)"
+    "notesOptional": "ማስታወሻ (አማራጭ)",
+    "presetQuick": "ፈጣን ፍተሻ",
+    "presetFull": "ሙሉ የህክምና መለኪያዎች",
+    "vitalsSaved": "መለኪያዎች ተቀምጠዋል",
+    "selectPatientRequired": "እባክዎ ታካሚ ይምረጡ"
   },
   "lab": {
     "nav": {
@@ -687,5 +691,41 @@
     "all": "ሁሉም",
     "noEntriesMatch": "ማጣሪያዎችዎን የሚያሟላ መዝገብ የለም",
     "createAdmin": "አስተዳዳሪ ፍጠር"
+  },
+  "medications": {
+    "statusAdministered": "ተሰጥቷል",
+    "statusSkipped": "ተዘሏል",
+    "skipTitle": "ይህን መጠን ይዘሉ",
+    "skipReason": "ምክንያት",
+    "skipNotes": "ማስታወሻ (አማራጭ)",
+    "skipConfirm": "መዘላትን አረጋግጥ",
+    "skipPatientRefused": "ታካሚው አልተቀበለም",
+    "skipPatientAbsent": "ታካሚው አልተገኘም",
+    "skipNpo": "በአፍ ምንም አይወሰድ",
+    "skipAdverseReaction": "የጎንዮሽ ጉዳት",
+    "skipDoctorHold": "በሐኪም ታግዷል",
+    "skipOther": "ሌላ ምክንያት"
+  },
+  "handover": {
+    "severityStable": "የተረጋጋ",
+    "severityAttention": "ትኩረት የሚሻ",
+    "severityCritical": "አሳሳቢ",
+    "newNote": "አዲስ ማስታወሻ",
+    "signHandover": "ርክክብ ፈርም",
+    "pendingTitle": "ለማረጋገጥ የሚጠበቁ ርክክቦች",
+    "acknowledge": "አረጋግጥ",
+    "notesTitle": "ማስታወሻዎች",
+    "noNotes": "በዚህ ሰዓት እስካሁን ማስታወሻ የለም",
+    "by": "በ",
+    "noteText": "ማስታወሻ",
+    "severity": "ክብደት",
+    "linkPatient": "ታካሚ ያገናኙ (አማራጭ)",
+    "none": "ምንም",
+    "saveNote": "ማስታወሻ አስቀምጥ",
+    "signInfo": "የስራ ሰዓትዎን ጨርሰው ለሌላ ነርስ ያስተላልፉ። እነሱም ማረጋገጥ አለባቸው።",
+    "toNurse": "ወደ ነርስ",
+    "unassigned": "ያልተመደበ",
+    "signNotes": "የርክክብ ማስታወሻዎች (አማራጭ)",
+    "confirmSign": "አረጋግጥ እና ፈርም"
   }
 }

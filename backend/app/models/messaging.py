@@ -96,6 +96,11 @@ class Thread(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now(),
     )
+    # Denormalized for fast "sort my threads by recency" queries.
+    # Matches the DB schema (NOT NULL with server_default=now()).
+    last_message_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True,
+    )
 
     participants = relationship(
         "ThreadParticipant",

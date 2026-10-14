@@ -539,7 +539,11 @@
     "dischargeReason": "ምኽንያት ምውጻእ (ብፍቓድ)",
     "roomEmpty": "እቲ ክፍሊ ጥራሕ እዩ",
     "assignPatient": "ሕሙም መድብ",
-    "notesOptional": "መዘኻኸሪ (ብፍቓድ)"
+    "notesOptional": "መዘኻኸሪ (ብፍቓድ)",
+    "presetQuick": "ቅልጡፍ ፍተሻ",
+    "presetFull": "ምሉእ ምልክታት ህይወት",
+    "vitalsSaved": "ምልክታት ህይወት ተቐሚጡ",
+    "selectPatientRequired": "በጃኹም ሕሙም ምረጹ"
   },
   "lab": {
     "nav": {
@@ -687,5 +691,41 @@
     "all": "ኩሉ",
     "noEntriesMatch": "ንማጣርያኹም ዝሰማማዕ መዝገብ የለን",
     "createAdmin": "ኣመሓዳሪ ፈጠር"
+  },
+  "medications": {
+    "statusAdministered": "ተዋሂቡ",
+    "statusSkipped": "ተሰጊሩ",
+    "skipTitle": "እዚ መጠን ስግሩ",
+    "skipReason": "ምኽንያት",
+    "skipNotes": "መዘኻኸሪ (ብፍቓድ)",
+    "skipConfirm": "ምስጋር ኣረጋግጽ",
+    "skipPatientRefused": "ሕሙም ኣይተቐበለን",
+    "skipPatientAbsent": "ሕሙም ኣይተረኸበን",
+    "skipNpo": "ብኣፍ ዝኾነ ኣይወሰድ",
+    "skipAdverseReaction": "ጎናዊ ጉዳት",
+    "skipDoctorHold": "ብሓኪም ተታሒዙ",
+    "skipOther": "ካልእ ምኽንያት"
+  },
+  "handover": {
+    "severityStable": "ዝተረጋጋ",
+    "severityAttention": "ትኩረት ዝደሊ",
+    "severityCritical": "ህጹጽ",
+    "newNote": "ሓዲሽ መዘኻኸሪ",
+    "signHandover": "ርክክብ ፈርም",
+    "pendingTitle": "ንምርግጋጽ ዝጽበዩ ርክክባት",
+    "acknowledge": "ኣረጋግጽ",
+    "notesTitle": "መዘኻኸሪታት",
+    "noNotes": "ኣብዚ ግዜ ክሳብ ሕጂ መዘኻኸሪ የለን",
+    "by": "ብ",
+    "noteText": "መዘኻኸሪ",
+    "severity": "ክብደት",
+    "linkPatient": "ሕሙም ኣራኽብ (ብፍቓድ)",
+    "none": "የለን",
+    "saveNote": "መዘኻኸሪ ኣቐምጥ",
+    "signInfo": "ግዜ ስራሕኩም ወድኡ፣ ንኻልእ ነርሲ ርከቡ። ንሳቶም ከኣ ከረጋግጹ ኣለዎም።",
+    "toNurse": "ናብ ነርሲ",
+    "unassigned": "ዘይተመደበ",
+    "signNotes": "መዘኻኸሪ ርክክብ (ብፍቓድ)",
+    "confirmSign": "ኣረጋግጽን ፈርምን"
   }
 }

@@ -535,7 +535,11 @@
     "dischargeReason": "Discharge reason (optional)",
     "roomEmpty": "Room is empty",
     "assignPatient": "Assign patient",
-    "notesOptional": "Notes (optional)"
+    "notesOptional": "Notes (optional)",
+    "presetQuick": "Quick check",
+    "presetFull": "Full vitals",
+    "vitalsSaved": "Vitals saved",
+    "selectPatientRequired": "Please select a patient"
   },
   "lab": {
     "nav": {
@@ -683,5 +687,41 @@
     "all": "All",
     "noEntriesMatch": "No entries match your filters",
     "createAdmin": "Create admin"
+  },
+  "medications": {
+    "statusAdministered": "Given",
+    "statusSkipped": "Skipped",
+    "skipTitle": "Skip this dose",
+    "skipReason": "Reason",
+    "skipNotes": "Notes (optional)",
+    "skipConfirm": "Confirm skip",
+    "skipPatientRefused": "Patient refused",
+    "skipPatientAbsent": "Patient absent",
+    "skipNpo": "NPO (nothing by mouth)",
+    "skipAdverseReaction": "Adverse reaction",
+    "skipDoctorHold": "Doctor hold",
+    "skipOther": "Other reason"
+  },
+  "handover": {
+    "severityStable": "Stable",
+    "severityAttention": "Attention",
+    "severityCritical": "Critical",
+    "newNote": "New note",
+    "signHandover": "Sign handover",
+    "pendingTitle": "Pending handovers to acknowledge",
+    "acknowledge": "Acknowledge",
+    "notesTitle": "Notes",
+    "noNotes": "No notes yet this shift",
+    "by": "by",
+    "noteText": "Note",
+    "severity": "Severity",
+    "linkPatient": "Link a patient (optional)",
+    "none": "None",
+    "saveNote": "Save note",
+    "signInfo": "End your shift and hand over to another nurse. They must acknowledge.",
+    "toNurse": "To nurse",
+    "unassigned": "Unassigned",
+    "signNotes": "Handover notes (optional)",
+    "confirmSign": "Confirm and sign"
   }
 }
