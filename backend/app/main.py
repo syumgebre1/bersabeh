@@ -6,33 +6,36 @@ Responsibilities:
   - Configure CORS for Expo web dev + native clients.
   - Wire slowapi (rate limiting).
   - Register routers under /api/v1.
-  - Mount /uploads for serving uploaded files.
   - Provide startup/shutdown logs.
+
+Run locally:
+    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 """
 
 import logging
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 
 from app.api import (
-appointments,
+    appointments,
     audit_logs,
     auth,
     bills,
     calls,
     content,
     encounters,
+    handover,
     health,
     labs,
+    medications,
     messages,
     prescriptions,
     rooms,
+    shifts,
     uploads,
     users,
     vitals,
@@ -62,7 +65,6 @@ async def lifespan(app: FastAPI):
     logger.info("Environment: %s | Debug: %s", settings.ENVIRONMENT, settings.DEBUG)
     logger.info("Docs:        http://localhost:%s/docs", settings.API_PORT)
     logger.info("Health:      http://localhost:%s/api/v1/health", settings.API_PORT)
-    logger.info("WS:          ws://localhost:%s/api/v1/ws/notifications", settings.API_PORT)
     logger.info("=" * 60)
     yield
     logger.info("%s shutting down", settings.APP_NAME)
@@ -122,6 +124,9 @@ app.include_router(users.router, prefix=API_PREFIX)
 app.include_router(appointments.router, prefix=API_PREFIX)
 app.include_router(encounters.router, prefix=API_PREFIX)
 app.include_router(rooms.router, prefix=API_PREFIX)
+app.include_router(medications.router, prefix=API_PREFIX)
+app.include_router(shifts.router, prefix=API_PREFIX)
+app.include_router(handover.router, prefix=API_PREFIX)
 app.include_router(prescriptions.router, prefix=API_PREFIX)
 app.include_router(vitals.router, prefix=API_PREFIX)
 app.include_router(labs.router, prefix=API_PREFIX)
@@ -131,16 +136,7 @@ app.include_router(bills.router, prefix=API_PREFIX)
 app.include_router(audit_logs.router, prefix=API_PREFIX)
 app.include_router(content.router, prefix=API_PREFIX)
 app.include_router(uploads.router, prefix=API_PREFIX)
-# WebSocket router has its own path (/ws/notifications) — mount under /api/v1
 app.include_router(ws.router, prefix=API_PREFIX)
-
-
-# ------------------------------------------------------------
-# Static files: serve uploaded files at /uploads/...
-# ------------------------------------------------------------
-UPLOAD_DIR = Path(settings.UPLOAD_DIR).resolve()
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 
 # ------------------------------------------------------------

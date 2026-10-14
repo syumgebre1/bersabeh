@@ -35,6 +35,10 @@ from app.schemas.prescription import (
     PrescriptionUpdate,
 )
 from app.core.pdf_translations import get_medical_translations
+from app.services.medication_scheduler import (
+    cancel_prescription_doses,
+    schedule_prescription,
+)
 from app.services.pdf import render_prescription_pdf
 
 
@@ -119,6 +123,11 @@ async def create_prescription(
             instructions=item.instructions,
             sort_order=i,
         ))
+
+    await db.flush()
+
+    # Auto-schedule doses (Decision 2 hybrid)
+    await schedule_prescription(db, p)
 
     await db.commit()
     await db.refresh(p)
@@ -227,6 +236,10 @@ async def cancel_prescription(
 
     p.status = PrescriptionStatus.CANCELLED
     p.updated_at = datetime.now(timezone.utc)
+
+    # Cancel all pending doses for this prescription
+    await cancel_prescription_doses(db, p)
+
     await db.commit()
     await db.refresh(p)
     return PrescriptionRead.model_validate(p)
