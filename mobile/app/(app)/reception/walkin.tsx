@@ -1,20 +1,13 @@
 /**
- * Reception: Register a walk-in patient and create an immediate appointment.
- *
- * Two-step:
- *   1. POST /auth/register/patient → creates a patient in pending_admin status
- *   2. Admin-approve then POST /appointments (we auto-approve via /users/{id}/approve)
- *      OR — simpler — create the appointment anyway with pending patient.
- *
- * For demo simplicity, we register + immediately create an appointment with
- * the doctor the receptionist chooses. The patient's status stays pending_admin
- * until an admin approves.
+ * Reception: Register walk-in patient + create immediate appointment.
+ * Trilingual.
  */
 
-import { ArrowLeft, Save, UserPlus } from "lucide-react-native";
+import { ArrowLeft, UserPlus } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from "react-native";
@@ -33,6 +26,7 @@ interface RegisterResponse {
 
 
 export default function WalkInRegister() {
+  const { t } = useTranslation();
   const router = useRouter();
   const qc = useQueryClient();
 
@@ -43,16 +37,16 @@ export default function WalkInRegister() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("WalkIn@12345"); // default; receptionist can change
+  const [password, setPassword] = useState("WalkIn@12345");
 
   // Appointment fields
   const [doctorId, setDoctorId] = useState("");
-  const [reason, setReason] = useState("Walk-in consultation");
+  const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const register = useMutation({
     mutationFn: async () => {
-      // 1. Register the patient
+      // 1. Register patient
       const reg = await apiFetch<RegisterResponse>("/api/v1/auth/register/patient", {
         method: "POST",
         body: JSON.stringify({
@@ -65,7 +59,7 @@ export default function WalkInRegister() {
       });
       const patientId = reg.user.id;
 
-      // 2. Create an immediate appointment (scheduled for now + 15 min)
+      // 2. Create appointment if a doctor was assigned
       if (doctorId) {
         const scheduledAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
         await apiFetch("/api/v1/appointments", {
@@ -75,7 +69,7 @@ export default function WalkInRegister() {
             doctor_id: doctorId,
             scheduled_at: scheduledAt,
             duration_minutes: 30,
-            reason,
+            reason: reason || null,
           }),
         });
       }
@@ -89,7 +83,7 @@ export default function WalkInRegister() {
       router.back();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : "Could not register walk-in");
+      setError(err instanceof Error ? err.message : t("common.error"));
     },
   });
 
@@ -103,11 +97,11 @@ export default function WalkInRegister() {
       <View style={styles.topBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <ArrowLeft size={16} color={theme.colors.text} strokeWidth={2.2} />
-          <Text style={styles.backText}>Reception</Text>
+          <Text style={styles.backText}>{t("reception.eyebrow")}</Text>
         </Pressable>
         <View style={styles.topBarMeta}>
-          <Text style={styles.eyebrow}>New patient</Text>
-          <Text style={styles.title}>Register walk-in</Text>
+          <Text style={styles.eyebrow}>{t("reception.walkin.eyebrow")}</Text>
+          <Text style={styles.title}>{t("reception.walkin.title")}</Text>
         </View>
       </View>
 
@@ -118,9 +112,9 @@ export default function WalkInRegister() {
       ) : null}
 
       <View style={styles.formCard}>
-        <Text style={styles.sectionLabel}>Patient details</Text>
+        <Text style={styles.sectionLabel}>{t("reception.walkin.details")}</Text>
 
-        <Text style={styles.label}>Full name</Text>
+        <Text style={styles.label}>{t("auth.fullName")}</Text>
         <TextInput
           value={fullName}
           onChangeText={setFullName}
@@ -129,7 +123,7 @@ export default function WalkInRegister() {
           style={styles.input}
         />
 
-        <Text style={[styles.label, styles.labelSpaced]}>Email</Text>
+        <Text style={[styles.label, styles.labelSpaced]}>{t("auth.email")}</Text>
         <TextInput
           value={email}
           onChangeText={setEmail}
@@ -140,7 +134,7 @@ export default function WalkInRegister() {
           style={styles.input}
         />
 
-        <Text style={[styles.label, styles.labelSpaced]}>Phone</Text>
+        <Text style={[styles.label, styles.labelSpaced]}>{t("auth.phoneOptional")}</Text>
         <TextInput
           value={phone}
           onChangeText={setPhone}
@@ -150,7 +144,7 @@ export default function WalkInRegister() {
           style={styles.input}
         />
 
-        <Text style={[styles.label, styles.labelSpaced]}>Temporary password</Text>
+        <Text style={[styles.label, styles.labelSpaced]}>{t("auth.tempPassword")}</Text>
         <TextInput
           value={password}
           onChangeText={setPassword}
@@ -159,13 +153,13 @@ export default function WalkInRegister() {
           placeholderTextColor={theme.colors.mutedLight}
           style={styles.input}
         />
-        <Text style={styles.helpText}>
-          The patient will be asked to change this on first login.
-        </Text>
+        <Text style={styles.helpText}>{t("reception.walkin.tempPasswordNote")}</Text>
 
-        <Text style={[styles.sectionLabel, styles.labelSpaced]}>Assign a doctor now (optional)</Text>
+        <Text style={[styles.sectionLabel, styles.labelSpaced]}>
+          {t("reception.walkin.assign")}
+        </Text>
         {doctors.length === 0 ? (
-          <Text style={styles.mutedText}>No doctors on staff.</Text>
+          <Text style={styles.mutedText}>{t("reception.book.noDoctors")}</Text>
         ) : (
           <View style={styles.pillWrap}>
             {doctors.map((d) => (
@@ -182,19 +176,24 @@ export default function WalkInRegister() {
           </View>
         )}
 
-        <Text style={[styles.label, styles.labelSpaced]}>Reason</Text>
+        <Text style={[styles.label, styles.labelSpaced]}>{t("reception.book.reason")}</Text>
         <TextInput
           value={reason}
           onChangeText={setReason}
-          placeholder="Walk-in consultation"
+          placeholder={t("patient.appointments.reason")}
           placeholderTextColor={theme.colors.mutedLight}
           style={styles.input}
         />
 
         <View style={styles.actions}>
-          <Button label="Cancel" variant="ghost" size="md" onPress={() => router.back()} />
           <Button
-            label="Register & book"
+            label={t("common.cancel")}
+            variant="ghost"
+            size="md"
+            onPress={() => router.back()}
+          />
+          <Button
+            label={t("reception.walkin.registerAndBook")}
             variant="primary"
             size="md"
             disabled={!canSubmit}
@@ -228,7 +227,7 @@ const styles = StyleSheet.create({
   mutedText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.muted, paddingVertical: theme.spacing.md },
   input: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, fontFamily: theme.fontFamily.body, fontSize: 14.5, color: theme.colors.text, backgroundColor: theme.colors.bg },
   pillWrap: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
-  pill: { paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.full, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border },
+  pill: { paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.full, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, cursor: "pointer" as any },
   pillActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   pillText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 13, color: theme.colors.text },
   pillTextActive: { color: theme.colors.textInverse, fontFamily: theme.fontFamily.bodyBold },

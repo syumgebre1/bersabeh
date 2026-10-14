@@ -402,6 +402,55 @@
       "walkin": "ብዘይ ቀጠሮ ዝመጹ",
       "billing": "ክፍያ",
       "messages": "መልእክትታት"
+    },
+    "eyebrow": "ጋሻ ተቀባሊ",
+    "greeting": "ከመይ ውዒልኩም፣ {{name}}።",
+    "appointmentsToday": "ናይ ሎምዓንቲ ቆፀሮታት",
+    "arrived": "ዝበጽሑ",
+    "expected": "ዝጽበዩ",
+    "collectedToday": "ሎሚ ዝተኣከበ",
+    "allCaughtUp": "ኩሉ ተኣናጊዱ እዩ — ዝፅበ ተሓካሚ የለን",
+    "noAppointmentsToday": "ሎሚ ዝኾነ ቆፀሮ የለን",
+    "book": {
+      "eyebrow": "ሓዲሽ",
+      "title": "ቆፀሮ ሐዙ",
+      "patient": "ሕሙም",
+      "doctor": "ሓኪም",
+      "duration": "ቆይታ (ብደቂቓ)",
+      "reason": "ምኽንያት (ብፍቓድ)",
+      "noPatients": "ክሳብ ሕጂ ዝተመዝገበ ሕሙም የለን",
+      "noDoctors": "ዝኾነ ሓኪም የለን"
+    },
+    "walkin": {
+      "eyebrow": "ሓዲሽ ተሓካሚ",
+      "title": "ብዘይ ቆፀሮ ዝመጸ ተሓካሚ መዝግብ",
+      "details": "ዝርዝር ሓበሬታ ተሓካሚ",
+      "assign": "ሕጂ ሓኪም መድብ (ብፍቓድ)",
+      "registerAndBook": "መዝግብን ቆፀሮ ሐዝን",
+      "tempPasswordNote": "እቲ ሕሙም ኣብ ፈለማ መእተዊኡ እዚ ክቕይር ክግደድ እዩ"
+    },
+    "billing": {
+      "eyebrow": "ፋይናንስ",
+      "title": "ክፍያ",
+      "filterAll": "ኩሉ",
+      "filterUnpaid": "ዘይተኸፍለ",
+      "filterPartial": "ክፋል",
+      "filterPaid": "ዝተኸፍለ",
+      "recordPayment": "ክፍሊት መዝግብ",
+      "method": "ሜላ ክፍሊት",
+      "methodCash": "ጥረ ገንዘብ",
+      "methodTelebirr": "ተለብር",
+      "methodCBE": "ንግዲ ባንክ ብር",
+      "methodChapa": "ቻፓ",
+      "methodCard": "ካርድ",
+      "amount": "መጠን (ብር)",
+      "notes": "መዘኻኸሪታት (ብፍቓድ)"
+    },
+    "messages": {
+      "title": "መልእክትታት",
+      "noThreads": "ክሳብ ሕጂ ዝኾነ ሓዱሽ መልእክቲ የለን",
+      "typeMessage": "መልእክት ጽሐፍ...",
+      "send": "ሰድድ"
     }
   },
   "doctor": {

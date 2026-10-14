@@ -398,6 +398,55 @@
       "walkin": "Walk-in",
       "billing": "Billing",
       "messages": "Messages"
+    },
+    "eyebrow": "Reception",
+    "greeting": "Good day, {{name}}.",
+    "appointmentsToday": "appointments today",
+    "arrived": "arrived",
+    "expected": "expected",
+    "collectedToday": "Collected today",
+    "allCaughtUp": "All caught up — no pending patients",
+    "noAppointmentsToday": "No appointments today",
+    "book": {
+      "eyebrow": "New",
+      "title": "Book appointment",
+      "patient": "Patient",
+      "doctor": "Doctor",
+      "duration": "Duration (minutes)",
+      "reason": "Reason (optional)",
+      "noPatients": "No registered patients yet",
+      "noDoctors": "No doctors on staff"
+    },
+    "walkin": {
+      "eyebrow": "New patient",
+      "title": "Register walk-in",
+      "details": "Patient details",
+      "assign": "Assign a doctor now (optional)",
+      "registerAndBook": "Register & book",
+      "tempPasswordNote": "The patient will be asked to change this on first login"
+    },
+    "billing": {
+      "eyebrow": "Finance",
+      "title": "Billing",
+      "filterAll": "All",
+      "filterUnpaid": "Unpaid",
+      "filterPartial": "Partial",
+      "filterPaid": "Paid",
+      "recordPayment": "Record payment",
+      "method": "Method",
+      "methodCash": "Cash",
+      "methodTelebirr": "Telebirr",
+      "methodCBE": "CBE Birr",
+      "methodChapa": "Chapa",
+      "methodCard": "Card",
+      "amount": "Amount (ETB)",
+      "notes": "Notes (optional)"
+    },
+    "messages": {
+      "title": "Messages",
+      "noThreads": "No message threads yet",
+      "typeMessage": "Type a message...",
+      "send": "Send"
     }
   },
   "doctor": {

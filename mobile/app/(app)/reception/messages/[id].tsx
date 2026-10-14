@@ -1,11 +1,12 @@
 /**
- * Reception: Single message thread.
+ * Reception: Single message thread — trilingual.
  */
 
 import { ArrowLeft, Send } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from "react-native";
@@ -25,6 +26,7 @@ interface Message {
 
 
 export default function ReceptionThreadDetail() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const user = useAppStore((s) => s.user);
@@ -55,15 +57,19 @@ export default function ReceptionThreadDetail() {
       <View style={styles.topBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <ArrowLeft size={16} color={theme.colors.text} strokeWidth={2.2} />
-          <Text style={styles.backText}>Messages</Text>
+          <Text style={styles.backText}>{t("reception.messages.title")}</Text>
         </Pressable>
       </View>
 
       {isLoading ? (
         <View style={styles.center}><ActivityIndicator size="small" color={theme.colors.primary} /></View>
+      ) : !messages || messages.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.mutedText}>{t("reception.messages.noThreads")}</Text>
+        </View>
       ) : (
         <ScrollView style={styles.scroll} contentContainerStyle={styles.messages}>
-          {(messages ?? []).map((m) => {
+          {messages.map((m) => {
             const mine = m.sender?.role === user?.role;
             return (
               <View key={m.id} style={[styles.bubbleWrap, mine ? styles.bubbleWrapMine : styles.bubbleWrapOther]}>
@@ -86,7 +92,7 @@ export default function ReceptionThreadDetail() {
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder="Type a message..."
+          placeholder={t("reception.messages.typeMessage")}
           placeholderTextColor={theme.colors.mutedLight}
           style={styles.input}
           onSubmitEditing={handleSend}
@@ -107,6 +113,7 @@ const styles = StyleSheet.create({
   backBtn: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs, alignSelf: "flex-start", paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm, borderWidth: 1, borderColor: theme.colors.border },
   backText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 13, color: theme.colors.text },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  mutedText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.muted },
   scroll: { flex: 1 },
   messages: { paddingHorizontal: theme.spacing.xxl, paddingVertical: theme.spacing.lg, gap: theme.spacing.md, maxWidth: 900, width: "100%", alignSelf: "center" },
   bubbleWrap: { flexDirection: "row" },
@@ -123,5 +130,5 @@ const styles = StyleSheet.create({
   timestampMine: { color: "rgba(255,255,255,0.55)" },
   composer: { flexDirection: "row", alignItems: "center", gap: theme.spacing.sm, padding: theme.spacing.lg, borderTopWidth: 1, borderTopColor: theme.colors.border, backgroundColor: theme.colors.surface },
   input: { flex: 1, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, fontFamily: theme.fontFamily.body, fontSize: 14.5, color: theme.colors.text, backgroundColor: theme.colors.bg },
-  sendBtn: { width: 40, height: 40, borderRadius: theme.radius.md, backgroundColor: theme.colors.primary, alignItems: "center", justifyContent: "center" },
+  sendBtn: { width: 40, height: 40, borderRadius: theme.radius.md, backgroundColor: theme.colors.primary, alignItems: "center", justifyContent: "center", cursor: "pointer" as any },
 });

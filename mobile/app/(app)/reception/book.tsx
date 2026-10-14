@@ -1,16 +1,14 @@
 /**
- * Reception: Book appointment form.
- *
- * Needs: patient, doctor, scheduled time, duration, reason.
- * Uses the existing POST /appointments endpoint.
+ * Reception: Book appointment form — trilingual.
  */
 
 import { ArrowLeft, CalendarPlus, Save } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from "react-native";
 
 import { Button } from "@/components/ui/Button";
@@ -20,15 +18,8 @@ import type { SessionUser } from "@/store/app";
 import { theme } from "@/constants/theme";
 
 
-interface Patient {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-}
-
-
 export default function BookAppointment() {
+  const { t } = useTranslation();
   const router = useRouter();
   const qc = useQueryClient();
 
@@ -41,7 +32,7 @@ export default function BookAppointment() {
   const [dateStr, setDateStr] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+    return d.toISOString().slice(0, 10);
   });
   const [timeStr, setTimeStr] = useState("10:00");
   const [duration, setDuration] = useState("30");
@@ -67,22 +58,22 @@ export default function BookAppointment() {
       router.back();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : "Could not book appointment");
+      setError(err instanceof Error ? err.message : t("common.error"));
     },
   });
 
-  const canSubmit = patientId && doctorId && dateStr && timeStr && !createAppt.isPending;
+  const canSubmit = !!(patientId && doctorId && dateStr && timeStr) && !createAppt.isPending;
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <ArrowLeft size={16} color={theme.colors.text} strokeWidth={2.2} />
-          <Text style={styles.backText}>Reception</Text>
+          <Text style={styles.backText}>{t("reception.eyebrow")}</Text>
         </Pressable>
         <View style={styles.topBarMeta}>
-          <Text style={styles.eyebrow}>New</Text>
-          <Text style={styles.title}>Book appointment</Text>
+          <Text style={styles.eyebrow}>{t("reception.book.eyebrow")}</Text>
+          <Text style={styles.title}>{t("reception.book.title")}</Text>
         </View>
       </View>
 
@@ -93,10 +84,10 @@ export default function BookAppointment() {
       ) : null}
 
       <View style={styles.formCard}>
-        {/* Patient picker */}
-        <Text style={styles.label}>Patient</Text>
+        {/* Patient */}
+        <Text style={styles.label}>{t("reception.book.patient")}</Text>
         {patients.length === 0 ? (
-          <Text style={styles.mutedText}>No registered patients yet.</Text>
+          <Text style={styles.mutedText}>{t("reception.book.noPatients")}</Text>
         ) : (
           <View style={styles.pillWrap}>
             {patients.map((p) => (
@@ -113,10 +104,10 @@ export default function BookAppointment() {
           </View>
         )}
 
-        {/* Doctor picker */}
-        <Text style={[styles.label, styles.labelSpaced]}>Doctor</Text>
+        {/* Doctor */}
+        <Text style={[styles.label, styles.labelSpaced]}>{t("reception.book.doctor")}</Text>
         {doctors.length === 0 ? (
-          <Text style={styles.mutedText}>No doctors on staff.</Text>
+          <Text style={styles.mutedText}>{t("reception.book.noDoctors")}</Text>
         ) : (
           <View style={styles.pillWrap}>
             {doctors.map((d) => (
@@ -133,10 +124,10 @@ export default function BookAppointment() {
           </View>
         )}
 
-        {/* Date + time + duration */}
+        {/* Date + Time */}
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={[styles.label, styles.labelSpaced]}>Date (YYYY-MM-DD)</Text>
+            <Text style={[styles.label, styles.labelSpaced]}>{t("patient.appointments.time")}</Text>
             <TextInput
               value={dateStr}
               onChangeText={setDateStr}
@@ -146,7 +137,7 @@ export default function BookAppointment() {
             />
           </View>
           <View style={styles.half}>
-            <Text style={[styles.label, styles.labelSpaced]}>Time (HH:MM)</Text>
+            <Text style={[styles.label, styles.labelSpaced]}>{t("patient.appointments.time")}</Text>
             <TextInput
               value={timeStr}
               onChangeText={setTimeStr}
@@ -157,7 +148,8 @@ export default function BookAppointment() {
           </View>
         </View>
 
-        <Text style={[styles.label, styles.labelSpaced]}>Duration (minutes)</Text>
+        {/* Duration */}
+        <Text style={[styles.label, styles.labelSpaced]}>{t("reception.book.duration")}</Text>
         <TextInput
           value={duration}
           onChangeText={(v) => setDuration(v.replace(/[^0-9]/g, ""))}
@@ -167,11 +159,12 @@ export default function BookAppointment() {
           style={styles.input}
         />
 
-        <Text style={[styles.label, styles.labelSpaced]}>Reason (optional)</Text>
+        {/* Reason */}
+        <Text style={[styles.label, styles.labelSpaced]}>{t("reception.book.reason")}</Text>
         <TextInput
           value={reason}
           onChangeText={setReason}
-          placeholder="Routine consultation"
+          placeholder={t("patient.appointments.reason")}
           multiline
           numberOfLines={2}
           placeholderTextColor={theme.colors.mutedLight}
@@ -179,9 +172,14 @@ export default function BookAppointment() {
         />
 
         <View style={styles.actions}>
-          <Button label="Cancel" variant="ghost" size="md" onPress={() => router.back()} />
           <Button
-            label="Book appointment"
+            label={t("common.cancel")}
+            variant="ghost"
+            size="md"
+            onPress={() => router.back()}
+          />
+          <Button
+            label={t("reception.book.title")}
             variant="primary"
             size="md"
             disabled={!canSubmit}
@@ -212,7 +210,7 @@ const styles = StyleSheet.create({
   labelSpaced: { marginTop: theme.spacing.lg },
   mutedText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.muted, paddingVertical: theme.spacing.md },
   pillWrap: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
-  pill: { paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.full, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border },
+  pill: { paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.full, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, cursor: "pointer" as any },
   pillActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   pillText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 13, color: theme.colors.text },
   pillTextActive: { color: theme.colors.textInverse, fontFamily: theme.fontFamily.bodyBold },

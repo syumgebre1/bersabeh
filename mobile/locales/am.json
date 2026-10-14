@@ -402,6 +402,55 @@
       "walkin": "ያለቀጠሮ የሚመጡ",
       "billing": "ክፍያ",
       "messages": "መልዕክቶች"
+    },
+    "eyebrow": "እንግዳ ተቀባይ",
+    "greeting": "እንደምን ዋሉ፣ {{name}}።",
+    "appointmentsToday": "የዛሬ ቀጠሮዎች",
+    "arrived": "የደረሱ",
+    "expected": "የሚጠበቁ",
+    "collectedToday": "ዛሬ የተሰበሰበ",
+    "allCaughtUp": "ሁሉም ተከናውኗል — ምንም በመጠበቅ ላይ ያለ ታካሚ የለም",
+    "noAppointmentsToday": "ዛሬ ምንም ቀጠሮ የለም",
+    "book": {
+      "eyebrow": "አዲስ",
+      "title": "ቀጠሮ ያዙ",
+      "patient": "ታካሚ",
+      "doctor": "ሐኪም",
+      "duration": "ቆይታ (በደቂቃ)",
+      "reason": "ምክንያት (አማራጭ)",
+      "noPatients": "እስካሁን የተመዘገበ ታካሚ የለም",
+      "noDoctors": "በሰራተኞች ውስጥ ሐኪም የለም"
+    },
+    "walkin": {
+      "eyebrow": "አዲስ ታካሚ",
+      "title": "ያለቀጠሮ የመጡ ታካሚን ይመዝግቡ",
+      "details": "የታካሚ ዝርዝር መረጃ",
+      "assign": "አሁን ሐኪም ይመድቡ (አማራጭ)",
+      "registerAndBook": "ይመዝግቡ እና ቀጠሮ ይያዙ",
+      "tempPasswordNote": "ታካሚው በመጀመሪያ መግቢያቸው ላይ ይህንን እንዲቀይሩ ይጠየቃሉ"
+    },
+    "billing": {
+      "eyebrow": "ፋይናንስ",
+      "title": "ክፍያ",
+      "filterAll": "ሁሉም",
+      "filterUnpaid": "ያልተከፈለ",
+      "filterPartial": "ከፊል",
+      "filterPaid": "የተከፈለ",
+      "recordPayment": "ክፍያ መዝግብ",
+      "method": "የክፍያ መንገድ",
+      "methodCash": "ጥሬ ገንዘብ",
+      "methodTelebirr": "ቴሌብር",
+      "methodCBE": "የንግድ ባንክ ብር",
+      "methodChapa": "ቻፓ",
+      "methodCard": "ካርድ",
+      "amount": "መጠን (ብር)",
+      "notes": "ማስታወሻዎች (አማራጭ)"
+    },
+    "messages": {
+      "title": "መልዕክቶች",
+      "noThreads": "እስካሁን ምንም የመልዕክት ክርክር የለም",
+      "typeMessage": "መልዕክት ይጻፉ...",
+      "send": "ላክ"
     }
   },
   "doctor": {

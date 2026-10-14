@@ -1,11 +1,13 @@
 /**
- * Reception: Billing — list of bills with a "Record payment" modal.
+ * Reception: Billing — bills list with a "Record payment" modal.
+ * Trilingual.
  */
 
 import { ArrowLeft, Receipt, Wallet, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from "react-native";
@@ -16,26 +18,28 @@ import { useBills } from "@/lib/admin";
 import { theme } from "@/constants/theme";
 
 
-const FILTERS = ["all", "unpaid", "partial", "paid"];
-const METHODS = ["cash", "telebirr", "cbe_birr", "chapa", "card"];
-
-
-function statusChip(s: string) {
-  switch (s) {
-    case "paid":     return { bg: theme.colors.successBg, fg: theme.colors.success, label: "Paid" };
-    case "partial":  return { bg: theme.colors.warningBg, fg: theme.colors.warning, label: "Partial" };
-    case "cancelled":return { bg: theme.colors.bgSunken,  fg: theme.colors.muted,   label: "Cancelled" };
-    default:         return { bg: theme.colors.dangerBg,  fg: theme.colors.danger,  label: "Unpaid" };
-  }
-}
-
-
 export default function ReceptionBilling() {
+  const { t } = useTranslation();
   const router = useRouter();
   const qc = useQueryClient();
   const { data: bills, isLoading, isError, refetch } = useBills({ limit: 200 });
-  const [filter, setFilter] = useState("all");
 
+  const FILTERS = [
+    { key: "all",     label: t("reception.billing.filterAll") },
+    { key: "unpaid",  label: t("reception.billing.filterUnpaid") },
+    { key: "partial", label: t("reception.billing.filterPartial") },
+    { key: "paid",    label: t("reception.billing.filterPaid") },
+  ];
+
+  const METHODS = [
+    { key: "cash",     label: t("reception.billing.methodCash") },
+    { key: "telebirr", label: t("reception.billing.methodTelebirr") },
+    { key: "cbe_birr", label: t("reception.billing.methodCBE") },
+    { key: "chapa",    label: t("reception.billing.methodChapa") },
+    { key: "card",     label: t("reception.billing.methodCard") },
+  ];
+
+  const [filter, setFilter] = useState("all");
   const [payingBillId, setPayingBillId] = useState<string | null>(null);
   const [amountStr, setAmountStr] = useState("");
   const [method, setMethod] = useState("cash");
@@ -59,7 +63,7 @@ export default function ReceptionBilling() {
 
   const recordPayment = useMutation({
     mutationFn: async () => {
-      if (!payingBillId) throw new Error("No bill selected");
+      if (!payingBillId) throw new Error(t("common.error"));
       return apiFetch(`/api/v1/bills/${payingBillId}/pay`, {
         method: "POST",
         body: JSON.stringify({
@@ -74,7 +78,7 @@ export default function ReceptionBilling() {
       closeModal();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : "Could not record payment");
+      setError(err instanceof Error ? err.message : t("common.error"));
     },
   });
 
@@ -103,25 +107,25 @@ export default function ReceptionBilling() {
       <View style={styles.topBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <ArrowLeft size={16} color={theme.colors.text} strokeWidth={2.2} />
-          <Text style={styles.backText}>Reception</Text>
+          <Text style={styles.backText}>{t("reception.eyebrow")}</Text>
         </Pressable>
         <View style={styles.topBarMeta}>
-          <Text style={styles.eyebrow}>Finance</Text>
-          <Text style={styles.title}>Billing</Text>
+          <Text style={styles.eyebrow}>{t("reception.billing.eyebrow")}</Text>
+          <Text style={styles.title}>{t("reception.billing.title")}</Text>
         </View>
-        <Text style={styles.count}>{filtered.length} bills</Text>
+        <Text style={styles.count}>{filtered.length}</Text>
       </View>
 
       {/* Filters */}
       <View style={styles.pillRow}>
         {FILTERS.map((f) => (
           <Pressable
-            key={f}
-            onPress={() => setFilter(f)}
-            style={[styles.pill, filter === f && styles.pillActive]}
+            key={f.key}
+            onPress={() => setFilter(f.key)}
+            style={[styles.pill, filter === f.key && styles.pillActive]}
           >
-            <Text style={[styles.pillText, filter === f && styles.pillTextActive]}>
-              {f}
+            <Text style={[styles.pillText, filter === f.key && styles.pillTextActive]}>
+              {f.label}
             </Text>
           </Pressable>
         ))}
@@ -131,26 +135,22 @@ export default function ReceptionBilling() {
         <View style={styles.center}><ActivityIndicator size="small" color={theme.colors.primary} /></View>
       ) : isError ? (
         <View style={styles.center}>
-          <Text style={styles.errorText}>Could not load bills.</Text>
-          <Button label="Retry" variant="outline" size="sm" onPress={() => refetch()} />
+          <Text style={styles.errorText}>{t("common.error")}</Text>
+          <Button label={t("common.retry")} variant="outline" size="sm" onPress={() => refetch()} />
         </View>
       ) : filtered.length === 0 ? (
         <View style={styles.center}>
           <Receipt size={32} color={theme.colors.muted} strokeWidth={1.6} />
-          <Text style={styles.mutedText}>No bills match this filter.</Text>
+          <Text style={styles.mutedText}>{t("patient.bills.noBills")}</Text>
         </View>
       ) : (
         <View style={styles.list}>
           {filtered.map((b, idx) => {
-            const c = statusChip(b.status);
             const due = Number(b.amount_etb) - Number(b.paid_amount_etb);
             return (
               <View
                 key={b.id}
-                style={[
-                  styles.row,
-                  idx < filtered.length - 1 && styles.rowBorder,
-                ]}
+                style={[styles.row, idx < filtered.length - 1 && styles.rowBorder]}
               >
                 <View style={styles.iconCol}>
                   <Receipt size={16} color={theme.colors.primary} strokeWidth={2.2} />
@@ -161,19 +161,13 @@ export default function ReceptionBilling() {
                   </Text>
                   <Text style={styles.rowSub}>
                     {new Date(b.created_at).toLocaleDateString([], { month: "short", day: "numeric" })}
-                    {due > 0.01 ? ` · ${due.toLocaleString()} ETB due` : " · settled"}
+                    {due > 0.01 ? ` · ${due.toLocaleString()} ETB` : " · ✅"}
                   </Text>
                 </View>
-                <View style={[styles.chip, { backgroundColor: c.bg }]}>
-                  <Text style={[styles.chipText, { color: c.fg }]}>{c.label}</Text>
-                </View>
                 {b.status !== "paid" && b.status !== "cancelled" ? (
-                  <Pressable
-                    onPress={() => openModal(b.id)}
-                    style={styles.payBtn}
-                  >
+                  <Pressable onPress={() => openModal(b.id)} style={styles.payBtn}>
                     <Wallet size={13} color={theme.colors.textInverse} strokeWidth={2.4} />
-                    <Text style={styles.payBtnText}>Pay</Text>
+                    <Text style={styles.payBtnText}>{t("status.paid")}</Text>
                   </Pressable>
                 ) : null}
               </View>
@@ -187,7 +181,7 @@ export default function ReceptionBilling() {
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Record payment</Text>
+              <Text style={styles.modalTitle}>{t("reception.billing.recordPayment")}</Text>
               <Pressable onPress={closeModal} style={styles.modalClose}>
                 <X size={16} color={theme.colors.muted} strokeWidth={2.2} />
               </Pressable>
@@ -195,8 +189,8 @@ export default function ReceptionBilling() {
 
             {payingBill ? (
               <Text style={styles.modalInfo}>
-                Bill total: <Text style={styles.modalInfoBold}>{Number(payingBill.amount_etb).toLocaleString()} ETB</Text>
-                {"  ·  "}Outstanding: <Text style={styles.modalInfoBold}>{outstanding.toLocaleString()} ETB</Text>
+                {Number(payingBill.amount_etb).toLocaleString()} ETB ·{" "}
+                {outstanding.toLocaleString()} ETB
               </Text>
             ) : null}
 
@@ -206,7 +200,7 @@ export default function ReceptionBilling() {
               </View>
             ) : null}
 
-            <Text style={styles.label}>Amount (ETB)</Text>
+            <Text style={styles.label}>{t("reception.billing.amount")}</Text>
             <TextInput
               value={amountStr}
               onChangeText={(v) => setAmountStr(v.replace(/[^0-9.]/g, ""))}
@@ -216,34 +210,34 @@ export default function ReceptionBilling() {
               style={styles.input}
             />
 
-            <Text style={[styles.label, styles.labelSpaced]}>Method</Text>
+            <Text style={[styles.label, styles.labelSpaced]}>{t("reception.billing.method")}</Text>
             <View style={styles.methodRow}>
               {METHODS.map((m) => (
                 <Pressable
-                  key={m}
-                  onPress={() => setMethod(m)}
-                  style={[styles.method, method === m && styles.methodActive]}
+                  key={m.key}
+                  onPress={() => setMethod(m.key)}
+                  style={[styles.method, method === m.key && styles.methodActive]}
                 >
-                  <Text style={[styles.methodText, method === m && styles.methodTextActive]}>
-                    {m.replace("_", " ")}
+                  <Text style={[styles.methodText, method === m.key && styles.methodTextActive]}>
+                    {m.label}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
-            <Text style={[styles.label, styles.labelSpaced]}>Notes (optional)</Text>
+            <Text style={[styles.label, styles.labelSpaced]}>{t("reception.billing.notes")}</Text>
             <TextInput
               value={notes}
               onChangeText={setNotes}
-              placeholder="Partial payment"
+              placeholder={t("patient.bills.partial")}
               placeholderTextColor={theme.colors.mutedLight}
               style={styles.input}
             />
 
             <View style={styles.modalActions}>
-              <Button label="Cancel" variant="ghost" size="md" onPress={closeModal} />
+              <Button label={t("common.cancel")} variant="ghost" size="md" onPress={closeModal} />
               <Button
-                label="Record payment"
+                label={t("reception.billing.recordPayment")}
                 variant="primary"
                 size="md"
                 disabled={!canSubmit}
@@ -270,9 +264,9 @@ const styles = StyleSheet.create({
   title: { fontFamily: theme.fontFamily.heading, fontSize: 28, letterSpacing: -0.5, color: theme.colors.text, marginTop: 2 },
   count: { fontFamily: theme.fontFamily.body, fontSize: 13, color: theme.colors.muted },
   pillRow: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.xs },
-  pill: { paddingHorizontal: theme.spacing.md, paddingVertical: 6, borderRadius: theme.radius.full, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border },
+  pill: { paddingHorizontal: theme.spacing.md, paddingVertical: 6, borderRadius: theme.radius.full, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, cursor: "pointer" as any },
   pillActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  pillText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12.5, color: theme.colors.text, textTransform: "capitalize" },
+  pillText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12.5, color: theme.colors.text },
   pillTextActive: { color: theme.colors.textInverse },
   center: { alignItems: "center", justifyContent: "center", paddingVertical: theme.spacing.huge, gap: theme.spacing.md },
   mutedText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.muted },
@@ -285,25 +279,21 @@ const styles = StyleSheet.create({
   rowContent: { flex: 1, minWidth: 0 },
   rowTitle: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 14.5, color: theme.colors.text },
   rowSub: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, marginTop: 3 },
-  chip: { paddingHorizontal: theme.spacing.sm, paddingVertical: 3, borderRadius: theme.radius.full },
-  chipText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 0.3 },
-  payBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: theme.spacing.md, paddingVertical: 7, backgroundColor: theme.colors.secondary, borderRadius: theme.radius.sm },
+  payBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: theme.spacing.md, paddingVertical: 7, backgroundColor: theme.colors.secondary, borderRadius: theme.radius.sm, cursor: "pointer" as any },
   payBtnText: { fontFamily: theme.fontFamily.bodyBold, fontSize: 12.5, color: theme.colors.textInverse },
-
   modalBackdrop: { flex: 1, backgroundColor: "rgba(20,20,31,0.5)", alignItems: "center", justifyContent: "center", padding: theme.spacing.lg },
   modalCard: { width: "100%", maxWidth: 480, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.xl, gap: theme.spacing.sm },
   modalHeader: { flexDirection: "row", alignItems: "center", marginBottom: theme.spacing.sm },
   modalTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 18, color: theme.colors.text, flex: 1 },
-  modalClose: { padding: theme.spacing.xs },
+  modalClose: { padding: theme.spacing.xs, cursor: "pointer" as any },
   modalInfo: { fontFamily: theme.fontFamily.body, fontSize: 13, color: theme.colors.muted, marginBottom: theme.spacing.sm },
-  modalInfoBold: { fontFamily: theme.fontFamily.bodyBold, color: theme.colors.text },
   label: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11.5, letterSpacing: 0.6, textTransform: "uppercase", color: theme.colors.muted },
   labelSpaced: { marginTop: theme.spacing.md },
   input: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, fontFamily: theme.fontFamily.body, fontSize: 14.5, color: theme.colors.text, backgroundColor: theme.colors.bg },
   methodRow: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.xs },
-  method: { paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.sm, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.bg },
+  method: { paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.sm, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.bg, cursor: "pointer" as any },
   methodActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  methodText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12.5, color: theme.colors.text, textTransform: "capitalize" },
+  methodText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12.5, color: theme.colors.text },
   methodTextActive: { color: theme.colors.textInverse, fontFamily: theme.fontFamily.bodyBold },
   modalActions: { flexDirection: "row", justifyContent: "flex-end", gap: theme.spacing.sm, marginTop: theme.spacing.lg },
 });
