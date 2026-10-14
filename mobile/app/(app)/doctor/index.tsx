@@ -1,16 +1,12 @@
 /**
- * Doctor dashboard — all buttons wired to real sub-routes.
+ * Doctor dashboard — fully trilingual (EN/AM/TI).
  */
 
 import {
-  ArrowRight,
-  ClipboardList,
-  FlaskConical,
-  MessageSquare,
-  Pill,
-  Stethoscope,
+  ArrowRight, ClipboardList, FlaskConical, MessageSquare, Pill, Stethoscope,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import { useAppointments, useLabOrders } from "@/lib/admin";
@@ -18,26 +14,27 @@ import { theme } from "@/constants/theme";
 import { useAppStore } from "@/store/app";
 
 
-function statusChip(status: string) {
+function statusChip(status: string, t: (k: string) => string) {
   switch (status) {
-    case "completed":  return { bg: theme.colors.successBg, fg: theme.colors.success, label: "Done" };
-    case "in_room":    return { bg: theme.colors.warningBg, fg: theme.colors.warning, label: "In room" };
-    case "checked_in": return { bg: theme.colors.infoBg,    fg: theme.colors.info,    label: "Checked in" };
-    default:           return { bg: theme.colors.bgSunken,  fg: theme.colors.muted,   label: "Scheduled" };
+    case "completed":  return { bg: theme.colors.successBg, fg: theme.colors.success, label: t("status.completed") };
+    case "in_room":    return { bg: theme.colors.warningBg, fg: theme.colors.warning, label: t("status.inRoom") };
+    case "checked_in": return { bg: theme.colors.infoBg,    fg: theme.colors.info,    label: t("status.checkedIn") };
+    default:           return { bg: theme.colors.bgSunken,  fg: theme.colors.muted,   label: t("status.scheduled") };
   }
 }
 
 
 export default function DoctorDashboard() {
+  const { t } = useTranslation();
   const router = useRouter();
   const user = useAppStore((s) => s.user);
   const { width } = useWindowDimensions();
   const isWide = width >= 1100;
 
   const { data: appts } = useAppointments({ limit: 100 });
-  const { data: labs }  = useLabOrders({ status: "completed", limit: 10 });
+  const { data: labs } = useLabOrders({ status: "completed", limit: 10 });
 
-  const firstName = (user?.full_name ?? "Doctor").split(" ").slice(-1)[0];
+  const firstName = (user?.full_name ?? "").split(" ").slice(-1)[0] || "";
   const visible = (appts ?? []).filter((a) => a.status !== "completed").slice(0, 6);
   const doneCount = (appts ?? []).filter((a) => a.status === "completed").length;
 
@@ -45,59 +42,62 @@ export default function DoctorDashboard() {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* Greeting */}
       <View style={styles.greeting}>
-        <Text style={styles.hello}>Dr. {firstName}</Text>
+        <Text style={styles.hello}>
+          {t("doctor.drPrefix")} {firstName}
+        </Text>
         <Text style={styles.sub}>
-          You have <Text style={styles.em}>{visible.length}</Text> patients waiting · {doneCount} done today
+          {t("doctor.youHave")} <Text style={styles.em}>{visible.length}</Text> {t("doctor.patientsWaiting")} · {doneCount} {t("doctor.doneToday")}
         </Text>
       </View>
 
-      {/* Quick actions — all wired */}
+      {/* Quick actions */}
       <View style={styles.quickRow}>
         <QuickAction
           Icon={Pill}
-          label="Prescribe"
+          label={t("doctor.quickPrescribe")}
           onPress={() => router.push("/(app)/doctor/prescribe" as any)}
         />
         <QuickAction
           Icon={FlaskConical}
-          label="Order lab"
+          label={t("doctor.quickOrderLab")}
           onPress={() => router.push("/(app)/doctor/labs" as any)}
         />
         <QuickAction
           Icon={ClipboardList}
-          label="Queue"
+          label={t("doctor.patientQueue")}
           onPress={() => router.push("/(app)/doctor/queue" as any)}
         />
         <QuickAction
           Icon={Stethoscope}
-          label="Today"
+          label={t("doctor.nav.today")}
           onPress={() => router.push("/(app)/doctor" as any)}
         />
         <QuickAction
           Icon={MessageSquare}
-          label="Messages"
+          label={t("doctor.nav.messages")}
           onPress={() => router.push("/(app)/doctor/messages" as any)}
         />
       </View>
 
-      {/* Two-column: schedule | queue */}
       <View style={[styles.cols, !isWide && styles.colsStack]}>
         {/* Today's schedule */}
         <View style={styles.panel}>
           <View style={styles.panelHeader}>
-            <Text style={styles.panelTitle}>Today's schedule</Text>
+            <Text style={styles.panelTitle}>{t("doctor.todaySchedule")}</Text>
             <Pressable onPress={() => router.push("/(app)/doctor/queue" as any)}>
-              <Text style={styles.panelMeta}>{appts?.length ?? 0} appointments →</Text>
+              <Text style={styles.panelMeta}>
+                {appts?.length ?? 0} {t("doctor.appointments")} →
+              </Text>
             </Pressable>
           </View>
           <View style={styles.panelBody}>
             {visible.length === 0 ? (
               <View style={styles.emptyRow}>
-                <Text style={styles.emptyText}>No appointments today.</Text>
+                <Text style={styles.emptyText}>{t("doctor.noAppointmentsToday")}</Text>
               </View>
             ) : (
-              visible.map((item, idx) => {
-                const chip = statusChip(item.status);
+              visible.map((item) => {
+                const chip = statusChip(item.status, t);
                 return (
                   <Pressable
                     key={item.id}
@@ -112,7 +112,7 @@ export default function DoctorDashboard() {
                     </View>
                     <View style={styles.scheduleContent}>
                       <Text style={styles.patientName}>{item.patient?.full_name ?? "—"}</Text>
-                      <Text style={styles.reason}>{item.reason ?? "General visit"}</Text>
+                      <Text style={styles.reason}>{item.reason ?? t("doctor.generalVisit")}</Text>
                     </View>
                     <View style={[styles.chip, { backgroundColor: chip.bg }]}>
                       <Text style={[styles.chipText, { color: chip.fg }]}>{chip.label}</Text>
@@ -131,22 +131,22 @@ export default function DoctorDashboard() {
             onPress={() => router.push("/(app)/doctor/queue" as any)}
             style={({ hovered }: any) => [styles.statCard, hovered && styles.statHover]}
           >
-            <Text style={styles.statLabel}>WAITING</Text>
+            <Text style={styles.statLabel}>{t("doctor.patientsWaiting").toUpperCase()}</Text>
             <Text style={styles.statValue}>{visible.length}</Text>
-            <Text style={styles.statSub}>Tap to view full queue →</Text>
+            <Text style={styles.statSub}>{t("doctor.viewFullQueue")}</Text>
           </Pressable>
 
           <View style={styles.panel}>
             <View style={styles.panelHeader}>
-              <Text style={styles.panelTitle}>Lab results to review</Text>
+              <Text style={styles.panelTitle}>{t("doctor.labResultsToReview")}</Text>
               <Pressable onPress={() => router.push("/(app)/doctor/labs" as any)}>
-                <Text style={styles.panelLink}>See all</Text>
+                <Text style={styles.panelLink}>{t("common.viewAll")}</Text>
               </Pressable>
             </View>
             <View style={styles.panelBody}>
               {(labs ?? []).length === 0 ? (
                 <View style={styles.emptyRow}>
-                  <Text style={styles.emptyText}>No completed lab orders.</Text>
+                  <Text style={styles.emptyText}>{t("lab.noCompletedResults")}</Text>
                 </View>
               ) : (
                 (labs ?? []).slice(0, 3).map((r) => (
@@ -165,7 +165,7 @@ export default function DoctorDashboard() {
                       </Text>
                     </View>
                     <View style={[styles.chip, { backgroundColor: theme.colors.successBg }]}>
-                      <Text style={[styles.chipText, { color: theme.colors.success }]}>Ready</Text>
+                      <Text style={[styles.chipText, { color: theme.colors.success }]}>{t("status.ready")}</Text>
                     </View>
                   </Pressable>
                 ))
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   sub: { fontFamily: theme.fontFamily.body, fontSize: 15, color: theme.colors.muted },
   em: { fontFamily: theme.fontFamily.bodyBold, color: theme.colors.text },
   quickRow: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
-  quickBtn: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs + 2, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md },
+  quickBtn: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs + 2, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, cursor: "pointer" as any },
   quickBtnHover: { borderColor: theme.colors.primary, backgroundColor: "rgba(42,42,114,0.02)" },
   quickText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 13, color: theme.colors.text },
   cols: { flexDirection: "row", gap: theme.spacing.lg },
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   panelMeta: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.primary },
   panelLink: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 12.5, color: theme.colors.primary },
   panelBody: { paddingVertical: 4 },
-  scheduleRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  scheduleRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, cursor: "pointer" as any },
   rowHover: { backgroundColor: "rgba(42,42,114,0.02)" },
   timeCol: { width: 52, alignItems: "flex-start", gap: 6 },
   timeText: { fontFamily: theme.fontFamily.headingMedium, fontSize: 13.5, color: theme.colors.text, letterSpacing: -0.1 },
@@ -228,12 +228,12 @@ const styles = StyleSheet.create({
   reason: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, marginTop: 2 },
   chip: { paddingHorizontal: theme.spacing.sm, paddingVertical: 3, borderRadius: theme.radius.full },
   chipText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 0.3 },
-  statCard: { backgroundColor: theme.colors.primaryDark, borderRadius: theme.radius.md, padding: theme.spacing.lg, gap: 2 },
+  statCard: { backgroundColor: theme.colors.primaryDark, borderRadius: theme.radius.md, padding: theme.spacing.lg, gap: 2, cursor: "pointer" as any },
   statHover: { opacity: 0.94 },
   statLabel: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 1.2, color: theme.colors.accent },
   statValue: { fontFamily: theme.fontFamily.heading, fontSize: 40, color: theme.colors.textInverse, letterSpacing: -1 },
   statSub: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: "rgba(255,255,255,0.65)" },
-  labRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  labRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, cursor: "pointer" as any },
   listIcon: { width: 32, height: 32, borderRadius: theme.radius.sm, backgroundColor: "rgba(199,91,57,0.08)", alignItems: "center", justifyContent: "center" },
   emptyRow: { paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.lg, alignItems: "center" },
   emptyText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.muted },
