@@ -531,3 +531,36 @@ export function useVitals(filters: { patient_id?: string; limit?: number } = {})
     queryFn: () => apiFetch<VitalRead[]>(url),
   });
 }
+
+
+// ============================================================
+// Vitals (create)
+// ============================================================
+export interface CreateVitalPayload {
+  encounter_id?: string | null;
+  temperature_c?: number | null;
+  heart_rate_bpm?: number | null;
+  respiratory_rate?: number | null;
+  bp_systolic?: number | null;
+  bp_diastolic?: number | null;
+  spo2_percent?: number | null;
+  weight_kg?: number | null;
+  height_cm?: number | null;
+  pain_scale?: number | null;
+  notes?: string | null;
+  recorded_at?: string | null;
+}
+
+export function useCreateVital() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ patientId, payload }: { patientId: string; payload: CreateVitalPayload }) =>
+      apiFetch(`/api/v1/vitals?patient_id=${patientId}`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["vitals"] });
+    },
+  });
+}
