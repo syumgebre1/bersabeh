@@ -25,6 +25,19 @@ from app.models.messaging import (
     ThreadKind,
     ThreadParticipant,
 )
+from app.models.medication import (
+    DoseStatus,
+    MedicationAdministration,
+    ScheduledDose,
+    SkipReason,
+)
+from app.models.shift import (
+    HandoverNote,
+    HandoverSeverity,
+    HandoverStatus,
+    NurseShift,
+    ShiftHandover,
+)
 from app.models.notification import (
     Notification,
     NotificationChannel,
@@ -88,4 +101,15 @@ __all__ = [
     "Room",
     "RoomType",
     "BedAssignment",
+    # Medications
+    "ScheduledDose",
+    "DoseStatus",
+    "SkipReason",
+    "MedicationAdministration",
+    # Shifts & handover
+    "NurseShift",
+    "HandoverNote",
+    "HandoverSeverity",
+    "ShiftHandover",
+    "HandoverStatus",
 ]
