@@ -1,10 +1,11 @@
 /**
- * Doctor: Prescription detail — refactored to use shared components.
+ * Doctor: Prescription detail — trilingual.
  */
 
 import { Pill } from "lucide-react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator, ScrollView, StyleSheet, Text, View,
 } from "react-native";
@@ -12,13 +13,12 @@ import {
 import { Button } from "@/components/ui/Button";
 import { DetailCard, DetailHeader, DownloadButton } from "@/components/app";
 import { apiFetch } from "@/lib/api";
+import { useMedicalMap } from "@/lib/useMedicalMap";
 import { theme } from "@/constants/theme";
 
 
 interface PrescriptionDetail {
   id: string;
-  patient_id: string;
-  doctor_id: string;
   status: string;
   notes: string | null;
   follow_up_date: string | null;
@@ -35,18 +35,11 @@ interface PrescriptionDetail {
 }
 
 
-function statusChip(s: string) {
-  switch (s) {
-    case "active":    return { bg: theme.colors.successBg, fg: theme.colors.success, label: "Active" };
-    case "completed": return { bg: theme.colors.bgSunken,  fg: theme.colors.muted,   label: "Completed" };
-    case "cancelled": return { bg: theme.colors.dangerBg,  fg: theme.colors.danger,  label: "Cancelled" };
-    default:          return { bg: theme.colors.bgSunken,  fg: theme.colors.muted,   label: s };
-  }
-}
-
-
-export default function PrescriptionDetail() {
+export default function DoctorPrescriptionDetail() {
+  const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const locale = i18n.language;
+  const { translateFrequency, translateInstruction } = useMedicalMap();
 
   const { data: rx, isLoading, isError, refetch } = useQuery({
     queryKey: ["prescription", id],
@@ -65,17 +58,22 @@ export default function PrescriptionDetail() {
   if (isError || !rx) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>Could not load prescription.</Text>
-        <Button label="Retry" variant="outline" size="sm" onPress={() => refetch()} />
+        <Text style={styles.errorText}>{t("common.error")}</Text>
+        <Button label={t("common.retry")} variant="outline" size="sm" onPress={() => refetch()} />
       </View>
     );
   }
 
-  const chip = statusChip(rx.status);
+  let chip: { bg: string; fg: string; label: string } = { bg: theme.colors.bgSunken, fg: theme.colors.muted, label: rx.status };
+  switch (rx.status) {
+    case "active":    chip = { bg: theme.colors.successBg, fg: theme.colors.success, label: t("status.active") }; break;
+    case "completed": chip = { bg: theme.colors.bgSunken,  fg: theme.colors.muted,   label: t("status.completed") }; break;
+    case "cancelled": chip = { bg: theme.colors.dangerBg,  fg: theme.colors.danger,  label: t("status.cancelled") }; break;
+  }
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      <DetailHeader backLabel="Prescriptions" chip={chip} />
+      <DetailHeader backLabel={t("doctor.prescriptions")} chip={chip} />
 
       <DetailCard>
         <View style={styles.headerRow}>
@@ -85,15 +83,17 @@ export default function PrescriptionDetail() {
           <View style={styles.headerContent}>
             <Text style={styles.patientName}>{rx.patient?.full_name ?? "—"}</Text>
             <Text style={styles.patientMeta}>
-              {rx.patient?.phone ?? "no phone"} ·{" "}
-              Prescribed {new Date(rx.created_at).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+              {rx.patient?.phone ?? "—"} ·{" "}
+              {new Date(rx.created_at).toLocaleDateString([], {
+                month: "short", day: "numeric", year: "numeric",
+              })}
             </Text>
           </View>
         </View>
       </DetailCard>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Medications</Text>
+        <Text style={styles.sectionTitle}>{t("patient.prescriptions.yourMedications")}</Text>
         <View style={styles.medsCard}>
           {rx.items.map((item, idx) => (
             <View
@@ -108,11 +108,15 @@ export default function PrescriptionDetail() {
                   {item.medication_name} <Text style={styles.medDose}>{item.dose}</Text>
                 </Text>
                 <Text style={styles.medMeta}>
-                  {item.frequency}
-                  {item.duration_days ? ` · ${item.duration_days} days` : ""}
+                  {translateFrequency(item.frequency, locale)}
+                  {item.duration_days
+                    ? ` · ${item.duration_days} ${t("patient.prescriptions.days")}`
+                    : ""}
                 </Text>
                 {item.instructions ? (
-                  <Text style={styles.medInstructions}>💡 {item.instructions}</Text>
+                  <Text style={styles.medInstructions}>
+                    💡 {translateInstruction(item.instructions, locale)}
+                  </Text>
                 ) : null}
               </View>
             </View>
@@ -122,7 +126,7 @@ export default function PrescriptionDetail() {
 
       {rx.notes ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Doctor's notes</Text>
+          <Text style={styles.sectionTitle}>{t("patient.prescriptions.doctorNotes")}</Text>
           <DetailCard variant="accent">
             <Text style={styles.notesText}>{rx.notes}</Text>
           </DetailCard>
@@ -131,7 +135,7 @@ export default function PrescriptionDetail() {
 
       {rx.follow_up_date ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Follow-up</Text>
+          <Text style={styles.sectionTitle}>{t("patient.prescriptions.followUp")}</Text>
           <DetailCard variant="dark" style={styles.followUpCard}>
             <Text style={styles.followUpDate}>{rx.follow_up_date}</Text>
           </DetailCard>
@@ -142,6 +146,7 @@ export default function PrescriptionDetail() {
         <DownloadButton
           path={`/api/v1/prescriptions/${id}/pdf`}
           filename={`prescription-${id}.pdf`}
+          label={t("common.downloadPdf")}
         />
       </View>
     </ScrollView>

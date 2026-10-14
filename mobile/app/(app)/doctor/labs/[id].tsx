@@ -1,10 +1,11 @@
 /**
- * Doctor: Lab order detail — refactored to use shared components.
+ * Doctor: Lab order detail — trilingual.
  */
 
 import { FlaskConical } from "lucide-react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator, ScrollView, StyleSheet, Text, View,
 } from "react-native";
@@ -40,19 +41,9 @@ interface LabOrderDetail {
 }
 
 
-function statusChip(s: string) {
-  switch (s) {
-    case "completed":   return { bg: theme.colors.successBg, fg: theme.colors.success, label: "Ready" };
-    case "in_progress": return { bg: theme.colors.infoBg,    fg: theme.colors.info,    label: "In progress" };
-    case "cancelled":   return { bg: theme.colors.dangerBg,  fg: theme.colors.danger,  label: "Cancelled" };
-    default:            return { bg: theme.colors.warningBg, fg: theme.colors.warning, label: "Pending" };
-  }
-}
-
-
-export default function LabOrderDetail() {
+export default function DoctorLabDetail() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
-
   const { data: order, isLoading, isError, refetch } = useQuery({
     queryKey: ["lab-order", id],
     queryFn: () => apiFetch<LabOrderDetail>(`/api/v1/labs/${id}`),
@@ -70,18 +61,24 @@ export default function LabOrderDetail() {
   if (isError || !order) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>Could not load lab order.</Text>
-        <Button label="Retry" variant="outline" size="sm" onPress={() => refetch()} />
+        <Text style={styles.errorText}>{t("common.error")}</Text>
+        <Button label={t("common.retry")} variant="outline" size="sm" onPress={() => refetch()} />
       </View>
     );
   }
 
-  const chip = statusChip(order.status);
+  let chip: { bg: string; fg: string; label: string } = { bg: theme.colors.warningBg, fg: theme.colors.warning, label: t("status.pending") };
+  switch (order.status) {
+    case "completed":   chip = { bg: theme.colors.successBg, fg: theme.colors.success, label: t("status.ready") }; break;
+    case "in_progress": chip = { bg: theme.colors.infoBg,    fg: theme.colors.info,    label: t("status.inProgress") }; break;
+    case "cancelled":   chip = { bg: theme.colors.dangerBg,  fg: theme.colors.danger,  label: t("status.cancelled") }; break;
+  }
+
   const result = order.result;
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      <DetailHeader backLabel="Lab orders" chip={chip} />
+      <DetailHeader backLabel={t("doctor.labOrders")} chip={chip} />
 
       <DetailCard>
         <View style={styles.headerRow}>
@@ -91,8 +88,7 @@ export default function LabOrderDetail() {
           <View style={styles.headerContent}>
             <Text style={styles.testName}>{order.test_name}</Text>
             <Text style={styles.testMeta}>
-              Ordered by {order.ordered_by?.full_name} ·{" "}
-              {new Date(order.ordered_at).toLocaleString([], {
+              {t("doctor.ordered")} {new Date(order.ordered_at).toLocaleString([], {
                 month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
               })}
             </Text>
@@ -102,7 +98,7 @@ export default function LabOrderDetail() {
 
       {order.clinical_notes ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Clinical notes</Text>
+          <Text style={styles.sectionTitle}>{t("lab.clinicalNotesFromDoctor")}</Text>
           <DetailCard variant="accent">
             <Text style={styles.notesText}>{order.clinical_notes}</Text>
           </DetailCard>
@@ -111,7 +107,7 @@ export default function LabOrderDetail() {
 
       {result ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Result</Text>
+          <Text style={styles.sectionTitle}>{t("patient.labs.result")}</Text>
           <DetailCard>
             {result.result_type === "numeric" && (
               <>
@@ -126,19 +122,19 @@ export default function LabOrderDetail() {
             <View style={styles.resultMetaGrid}>
               {result.reference_range ? (
                 <>
-                  <Text style={styles.metaKey}>Reference range</Text>
+                  <Text style={styles.metaKey}>{t("patient.labs.referenceRange")}</Text>
                   <Text style={styles.metaVal}>{result.reference_range}</Text>
                 </>
               ) : null}
               {result.interpretation ? (
                 <>
-                  <Text style={styles.metaKey}>Interpretation</Text>
+                  <Text style={styles.metaKey}>{t("patient.labs.interpretation")}</Text>
                   <Text style={styles.metaVal}>{result.interpretation}</Text>
                 </>
               ) : null}
-              <Text style={styles.metaKey}>Resulted by</Text>
+              <Text style={styles.metaKey}>{t("lab.resultedBy")}</Text>
               <Text style={styles.metaVal}>{result.resulted_by?.full_name ?? "—"}</Text>
-              <Text style={styles.metaKey}>Resulted at</Text>
+              <Text style={styles.metaKey}>{t("patient.labs.resultedAt")}</Text>
               <Text style={styles.metaVal}>
                 {new Date(result.resulted_at).toLocaleString([], {
                   month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
@@ -148,21 +144,16 @@ export default function LabOrderDetail() {
 
             {result.notes ? (
               <View style={styles.labNotesWrap}>
-                <Text style={styles.labNotesLabel}>Lab notes</Text>
+                <Text style={styles.labNotesLabel}>{t("patient.labs.notes")}</Text>
                 <Text style={styles.labNotesText}>{result.notes}</Text>
               </View>
             ) : null}
           </DetailCard>
         </View>
       ) : (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Result</Text>
-          <DetailCard variant="warning">
-            <Text style={styles.pendingText}>
-              Result not yet entered. Lab has been notified.
-            </Text>
-          </DetailCard>
-        </View>
+        <DetailCard variant="warning">
+          <Text style={styles.pendingText}>{t("lab.resultPending")}</Text>
+        </DetailCard>
       )}
 
       {result ? (
@@ -170,6 +161,7 @@ export default function LabOrderDetail() {
           <DownloadButton
             path={`/api/v1/labs/${id}/pdf`}
             filename={`lab-report-${id}.pdf`}
+            label={t("common.downloadPdf")}
           />
         </View>
       ) : null}
@@ -191,13 +183,13 @@ const styles = StyleSheet.create({
   section: { gap: theme.spacing.md },
   sectionTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: theme.colors.muted },
   notesText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.text, lineHeight: 20 },
-  pendingText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.warning, lineHeight: 20 },
   resultValue: { fontFamily: theme.fontFamily.heading, fontSize: 48, color: theme.colors.primary, letterSpacing: -1.5 },
   resultUnits: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 15, color: theme.colors.muted, marginTop: -theme.spacing.sm },
   resultTextValue: { fontFamily: theme.fontFamily.body, fontSize: 16, color: theme.colors.text, lineHeight: 24 },
   resultMetaGrid: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.md, borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: theme.spacing.md, marginTop: theme.spacing.md },
   metaKey: { width: "35%", fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, textTransform: "uppercase", letterSpacing: 0.5 },
   metaVal: { width: "60%", fontFamily: theme.fontFamily.bodyMedium, fontSize: 13.5, color: theme.colors.text },
+  pendingText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.warning, lineHeight: 20 },
   labNotesWrap: { backgroundColor: theme.colors.bg, borderRadius: theme.radius.sm, padding: theme.spacing.md, marginTop: theme.spacing.md },
   labNotesLabel: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: theme.colors.muted, marginBottom: 4 },
   labNotesText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.text, lineHeight: 19 },
