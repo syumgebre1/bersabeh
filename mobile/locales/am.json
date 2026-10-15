@@ -751,5 +751,21 @@
     "send": "ላክ",
     "patient": "ታካሚ",
     "noPatients": "ምንም ታካሚ አልተገኘም"
+  },
+  "booking": {
+    "title": "ጉብኝትዎን ያስይዙ",
+    "doctor": "ሚመርጡት ሐኪም",
+    "anyDoctor": "ማንኛውም ዝገኘ",
+    "date": "ሚመርጡት ቀን",
+    "time": "ሚመርጡት ሰዓት",
+    "fullName": "ሙሉ ስምዎ",
+    "fullNamePlaceholder": "አበበ ከበደ",
+    "phone": "ስልክ ቁጥር",
+    "email": "ኢሜይል (አማራጭ)",
+    "reason": "ምክንያት (አማራጭ)",
+    "reasonPlaceholder": "ምልክቶችዎን ይግለጹ…",
+    "submit": "ቀጠሮ ይጠይቁ",
+    "successTitle": "ጥያቄዎ ተቀብሏል",
+    "successBody": "የእንግዳ አቀባበል ቡድናችን በ2 ሰዓት ውስጥ ደውሎ ቀጠሮዎን ያረጋግጣል።"
   }
 }

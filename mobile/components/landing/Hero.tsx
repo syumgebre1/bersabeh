@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
+import { BookingModal } from "@/components/landing/BookingModal";
 import { DatePickerModal } from "@/components/ui/DatePickerModal";
 import { DepartmentPicker } from "@/components/ui/DepartmentPicker";
 import { theme } from "@/constants/theme";
@@ -36,13 +37,10 @@ export function Hero() {
   const [department, setDepartment] = useState<string>("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDeptPicker, setShowDeptPicker] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   const handleCheck = () => {
-    const params = new URLSearchParams();
-    if (department) params.set("department", department);
-    if (date) params.set("date", date);
-    const query = params.toString();
-    router.push(`/(auth)/register${query ? `?${query}` : ""}` as any);
+    setShowBookingModal(true);
   };
 
   const displayDate = date
@@ -134,6 +132,12 @@ export function Hero() {
         visible={showDeptPicker}
         onSelect={setDepartment}
         onClose={() => setShowDeptPicker(false)}
+      />
+      <BookingModal
+        visible={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        defaultDate={date}
+        defaultDepartment={department}
       />
     </View>
   );

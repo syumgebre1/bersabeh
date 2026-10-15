@@ -747,5 +747,21 @@
     "send": "Send",
     "patient": "Patient",
     "noPatients": "No patients available"
+  },
+  "booking": {
+    "title": "Book your visit",
+    "doctor": "Preferred doctor",
+    "anyDoctor": "Any available",
+    "date": "Preferred date",
+    "time": "Preferred time",
+    "fullName": "Your full name",
+    "fullNamePlaceholder": "Abebe Kebede",
+    "phone": "Phone number",
+    "email": "Email (optional)",
+    "reason": "Reason (optional)",
+    "reasonPlaceholder": "Describe your symptoms…",
+    "submit": "Request appointment",
+    "successTitle": "Request received",
+    "successBody": "Our reception team will call you within 2 hours to confirm your appointment."
   }
 }

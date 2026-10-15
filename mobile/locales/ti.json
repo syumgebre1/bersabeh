@@ -751,5 +751,21 @@
     "send": "ስደድ",
     "patient": "ሕሙም",
     "noPatients": "ዝርከብ ሕሙም የለን"
+  },
+  "booking": {
+    "title": "ብጻሕኩም ሓዙ",
+    "doctor": "ዝመርጹዎ ሓኪም",
+    "anyDoctor": "ዝርከብ ዝኾነ",
+    "date": "ዝመርጹዎ መዓልቲ",
+    "time": "ዝመርጹዎ ሰዓት",
+    "fullName": "ምሉእ ስምኩም",
+    "fullNamePlaceholder": "ኣበበ ከበደ",
+    "phone": "ቁጽሪ ተሌፎን",
+    "email": "ኢመይል (ኣማራጺ)",
+    "reason": "ምኽንያት (ኣማራጺ)",
+    "reasonPlaceholder": "ምልክታትኩም ግለጹ…",
+    "submit": "ቆፀሮ ሕተቱ",
+    "successTitle": "ሕቶኹም ተቐቢሉ",
+    "successBody": "ናይ ኣቀባበል ጋንታና ኣብ 2 ሰዓት ውሽጢ ደዊሉ ቆፀሮኹም ከረጋግጽ እዩ።"
   }
 }
