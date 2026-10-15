@@ -12,9 +12,10 @@ import {
 } from "react-native";
 
 import { Button } from "@/components/ui/Button";
+import { DateStrip } from "@/components/ui/DateStrip";
+import { TimeSlotGrid } from "@/components/ui/TimeSlotGrid";
 import { apiFetch } from "@/lib/api";
-import { useStaffList } from "@/lib/admin";
-import type { SessionUser } from "@/store/app";
+import { usePatients, useDoctors } from "@/lib/admin";
 import { theme } from "@/constants/theme";
 
 
@@ -23,9 +24,10 @@ export default function BookAppointment() {
   const router = useRouter();
   const qc = useQueryClient();
 
-  const { data: users } = useStaffList();
-  const patients = (users ?? []).filter((u: SessionUser) => u.role === "patient");
-  const doctors  = (users ?? []).filter((u: SessionUser) => u.role === "doctor");
+  const { data: patientsData } = usePatients();
+  const { data: doctorsData } = useDoctors();
+  const patients = patientsData ?? [];
+  const doctors = doctorsData ?? [];
 
   const [patientId, setPatientId] = useState("");
   const [doctorId, setDoctorId] = useState("");
@@ -127,24 +129,12 @@ export default function BookAppointment() {
         {/* Date + Time */}
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={[styles.label, styles.labelSpaced]}>{t("patient.appointments.time")}</Text>
-            <TextInput
-              value={dateStr}
-              onChangeText={setDateStr}
-              placeholder="2026-10-20"
-              placeholderTextColor={theme.colors.mutedLight}
-              style={styles.input}
-            />
+            <Text style={[styles.label, styles.labelSpaced]}>{t("patient.appointments.date")}</Text>
+            <DateStrip value={dateStr} onChange={setDateStr} />
           </View>
           <View style={styles.half}>
             <Text style={[styles.label, styles.labelSpaced]}>{t("patient.appointments.time")}</Text>
-            <TextInput
-              value={timeStr}
-              onChangeText={setTimeStr}
-              placeholder="10:00"
-              placeholderTextColor={theme.colors.mutedLight}
-              style={styles.input}
-            />
+            <TimeSlotGrid value={timeStr} onChange={setTimeStr} />
           </View>
         </View>
 

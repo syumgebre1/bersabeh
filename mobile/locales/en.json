@@ -247,7 +247,8 @@
       "selectDate": "Select date",
       "selectTime": "Select time",
       "reasonPlaceholder": "Describe your symptoms…",
-      "confirmBooking": "Confirm booking"
+      "confirmBooking": "Confirm booking",
+      "date": "Date"
     },
     "labs": {
       "result": "Result",

@@ -251,7 +251,8 @@
       "selectDate": "ቀን ይምረጡ",
       "selectTime": "ሰዓት ይምረጡ",
       "reasonPlaceholder": "ምልክቶችዎን ይግለጹ…",
-      "confirmBooking": "ቀጠሮ ያረጋግጡ"
+      "confirmBooking": "ቀጠሮ ያረጋግጡ",
+      "date": "ቀን"
     },
     "labs": {
       "result": "ውጤት",
