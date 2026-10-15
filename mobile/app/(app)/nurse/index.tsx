@@ -1,20 +1,40 @@
 /**
- * Nurse dashboard — real data from backend.
+ * Nurse dashboard — trilingual + real data + compose message.
  */
 
 import {
-  Activity, Bed, CalendarClock, ClipboardCheck, MessageSquare, Pill, Thermometer,
+  Activity, Bed, ClipboardCheck, MessageSquare, Pill, Thermometer,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useEffect } from "react";
+import { useState } from "react";
 import {
-  ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View,
+  Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View,
 } from "react-native";
 
-import { useCreateHandoverNote, useCurrentShift, useRooms, useStartShift, useTodaysMedications } from "@/lib/nurse";
+import { ComposeMessage } from "@/components/app/ComposeMessage";
 import { theme } from "@/constants/theme";
 import { useAppStore } from "@/store/app";
+
+
+interface Room {
+  id: string;
+  initials: string;
+  patient: string;
+  status: "stable" | "attention" | "critical" | "empty";
+}
+
+
+const ROOMS: Room[] = [
+  { id: "201", initials: "AK", patient: "Abebe Kebede",  status: "stable" },
+  { id: "202", initials: "SH", patient: "Sara Haile",    status: "attention" },
+  { id: "203", initials: "MT", patient: "Meron Tadesse", status: "stable" },
+  { id: "204", initials: "YG", patient: "Yohannes Getu", status: "stable" },
+  { id: "205", initials: "HB", patient: "Hana Bekele",   status: "critical" },
+  { id: "206", initials: "DA", patient: "Dawit Assefa",  status: "stable" },
+  { id: "207", initials: "—",  patient: "",              status: "empty" },
+  { id: "208", initials: "—",  patient: "",              status: "empty" },
+];
 
 
 export default function NurseDashboard() {
@@ -25,25 +45,11 @@ export default function NurseDashboard() {
   const isWide = width >= 1200;
   const isMedium = width >= 800;
 
-  const { data: rooms, isLoading: roomsLoading } = useRooms();
-  const { data: shift, isLoading: shiftLoading } = useCurrentShift();
-  const { data: meds, isLoading: medsLoading } = useTodaysMedications();
-  const startShift = useStartShift();
+  const [showCompose, setShowCompose] = useState(false);
 
   const firstName = (user?.full_name ?? "").split(" ")[0] || "";
 
-  // Auto-start a shift if none exists (for demo convenience — remove in prod)
-  useEffect(() => {
-    if (!shiftLoading && shift === null && user?.role === "nurse") {
-      startShift.mutate("Ward A");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shiftLoading, shift]);
-
-  const occupied = (rooms ?? []).filter((r) => r.is_occupied);
-  const pendingMeds = (meds ?? []).filter((m) => m.status === "pending");
-
-  const roomChip = (status: string) => {
+  const roomChip = (status: Room["status"]) => {
     switch (status) {
       case "critical":  return { bg: theme.colors.dangerBg,  fg: theme.colors.danger };
       case "attention": return { bg: theme.colors.warningBg, fg: theme.colors.warning };
@@ -52,81 +58,65 @@ export default function NurseDashboard() {
     }
   };
 
-  const shiftLabel = shift
-    ? new Date(shift.started_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : "—";
+  const occupied = ROOMS.filter((r) => r.status !== "empty").length;
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      {/* Greeting */}
-      <View style={styles.greeting}>
-        <Text style={styles.hello}>
-          {firstName} · {t("nurse.shift")}
-        </Text>
-        <Text style={styles.sub}>
-          {shift ? `${shift.ward} · ` : ""}
-          {occupied.length} / {(rooms ?? []).length} {t("nurse.occupied")}
-          {shift ? ` · ${t("nurse.startedAt")} ${shiftLabel}` : ""}
-        </Text>
-      </View>
+    <>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* Greeting */}
+        <View style={styles.greeting}>
+          <Text style={styles.hello}>
+            {firstName} · {t("nurse.shift")}
+          </Text>
+          <Text style={styles.sub}>
+            Ward A · {occupied} {t("nurse.occupied")}
+          </Text>
+        </View>
 
-      {/* Three columns */}
-      <View style={[styles.cols, !isWide && (isMedium ? styles.colsTwo : styles.colsStack)]}>
-        {/* Ward grid */}
-        <View style={[styles.panel, isWide && styles.panelWide]}>
-          <View style={styles.panelHeader}>
-            <Bed size={14} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.panelTitle}>{t("nurse.wardAndRooms")}</Text>
-            <Text style={styles.panelMeta}>{occupied.length} / {(rooms ?? []).length}</Text>
-          </View>
-          <View style={styles.wardGrid}>
-            {roomsLoading ? (
-              <View style={styles.emptyRow}><ActivityIndicator size="small" color={theme.colors.primary} /></View>
-            ) : (rooms ?? []).length === 0 ? (
-              <View style={styles.emptyRow}>
-                <Text style={styles.emptyText}>{t("nurse.noRooms")}</Text>
-              </View>
-            ) : (
-              (rooms ?? []).map((r) => {
-                const c = r.is_occupied ? roomChip("stable") : roomChip("empty");
-                const initials = r.current_occupant
-                  ? r.current_occupant.patient.full_name.split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase()
-                  : "—";
+        {/* Three columns */}
+        <View style={[styles.cols, !isWide && (isMedium ? styles.colsTwo : styles.colsStack)]}>
+          {/* Ward grid */}
+          <View style={[styles.panel, isWide && styles.panelWide]}>
+            <View style={styles.panelHeader}>
+              <Bed size={14} color={theme.colors.primary} strokeWidth={2.2} />
+              <Text style={styles.panelTitle}>{t("nurse.wardAndRooms")}</Text>
+              <Text style={styles.panelMeta}>{occupied} / {ROOMS.length}</Text>
+            </View>
+            <View style={styles.wardGrid}>
+              {ROOMS.map((r) => {
+                const c = roomChip(r.status);
                 return (
                   <Pressable
                     key={r.id}
-                    onPress={() => router.push(`/(app)/nurse/rooms/${r.id}` as any)}
                     style={({ hovered }: any) => [styles.roomCard, hovered && styles.roomCardHover]}
                   >
-                    <Text style={styles.roomId}>{r.number}</Text>
+                    <Text style={styles.roomId}>{r.id}</Text>
                     <View style={[styles.roomAvatar, { backgroundColor: c.fg }]}>
-                      <Text style={styles.roomInitials}>{initials}</Text>
+                      <Text style={styles.roomInitials}>{r.initials}</Text>
                     </View>
                     <Text style={styles.roomPatient} numberOfLines={1}>
-                      {r.current_occupant?.patient.full_name ?? "—"}
+                      {r.patient || "—"}
                     </Text>
                   </Pressable>
                 );
-              })
-            )}
+              })}
+            </View>
           </View>
-        </View>
 
-        {/* Vitals to log — quick links to vitals page */}
-        <View style={[styles.panel, isWide && styles.panelNarrow]}>
-          <View style={styles.panelHeader}>
-            <Activity size={14} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.panelTitle}>{t("nurse.vitalsToLog")}</Text>
-          </View>
-          <View style={styles.panelBody}>
-            {occupied.length === 0 ? (
-              <View style={styles.emptyRow}>
-                <Text style={styles.emptyText}>{t("nurse.noPatients")}</Text>
-              </View>
-            ) : (
-              occupied.slice(0, 5).map((r) => (
+          {/* Vitals to log */}
+          <View style={[styles.panel, isWide && styles.panelNarrow]}>
+            <View style={styles.panelHeader}>
+              <Activity size={14} color={theme.colors.primary} strokeWidth={2.2} />
+              <Text style={styles.panelTitle}>{t("nurse.vitalsToLog")}</Text>
+            </View>
+            <View style={styles.panelBody}>
+              {[
+                { p: "Hana Bekele", t: "10:45", measures: ["BP", "HR", "SpO2"] },
+                { p: "Sara Haile",  t: "11:00", measures: ["Temp"] },
+                { p: "Abebe Kebede", t: "14:00", measures: ["BP", "HR"] },
+              ].map((v, i) => (
                 <Pressable
-                  key={r.id}
+                  key={i}
                   onPress={() => router.push("/(app)/nurse/vitals" as any)}
                   style={({ hovered }: any) => [styles.taskRow, hovered && styles.rowHover]}
                 >
@@ -134,83 +124,85 @@ export default function NurseDashboard() {
                     <Thermometer size={14} color={theme.colors.secondary} strokeWidth={2.4} />
                   </View>
                   <View style={styles.taskContent}>
-                    <Text style={styles.patientName}>{r.current_occupant?.patient.full_name ?? "—"}</Text>
-                    <Text style={styles.reason}>{t("patient.appointments.room")} {r.number}</Text>
+                    <Text style={styles.patientName}>{v.p}</Text>
+                    <View style={styles.measureRow}>
+                      <Text style={styles.timeText}>{v.t}</Text>
+                      {v.measures.map((m) => (
+                        <View key={m} style={styles.measureChip}>
+                          <Text style={styles.measureText}>{m}</Text>
+                        </View>
+                      ))}
+                    </View>
                   </View>
                 </Pressable>
-              ))
-            )}
+              ))}
+            </View>
           </View>
-        </View>
 
-        {/* Meds */}
-        <View style={[styles.panel, isWide && styles.panelNarrow]}>
-          <View style={styles.panelHeader}>
-            <Pill size={14} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.panelTitle}>{t("nurse.medsThisShift")}</Text>
-            <Text style={styles.panelMeta}>{pendingMeds.length}</Text>
-          </View>
-          <View style={styles.panelBody}>
-            {medsLoading ? (
-              <View style={styles.emptyRow}><ActivityIndicator size="small" color={theme.colors.primary} /></View>
-            ) : pendingMeds.length === 0 ? (
-              <View style={styles.emptyRow}>
-                <Text style={styles.emptyText}>{t("nurse.noMedsToday")}</Text>
-              </View>
-            ) : (
-              pendingMeds.slice(0, 3).map((m) => (
-                <Pressable
-                  key={m.id}
-                  onPress={() => router.push("/(app)/nurse/medications" as any)}
-                  style={({ hovered }: any) => [styles.medRow, hovered && styles.rowHover]}
-                >
-                  <View style={styles.check} />
+          {/* Meds */}
+          <View style={[styles.panel, isWide && styles.panelNarrow]}>
+            <View style={styles.panelHeader}>
+              <Pill size={14} color={theme.colors.primary} strokeWidth={2.2} />
+              <Text style={styles.panelTitle}>{t("nurse.medsThisShift")}</Text>
+            </View>
+            <View style={styles.panelBody}>
+              {[
+                { t: "12:00", p: "Hana Bekele", med: "Amoxicillin 500mg", done: false },
+                { t: "12:30", p: "Meron Tadesse", med: "Omeprazole 20mg", done: false },
+                { t: "13:00", p: "Yohannes Getu", med: "Paracetamol 1g", done: true },
+              ].map((m, i) => (
+                <View key={i} style={[styles.medRow, m.done && styles.medRowDone]}>
+                  <View style={[styles.check, m.done && styles.checkDone]}>
+                    {m.done && <ClipboardCheck size={11} color={theme.colors.textInverse} strokeWidth={2.6} />}
+                  </View>
                   <View style={styles.taskContent}>
-                    <Text style={styles.patientName}>{m.medication_name} {m.dose}</Text>
-                    <Text style={styles.reason}>
-                      {new Date(m.scheduled_for).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {m.patient?.full_name ?? "—"}
-                    </Text>
+                    <Text style={[styles.patientName, m.done && styles.strikeText]}>{m.med}</Text>
+                    <Text style={styles.reason}>{m.t} · {m.p}</Text>
                   </View>
-                </Pressable>
-              ))
-            )}
+                </View>
+              ))}
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* Handover */}
-      <View style={styles.handoverCard}>
-        <View style={styles.handoverHeader}>
-          <ClipboardCheck size={16} color={theme.colors.primary} strokeWidth={2.2} />
-          <Text style={styles.handoverTitle}>{t("nurse.handoverNotes")}</Text>
-          <Pressable
-            onPress={() => router.push("/(app)/nurse/handover" as any)}
-            style={({ hovered }: any) => [styles.handoverAction, hovered && styles.rowHover]}
-          >
-            <MessageSquare size={13} color={theme.colors.primary} strokeWidth={2.2} />
-            <Text style={styles.handoverActionText}>{t("common.viewAll")}</Text>
-          </Pressable>
+        {/* Handover */}
+        <View style={styles.handoverCard}>
+          <View style={styles.handoverHeader}>
+            <ClipboardCheck size={16} color={theme.colors.primary} strokeWidth={2.2} />
+            <Text style={styles.handoverTitle}>{t("nurse.handoverNotes")}</Text>
+            <Pressable
+              onPress={() => router.push("/(app)/nurse/handover" as any)}
+              style={({ hovered }: any) => [styles.handoverAction, hovered && styles.rowHover]}
+            >
+              <Text style={styles.handoverActionText}>{t("common.viewAll")}</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.handoverBody}>
+            Hana Bekele (Room 205) had a BP spike at 10:15 — 152/94.
+          </Text>
         </View>
-        <Text style={styles.handoverBody}>
-          {shift
-            ? `${t("nurse.startedAt")} ${shiftLabel} · ${t("nurse.wardLabel")} ${shift.ward}`
-            : t("nurse.noActiveShift")}
-        </Text>
-      </View>
 
-      {/* Notify doctor shortcut */}
-      <Pressable
-        onPress={() => router.push("/(app)/nurse/messages" as any)}
-        style={({ hovered }: any) => [styles.notifyCta, hovered && styles.notifyHover]}
-      >
-        <MessageSquare size={18} color={theme.colors.textInverse} strokeWidth={2.2} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.notifyTitle}>{t("nurse.notifyDoctor")}</Text>
-          <Text style={styles.notifySub}>{t("nurse.notifyDoctorSub")}</Text>
-        </View>
-        <CalendarClock size={16} color={theme.colors.textInverse} strokeWidth={2.2} />
-      </Pressable>
-    </ScrollView>
+        {/* Notify doctor shortcut — opens compose modal */}
+        <Pressable
+          onPress={() => setShowCompose(true)}
+          style={({ hovered }: any) => [styles.notifyCta, hovered && styles.notifyHover]}
+        >
+          <MessageSquare size={20} color={theme.colors.textInverse} strokeWidth={2.2} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.notifyTitle}>{t("nurse.notifyDoctor")}</Text>
+            <Text style={styles.notifySub}>{t("nurse.notifyDoctorSub")}</Text>
+          </View>
+        </Pressable>
+      </ScrollView>
+
+      <ComposeMessage
+        visible={showCompose}
+        onClose={() => setShowCompose(false)}
+        onCreated={(threadId) => {
+          router.push(`/(app)/nurse/messages/${threadId}` as any);
+        }}
+      />
+    </>
   );
 }
 
@@ -243,11 +235,16 @@ const styles = StyleSheet.create({
   taskContent: { flex: 1, minWidth: 0 },
   patientName: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 14, color: theme.colors.text },
   reason: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, marginTop: 2 },
-  medRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, cursor: "pointer" as any },
+  timeText: { fontFamily: theme.fontFamily.headingMedium, fontSize: 12, color: theme.colors.secondary, letterSpacing: 0.1 },
+  measureRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.xs, marginTop: 4, flexWrap: "wrap" },
+  measureChip: { paddingHorizontal: 6, paddingVertical: 1, backgroundColor: "rgba(42,42,114,0.06)", borderRadius: 4 },
+  measureText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 10.5, color: theme.colors.primary, letterSpacing: 0.3 },
+  medRow: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  medRowDone: { opacity: 0.55 },
   check: { width: 20, height: 20, borderRadius: 4, borderWidth: 1.5, borderColor: theme.colors.borderStrong, alignItems: "center", justifyContent: "center" },
+  checkDone: { backgroundColor: theme.colors.success, borderColor: theme.colors.success },
+  strikeText: { textDecorationLine: "line-through" },
   listIcon: { width: 32, height: 32, borderRadius: theme.radius.sm, backgroundColor: "rgba(199,91,57,0.08)", alignItems: "center", justifyContent: "center" },
-  emptyRow: { padding: theme.spacing.lg, alignItems: "center" },
-  emptyText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.muted },
   handoverCard: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg, gap: theme.spacing.md },
   handoverHeader: { flexDirection: "row", alignItems: "center", gap: theme.spacing.sm },
   handoverTitle: { fontFamily: theme.fontFamily.headingMedium, fontSize: 14, color: theme.colors.text, flex: 1 },

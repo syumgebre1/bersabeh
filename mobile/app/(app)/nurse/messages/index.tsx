@@ -1,15 +1,17 @@
 /**
- * Nurse: Message threads list — trilingual.
+ * Nurse: Message threads list — trilingual + new message button.
  */
 
-import { ArrowLeft, ArrowRight, MessageSquare } from "lucide-react-native";
+import { ArrowLeft, ArrowRight, MessageSquare, Plus } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import {
   ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View,
 } from "react-native";
 
 import { Button } from "@/components/ui/Button";
+import { ComposeMessage } from "@/components/app/ComposeMessage";
 import { useThreads } from "@/lib/admin";
 import { theme } from "@/constants/theme";
 
@@ -18,66 +20,89 @@ export default function NurseMessages() {
   const { t } = useTranslation();
   const router = useRouter();
   const { data: threads, isLoading, isError, refetch } = useThreads();
+  const [showCompose, setShowCompose] = useState(false);
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      <View style={styles.topBar}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <ArrowLeft size={16} color={theme.colors.text} strokeWidth={2.2} />
-          <Text style={styles.backText}>{t("nurse.roleName")}</Text>
-        </Pressable>
-        <View style={styles.topBarMeta}>
-          <Text style={styles.eyebrow}>{t("nurse.nav.messages")}</Text>
-          <Text style={styles.title}>{t("nurse.nav.messages")}</Text>
+    <>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <View style={styles.topBar}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <ArrowLeft size={16} color={theme.colors.text} strokeWidth={2.2} />
+            <Text style={styles.backText}>{t("nurse.roleName")}</Text>
+          </Pressable>
+          <View style={styles.topBarMeta}>
+            <Text style={styles.eyebrow}>{t("nurse.nav.messages")}</Text>
+            <Text style={styles.title}>{t("nurse.nav.messages")}</Text>
+          </View>
+          <Pressable
+            onPress={() => setShowCompose(true)}
+            style={({ hovered }: any) => [styles.newBtn, hovered && styles.newBtnHover]}
+          >
+            <Plus size={14} color={theme.colors.textInverse} strokeWidth={2.6} />
+            <Text style={styles.newBtnText}>{t("messages.newMessage")}</Text>
+          </Pressable>
         </View>
-        <Text style={styles.count}>{threads?.length ?? 0}</Text>
-      </View>
 
-      {isLoading ? (
-        <View style={styles.center}><ActivityIndicator size="small" color={theme.colors.primary} /></View>
-      ) : isError ? (
-        <View style={styles.center}>
-          <Text style={styles.errorText}>{t("common.error")}</Text>
-          <Button label={t("common.retry")} variant="outline" size="sm" onPress={() => refetch()} />
-        </View>
-      ) : !threads || threads.length === 0 ? (
-        <View style={styles.center}>
-          <MessageSquare size={32} color={theme.colors.muted} strokeWidth={1.6} />
-          <Text style={styles.mutedText}>{t("patient.messages.noThreads")}</Text>
-        </View>
-      ) : (
-        <View style={styles.list}>
-          {threads.map((th, idx) => {
-            const others = (th.participants ?? []).filter((p) => p.role !== "nurse");
-            const otherName = others[0]?.full_name ?? "—";
-            const otherRole = others[0]?.role ?? "";
-            return (
-              <Pressable
-                key={th.id}
-                onPress={() => router.push(`/(app)/nurse/messages/${th.id}` as any)}
-                style={({ hovered }: any) => [
-                  styles.row, idx < threads.length - 1 && styles.rowBorder, hovered && styles.rowHover,
-                ]}
-              >
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {otherName.replace(/^Dr\.?\s+/i, "").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase()}
-                  </Text>
-                </View>
-                <View style={styles.rowContent}>
-                  <Text style={styles.rowTitle}>{otherName}</Text>
-                  <Text style={styles.rowSub} numberOfLines={1}>
-                    {otherRole ? `[${otherRole}] ` : ""}
-                    {th.subject ?? t("patient.messages.caseDiscussion")}
-                  </Text>
-                </View>
-                <ArrowRight size={14} color={theme.colors.muted} strokeWidth={2} />
-              </Pressable>
-            );
-          })}
-        </View>
-      )}
-    </ScrollView>
+        {isLoading ? (
+          <View style={styles.center}><ActivityIndicator size="small" color={theme.colors.primary} /></View>
+        ) : isError ? (
+          <View style={styles.center}>
+            <Text style={styles.errorText}>{t("common.error")}</Text>
+            <Button label={t("common.retry")} variant="outline" size="sm" onPress={() => refetch()} />
+          </View>
+        ) : !threads || threads.length === 0 ? (
+          <View style={styles.center}>
+            <MessageSquare size={32} color={theme.colors.muted} strokeWidth={1.6} />
+            <Text style={styles.mutedText}>{t("patient.messages.noThreads")}</Text>
+            <Button
+              label={t("messages.newMessage")}
+              variant="primary"
+              size="md"
+              onPress={() => setShowCompose(true)}
+            />
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {threads.map((th, idx) => {
+              const others = (th.participants ?? []).filter((p) => p.role !== "nurse");
+              const otherName = others[0]?.full_name ?? "—";
+              const otherRole = others[0]?.role ?? "";
+              return (
+                <Pressable
+                  key={th.id}
+                  onPress={() => router.push(`/(app)/nurse/messages/${th.id}` as any)}
+                  style={({ hovered }: any) => [
+                    styles.row, idx < threads.length - 1 && styles.rowBorder, hovered && styles.rowHover,
+                  ]}
+                >
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                      {otherName.replace(/^Dr\.?\s+/i, "").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.rowContent}>
+                    <Text style={styles.rowTitle}>{otherName}</Text>
+                    <Text style={styles.rowSub} numberOfLines={1}>
+                      {otherRole ? `[${otherRole}] ` : ""}
+                      {th.subject ?? t("patient.messages.caseDiscussion")}
+                    </Text>
+                  </View>
+                  <ArrowRight size={14} color={theme.colors.muted} strokeWidth={2} />
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+      </ScrollView>
+
+      <ComposeMessage
+        visible={showCompose}
+        onClose={() => setShowCompose(false)}
+        onCreated={(threadId) => {
+          router.push(`/(app)/nurse/messages/${threadId}` as any);
+        }}
+      />
+    </>
   );
 }
 
@@ -91,7 +116,9 @@ const styles = StyleSheet.create({
   topBarMeta: { flex: 1, minWidth: 200 },
   eyebrow: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: theme.colors.secondary },
   title: { fontFamily: theme.fontFamily.heading, fontSize: 28, letterSpacing: -0.5, color: theme.colors.text, marginTop: 2 },
-  count: { fontFamily: theme.fontFamily.body, fontSize: 13, color: theme.colors.muted },
+  newBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.md, backgroundColor: theme.colors.primary, cursor: "pointer" as any },
+  newBtnHover: { opacity: 0.92 },
+  newBtnText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 13, color: theme.colors.textInverse, letterSpacing: 0.2 },
   center: { alignItems: "center", justifyContent: "center", paddingVertical: theme.spacing.huge, gap: theme.spacing.md },
   mutedText: { fontFamily: theme.fontFamily.body, fontSize: 14, color: theme.colors.muted },
   errorText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.danger },

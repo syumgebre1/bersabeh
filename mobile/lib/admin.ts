@@ -635,3 +635,51 @@ export function usePatients(search?: string) {
     queryFn: () => apiFetch<PatientBrief[]>(`/api/v1/users/patients${qs}`),
   });
 }
+
+
+// ============================================================
+// Threads — create + send message
+// ============================================================
+
+export interface ThreadCreatePayload {
+  participant_ids: string[];
+  kind: string;
+  subject?: string | null;
+  patient_id?: string | null;
+}
+
+export function useCreateThread() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: ThreadCreatePayload) =>
+      apiFetch<ThreadRead>("/api/v1/threads", {
+        method: "POST",
+        body: JSON.stringify({
+          participant_ids: payload.participant_ids,
+          kind: payload.kind,
+          subject: payload.subject ?? null,
+          patient_id: payload.patient_id ?? null,
+        }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["threads"] });
+    },
+  });
+}
+
+export function useSendMessage(threadId: string | null | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: string) =>
+      apiFetch(`/api/v1/threads/${threadId}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ body }),
+      }),
+    onSuccess: () => {
+      if (threadId) {
+        qc.invalidateQueries({ queryKey: ["thread-messages", threadId] });
+        qc.invalidateQueries({ queryKey: ["threads"] });
+      }
+    },
+  });
+}

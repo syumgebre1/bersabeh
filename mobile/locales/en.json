@@ -733,5 +733,18 @@
     "unassigned": "Unassigned",
     "signNotes": "Handover notes (optional)",
     "confirmSign": "Confirm and sign"
+  },
+  "messages": {
+    "composeTitle": "New message",
+    "newMessage": "+ New message",
+    "recipient": "Recipient",
+    "noRecipients": "No recipients available",
+    "subjectOptional": "Subject (optional)",
+    "subjectPlaceholder": "What is this about?",
+    "message": "Message",
+    "messagePlaceholder": "Write your message…",
+    "send": "Send",
+    "patient": "Patient",
+    "noPatients": "No patients available"
   }
 }

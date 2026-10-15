@@ -737,5 +737,18 @@
     "unassigned": "ያልተመደበ",
     "signNotes": "የርክክብ ማስታወሻዎች (አማራጭ)",
     "confirmSign": "አረጋግጥ እና ፈርም"
+  },
+  "messages": {
+    "composeTitle": "አዲስ መልእክት",
+    "newMessage": "+ አዲስ መልእክት",
+    "recipient": "ተቀባይ",
+    "noRecipients": "ምንም ተቀባይ አልተገኘም",
+    "subjectOptional": "ርዕስ (አማራጭ)",
+    "subjectPlaceholder": "ስለ ምን ነው?",
+    "message": "መልእክት",
+    "messagePlaceholder": "መልእክትዎን ይጻፉ…",
+    "send": "ላክ",
+    "patient": "ታካሚ",
+    "noPatients": "ምንም ታካሚ አልተገኘም"
   }
 }

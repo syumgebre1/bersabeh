@@ -737,5 +737,18 @@
     "unassigned": "ዘይተመደበ",
     "signNotes": "መዘኻኸሪ ርክክብ (ብፍቓድ)",
     "confirmSign": "ኣረጋግጽን ፈርምን"
+  },
+  "messages": {
+    "composeTitle": "ሓድሽ መልእኽቲ",
+    "newMessage": "+ ሓድሽ መልእኽቲ",
+    "recipient": "ተቐባሊ",
+    "noRecipients": "ተቐባሊ ኣይተረኽበን",
+    "subjectOptional": "ኣርእስቲ (ኣማራጺ)",
+    "subjectPlaceholder": "ብዛዕባ እንታይ እዩ?",
+    "message": "መልእኽቲ",
+    "messagePlaceholder": "መልእኽትኹም ጽሓፉ…",
+    "send": "ስደድ",
+    "patient": "ሕሙም",
+    "noPatients": "ዝርከብ ሕሙም የለን"
   }
 }
