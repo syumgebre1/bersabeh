@@ -21,6 +21,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import CurrentUser
 from app.db.session import get_db
+from app.models.medication import MedicationAdministration
+from datetime import datetime, timedelta, timezone
+
 from app.models.encounter import Encounter
 from app.models.prescription import (
     Prescription,
@@ -306,3 +309,67 @@ async def download_prescription_pdf(
             "Content-Disposition": f'inline; filename="prescription-{p.id}.pdf"',
         },
     )
+
+
+
+def _parse_frequency_per_day(freq: str) -> int:
+    """Map common frequency strings to doses-per-day."""
+    if not freq:
+        return 1
+    f = freq.lower().strip()
+    table = {
+        "1x daily": 1, "once daily": 1, "qd": 1,
+        "2x daily": 2, "twice daily": 2, "bid": 2,
+        "3x daily": 3, "three times daily": 3, "tid": 3,
+        "4x daily": 4, "four times daily": 4, "qid": 4,
+        "as needed": 0, "prn": 0,
+    }
+    for k, v in table.items():
+        if k in f:
+            return v
+    # Numeric fallback e.g. "3 times"
+    import re
+    m = re.search(r"(\d+)", f)
+    if m:
+        return int(m.group(1))
+    return 1
+
+
+async def _spawn_administrations(
+    db: AsyncSession,
+    prescription_id,
+    patient_id,
+    items,
+):
+    """Create MedicationAdministration rows for every scheduled dose."""
+    now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+    rows = []
+    for item in items:
+        per_day = _parse_frequency_per_day(item.frequency)
+        days = item.duration_days or 1
+        if per_day <= 0:
+            # as-needed — one row, no schedule
+            rows.append(MedicationAdministration(
+                prescription_item_id=item.id,
+                patient_id=patient_id,
+                scheduled_at=now,
+                status="pending",
+                notes="PRN — administer as needed",
+            ))
+            continue
+        interval_hours = 24 // per_day
+        for d in range(days):
+            for dose_i in range(per_day):
+                scheduled = now + timedelta(
+                    days=d, hours=dose_i * interval_hours
+                )
+                rows.append(MedicationAdministration(
+                    prescription_item_id=item.id,
+                    patient_id=patient_id,
+                    scheduled_at=scheduled,
+                    status="pending",
+                ))
+    if rows:
+        db.add_all(rows)
+        await db.commit()
+

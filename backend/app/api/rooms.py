@@ -1,15 +1,6 @@
+from typing import Annotated
 """
-Room + bed assignment endpoints.
-
-Role permissions:
-                            Patient  Doctor  Nurse  Reception  Lab  Admin
-  GET    /rooms               ❌      ✅      ✅      ✅        ❌   ✅
-  GET    /rooms/{id}          ❌      ✅      ✅      ✅        ❌   ✅
-  GET    /rooms/available     ❌      ❌      ✅      ✅        ❌   ✅
-  POST   /rooms               ❌      ❌      ❌      ❌        ❌   ✅
-  PATCH  /rooms/{id}          ❌      ❌      ❌      ❌        ❌   ✅
-  POST   /rooms/{id}/assign   ❌      ❌      ✅      ✅        ❌   ✅
-  POST   /rooms/{id}/discharge ❌     ❌      ✅      ✅        ❌   ✅
+Rooms + bed assignments.
 """
 
 import uuid
@@ -18,297 +9,225 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.core.deps import CurrentUser
+from app.core.deps import CurrentUser, require_roles
 from app.db.session import get_db
-from app.models.room import BedAssignment, Room, RoomType
+from app.models.bed_assignment import BedAssignment
+from app.models.room import Room
 from app.models.user import User, UserRole
 from app.schemas.room import (
-    BedAssignmentCreate,
-    BedAssignmentDischarge,
-    BedAssignmentRead,
-    CurrentOccupant,
+    AssignPatientIn,
+    DischargeIn,
     RoomCreate,
-    RoomRead,
+    RoomOut,
     RoomUpdate,
 )
-from app.schemas.user import UserPublic
-
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
-
-# ============================================================
-# Helpers
-# ============================================================
-def _can_view(user: User) -> bool:
-    return user.role in (
-        UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTION,
-        UserRole.ADMIN, UserRole.SUPER_ADMIN,
-    )
+STAFF = (
+    UserRole.SUPER_ADMIN,
+    UserRole.ADMIN,
+    UserRole.DOCTOR,
+    UserRole.NURSE,
+    UserRole.RECEPTION,
+)
 
 
-def _can_manage_rooms(user: User) -> bool:
-    return user.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
-
-
-def _can_assign(user: User) -> bool:
-    return user.role in (
-        UserRole.NURSE, UserRole.RECEPTION,
-        UserRole.ADMIN, UserRole.SUPER_ADMIN,
-    )
-
-
-async def _get_active_assignment(
-    db: AsyncSession, room_id: uuid.UUID,
-) -> BedAssignment | None:
-    result = await db.execute(
-        select(BedAssignment)
-        .where(BedAssignment.room_id == room_id)
-        .where(BedAssignment.discharged_at.is_(None))
-    )
-    return result.scalar_one_or_none()
-
-
-def _build_room_read(room: Room, assignment: BedAssignment | None) -> RoomRead:
-    """Compose a RoomRead with computed occupancy."""
-    payload = RoomRead.model_validate(room)
-    if assignment is not None:
-        payload.is_occupied = True
-        payload.current_occupant = CurrentOccupant(
-            assignment_id=assignment.id,
-            patient=UserPublic.model_validate(assignment.patient),
-            assigned_by=UserPublic.model_validate(assignment.assigned_by),
-            admitted_at=assignment.admitted_at,
-            notes=assignment.notes,
-        )
-    else:
-        payload.is_occupied = False
-        payload.current_occupant = None
-    return payload
-
-
-async def _get_room_or_404(db: AsyncSession, room_id: uuid.UUID) -> Room:
-    result = await db.execute(select(Room).where(Room.id == room_id))
-    room = result.scalar_one_or_none()
-    if room is None:
-        raise HTTPException(status_code=404, detail="Room not found")
-    return room
-
-
-# ============================================================
-# GET /rooms — list all rooms with occupancy
-# ============================================================
-@router.get("", response_model=list[RoomRead], summary="List all rooms")
+@router.get("", response_model=list[RoomOut])
 async def list_rooms(
-    current_user: CurrentUser,
+    ward: str | None = None,
     db: AsyncSession = Depends(get_db),
-) -> list[RoomRead]:
-    if not _can_view(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed to view rooms")
+    _: Annotated[User, Depends(require_roles(*STAFF))] = None,
+):
+    stmt = select(Room).where(Room.is_active.is_(True)).order_by(Room.number)
+    if ward:
+        stmt = stmt.where(Room.ward == ward)
+    rooms = (await db.execute(stmt)).scalars().all()
 
-    rooms_res = await db.execute(select(Room).order_by(Room.ward, Room.number))
-    rooms = rooms_res.scalars().all()
+    # Load active assignments for all rooms
+    room_ids = [r.id for r in rooms]
+    active_map: dict[uuid.UUID, BedAssignment] = {}
+    if room_ids:
+        a_stmt = (
+            select(BedAssignment)
+            .where(
+                BedAssignment.room_id.in_(room_ids),
+                BedAssignment.discharged_at.is_(None),
+            )
+            .options(selectinload(BedAssignment.patient))
+        )
+        for a in (await db.execute(a_stmt)).scalars().all():
+            active_map[a.room_id] = a
 
-    # Load active assignments in one query
-    assign_res = await db.execute(
-        select(BedAssignment).where(BedAssignment.discharged_at.is_(None))
-    )
-    active_by_room: dict[uuid.UUID, BedAssignment] = {
-        a.room_id: a for a in assign_res.scalars().all()
-    }
-
-    return [_build_room_read(r, active_by_room.get(r.id)) for r in rooms]
-
-
-# ============================================================
-# GET /rooms/available — empty rooms
-# ============================================================
-@router.get("/available", response_model=list[RoomRead], summary="List available rooms")
-async def list_available_rooms(
-    current_user: CurrentUser,
-    db: AsyncSession = Depends(get_db),
-) -> list[RoomRead]:
-    if not _can_assign(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed")
-
-    # Rooms with no active assignment
-    active_res = await db.execute(
-        select(BedAssignment.room_id).where(BedAssignment.discharged_at.is_(None))
-    )
-    occupied_ids = {row[0] for row in active_res.all()}
-
-    rooms_res = await db.execute(
-        select(Room)
-        .where(Room.is_active.is_(True))
-        .order_by(Room.ward, Room.number)
-    )
-    rooms = [r for r in rooms_res.scalars().all() if r.id not in occupied_ids]
-
-    return [_build_room_read(r, None) for r in rooms]
+    out: list[RoomOut] = []
+    for r in rooms:
+        assignment = active_map.get(r.id)
+        room_out = RoomOut.model_validate(r)
+        if assignment:
+            room_out.current_patient = assignment.patient
+            room_out.current_assignment_id = assignment.id
+            room_out.occupied = 1
+        out.append(room_out)
+    return out
 
 
-# ============================================================
-# GET /rooms/{id} — single room
-# ============================================================
-@router.get("/{room_id}", response_model=RoomRead, summary="Get one room")
+@router.get("/{room_id}", response_model=RoomOut)
 async def get_room(
     room_id: uuid.UUID,
-    current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
-) -> RoomRead:
-    if not _can_view(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed")
+    _: Annotated[User, Depends(require_roles(*STAFF))] = None,
+):
+    room = (await db.execute(select(Room).where(Room.id == room_id))).scalar_one_or_none()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
 
-    room = await _get_room_or_404(db, room_id)
-    assignment = await _get_active_assignment(db, room_id)
-    return _build_room_read(room, assignment)
+    a_stmt = (
+        select(BedAssignment)
+        .where(
+            BedAssignment.room_id == room_id,
+            BedAssignment.discharged_at.is_(None),
+        )
+        .options(selectinload(BedAssignment.patient))
+    )
+    assignment = (await db.execute(a_stmt)).scalar_one_or_none()
+
+    room_out = RoomOut.model_validate(room)
+    if assignment:
+        room_out.current_patient = assignment.patient
+        room_out.current_assignment_id = assignment.id
+        room_out.occupied = 1
+    return room_out
 
 
-# ============================================================
-# POST /rooms — create room (admin)
-# ============================================================
-@router.post(
-    "",
-    response_model=RoomRead,
-    status_code=status.HTTP_201_CREATED,
-    summary="Create a room (admin)",
-)
+@router.post("", response_model=RoomOut, status_code=status.HTTP_201_CREATED)
 async def create_room(
     payload: RoomCreate,
-    current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
-) -> RoomRead:
-    if not _can_manage_rooms(current_user):
-        raise HTTPException(status_code=403, detail="Only admins can create rooms")
+    _: Annotated[User, Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN))] = None,
+):
+    exists = (
+        await db.execute(select(Room).where(Room.number == payload.number))
+    ).scalar_one_or_none()
+    if exists:
+        raise HTTPException(status_code=409, detail="Room number already exists")
 
-    # Check unique number
-    existing = await db.execute(select(Room).where(Room.number == payload.number))
-    if existing.scalar_one_or_none() is not None:
-        raise HTTPException(status_code=400, detail="Room number already exists")
-
-    room = Room(
-        number=payload.number,
-        ward=payload.ward,
-        floor=payload.floor,
-        room_type=payload.room_type,
-        capacity=payload.capacity,
-        notes=payload.notes,
-    )
+    room = Room(**payload.model_dump())
     db.add(room)
     await db.commit()
     await db.refresh(room)
-    return _build_room_read(room, None)
+    return RoomOut.model_validate(room)
 
 
-# ============================================================
-# PATCH /rooms/{id} — update room (admin)
-# ============================================================
-@router.patch(
-    "/{room_id}",
-    response_model=RoomRead,
-    summary="Update a room (admin)",
-)
+@router.patch("/{room_id}", response_model=RoomOut)
 async def update_room(
     room_id: uuid.UUID,
     payload: RoomUpdate,
-    current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
-) -> RoomRead:
-    if not _can_manage_rooms(current_user):
-        raise HTTPException(status_code=403, detail="Only admins can update rooms")
+    _: Annotated[User, Depends(require_roles(UserRole.SUPER_ADMIN, UserRole.ADMIN))] = None,
+):
+    room = (await db.execute(select(Room).where(Room.id == room_id))).scalar_one_or_none()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
 
-    room = await _get_room_or_404(db, room_id)
-    data = payload.model_dump(exclude_unset=True)
-    for k, v in data.items():
+    for k, v in payload.model_dump(exclude_unset=True).items():
         setattr(room, k, v)
-
     await db.commit()
     await db.refresh(room)
-    assignment = await _get_active_assignment(db, room_id)
-    return _build_room_read(room, assignment)
+    return RoomOut.model_validate(room)
 
 
-# ============================================================
-# POST /rooms/{id}/assign — assign patient to room
-# ============================================================
-@router.post(
-    "/{room_id}/assign",
-    response_model=BedAssignmentRead,
-    status_code=status.HTTP_201_CREATED,
-    summary="Assign a patient to a room",
-)
+@router.post("/{room_id}/assign", response_model=RoomOut)
 async def assign_patient(
     room_id: uuid.UUID,
-    payload: BedAssignmentCreate,
-    current_user: CurrentUser,
+    payload: AssignPatientIn,
     db: AsyncSession = Depends(get_db),
-) -> BedAssignmentRead:
-    if not _can_assign(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed to assign rooms")
+    current: Annotated[User, Depends(require_roles(*STAFF))] = None,
+):
+    room = (await db.execute(select(Room).where(Room.id == room_id))).scalar_one_or_none()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
 
-    room = await _get_room_or_404(db, room_id)
-    if not room.is_active:
-        raise HTTPException(status_code=400, detail="Room is inactive")
+    # Check no active assignment on this room
+    existing = (
+        await db.execute(
+            select(BedAssignment).where(
+                BedAssignment.room_id == room_id,
+                BedAssignment.discharged_at.is_(None),
+            )
+        )
+    ).scalar_one_or_none()
+    if existing:
+        raise HTTPException(status_code=409, detail="Room already occupied")
 
-    # Room must be empty
-    existing = await _get_active_assignment(db, room_id)
-    if existing is not None:
-        raise HTTPException(status_code=400, detail="Room is already occupied")
+    # Check patient not already admitted
+    patient_active = (
+        await db.execute(
+            select(BedAssignment).where(
+                BedAssignment.patient_id == payload.patient_id,
+                BedAssignment.discharged_at.is_(None),
+            )
+        )
+    ).scalar_one_or_none()
+    if patient_active:
+        raise HTTPException(status_code=409, detail="Patient already admitted")
 
-    # Patient must exist and be a patient
-    patient_res = await db.execute(select(User).where(User.id == payload.patient_id))
-    patient = patient_res.scalar_one_or_none()
-    if patient is None or patient.is_deleted or patient.role != UserRole.PATIENT:
-        raise HTTPException(status_code=400, detail="Invalid patient")
-
-    # Patient must not already be in another room
-    patient_assign_res = await db.execute(
-        select(BedAssignment)
-        .where(BedAssignment.patient_id == payload.patient_id)
-        .where(BedAssignment.discharged_at.is_(None))
-    )
-    if patient_assign_res.scalar_one_or_none() is not None:
-        raise HTTPException(status_code=400, detail="Patient is already assigned to a room")
+    # Verify patient exists
+    patient = (
+        await db.execute(select(User).where(User.id == payload.patient_id))
+    ).scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
 
     assignment = BedAssignment(
-        room_id=room_id,
         patient_id=payload.patient_id,
-        assigned_by_id=current_user.id,
-        notes=payload.notes,
+        room_id=room_id,
+        admitted_by=current.id,
+        reason=payload.reason,
+        
     )
     db.add(assignment)
     await db.commit()
-    await db.refresh(assignment)
-    return BedAssignmentRead.model_validate(assignment)
+
+    # Reload with patient
+    a_stmt = (
+        select(BedAssignment)
+        .where(BedAssignment.id == assignment.id)
+        .options(selectinload(BedAssignment.patient))
+    )
+    assignment = (await db.execute(a_stmt)).scalar_one()
+
+    room_out = RoomOut.model_validate(room)
+    room_out.current_patient = assignment.patient
+    room_out.current_assignment_id = assignment.id
+    room_out.occupied = 1
+    return room_out
 
 
-# ============================================================
-# POST /rooms/{id}/discharge
-# ============================================================
-@router.post(
-    "/{room_id}/discharge",
-    response_model=BedAssignmentRead,
-    summary="Discharge the current patient from a room",
-)
+@router.post("/{room_id}/discharge", response_model=RoomOut)
 async def discharge_patient(
     room_id: uuid.UUID,
-    payload: BedAssignmentDischarge,
-    current_user: CurrentUser,
+    payload: DischargeIn,
     db: AsyncSession = Depends(get_db),
-) -> BedAssignmentRead:
-    if not _can_assign(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed to discharge")
-
-    await _get_room_or_404(db, room_id)
-
-    assignment = await _get_active_assignment(db, room_id)
-    if assignment is None:
-        raise HTTPException(status_code=400, detail="Room is already empty")
+    _: Annotated[User, Depends(require_roles(*STAFF))] = None,
+):
+    assignment = (
+        await db.execute(
+            select(BedAssignment).where(
+                BedAssignment.room_id == room_id,
+                BedAssignment.discharged_at.is_(None),
+            )
+        )
+    ).scalar_one_or_none()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="No active assignment in this room")
 
     assignment.discharged_at = datetime.now(timezone.utc)
-    assignment.discharge_reason = payload.discharge_reason
-
+    assignment.discharged_at = datetime.now(timezone.utc)
+    if payload.notes:
+        assignment.reason = (assignment.reason or "") + f"\n[discharge] {payload.notes}"
     await db.commit()
-    await db.refresh(assignment)
-    return BedAssignmentRead.model_validate(assignment)
+
+    room = (await db.execute(select(Room).where(Room.id == room_id))).scalar_one()
+    return RoomOut.model_validate(room)

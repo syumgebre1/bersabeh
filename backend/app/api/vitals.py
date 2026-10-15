@@ -16,6 +16,7 @@ Where:
   - "all" (nurse, reception) = all vitals
 """
 
+from typing import Annotated
 import uuid
 from datetime import datetime, timezone
 
@@ -23,7 +24,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import CurrentUser
+from app.core.deps import CurrentUser, require_roles
 from app.db.session import get_db
 from app.models.encounter import Encounter
 from app.models.user import User, UserRole
@@ -32,6 +33,66 @@ from app.schemas.vital import VitalBrief, VitalCreate, VitalRead
 
 
 router = APIRouter(prefix="/vitals", tags=["vitals"])
+
+
+@router.get("/pending")
+async def pending_vitals(
+    window_hours: int = 8,
+    db: AsyncSession = Depends(get_db),
+    _: Annotated[User, Depends(require_roles(
+        UserRole.NURSE, UserRole.DOCTOR, UserRole.ADMIN, UserRole.SUPER_ADMIN
+    ))] = None,
+):
+    """
+    Patients with active bed assignments who have no vitals recorded
+    in the last `window_hours` hours.
+    """
+    from datetime import datetime, timedelta, timezone
+    from sqlalchemy import select as _select
+    from app.models.bed_assignment import BedAssignment
+    from app.models.vital import Vital
+    from app.models.user import User as _User
+
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours)
+
+    # All active inpatients
+    assignments = (
+        await db.execute(
+            _select(BedAssignment).where(BedAssignment.status == "active")
+        )
+    ).scalars().all()
+    if not assignments:
+        return []
+
+    patient_ids = [a.patient_id for a in assignments]
+
+    # Latest vital per patient
+    latest_stmt = (
+        _select(Vital.patient_id, Vital.recorded_at)
+        .where(Vital.patient_id.in_(patient_ids))
+        .order_by(Vital.patient_id, Vital.recorded_at.desc())
+    )
+    rows = (await db.execute(latest_stmt)).all()
+    latest: dict = {}
+    for pid, ts in rows:
+        if pid not in latest:
+            latest[pid] = ts
+
+    out = []
+    for a in assignments:
+        last = latest.get(a.patient_id)
+        if last is None or last < cutoff:
+            patient = (
+                await db.execute(_select(_User).where(_User.id == a.patient_id))
+            ).scalar_one_or_none()
+            out.append({
+                "patient_id": str(a.patient_id),
+                "patient_name": patient.full_name if patient else "—",
+                "room_id": str(a.room_id),
+                "last_vitals_at": last.isoformat() if last else None,
+                "due_since": cutoff.isoformat(),
+            })
+    return out
 
 
 # ============================================================

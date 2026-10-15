@@ -83,6 +83,7 @@ class Thread(Base):
         nullable=True,
     )
 
+    is_seed_data: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
     is_archived: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
 
     created_by_id: Mapped[uuid.UUID] = mapped_column(
@@ -116,7 +117,6 @@ class Thread(Base):
     )
 
     __table_args__ = (
-        Index("ix_threads_kind_updated", "kind", "updated_at"),
     )
 
     def __repr__(self) -> str:
@@ -187,13 +187,10 @@ class Message(Base):
     body: Mapped[str] = mapped_column(Text, nullable=False)
     is_system: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
 
-    client_message_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    client_message_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), index=True,
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now(),
     )
 
     thread = relationship("Thread", back_populates="messages")
@@ -207,6 +204,7 @@ class Message(Base):
 
     __table_args__ = (
         Index("ix_messages_thread_created", "thread_id", "created_at"),
+        UniqueConstraint("thread_id", "sender_id", "client_message_id", name="uq_messages_thread_sender_client_id"),
     )
 
     def __repr__(self) -> str:
@@ -229,16 +227,20 @@ class MessageAttachment(Base):
         nullable=False, index=True,
     )
 
-    file_url: Mapped[str] = mapped_column(String(500), nullable=False)
-    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    file_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    file_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    url: Mapped[str] = mapped_column(String(500), nullable=False)
+    filename: Mapped[str] = mapped_column(String(300), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    uploaded_at: Mapped[datetime] = mapped_column(
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(),
     )
 
     message = relationship("Message", back_populates="attachments")
 
     def __repr__(self) -> str:
-        return f"<MessageAttachment {self.file_name} ({self.file_type})>"
+        return f"<MessageAttachment {self.filename} ({self.content_type})>"

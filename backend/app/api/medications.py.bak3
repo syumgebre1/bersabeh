@@ -1,0 +1,154 @@
+"""
+Medication administration — nurse schedule + administer/skip.
+"""
+
+import uuid
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from app.core.deps import CurrentUser, require_roles
+from app.db.session import get_db
+from app.models.medication import MedicationAdministration
+from app.models.prescription import PrescriptionItem
+from app.models.user import User, UserRole
+from app.schemas.medication_admin import (
+    AdministerIn,
+    MedicationAdminOut,
+    SkipIn,
+)
+
+router = APIRouter(prefix="/medications", tags=["medications"])
+
+NURSE_ROLES = (UserRole.NURSE, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+
+
+def _decorate(m: MedicationAdministration) -> MedicationAdminOut:
+    out = MedicationAdminOut.model_validate(m)
+    if m.prescription_item:
+        out.medication_name = m.prescription_item.medication_name
+        out.dose = m.prescription_item.dose
+        out.instructions = m.prescription_item.instructions
+    return out
+
+
+@router.get("/schedule", response_model=list[MedicationAdminOut])
+async def get_schedule(
+    window_hours: int = 12,
+    patient_id: uuid.UUID | None = None,
+    db: AsyncSession = Depends(get_db),
+    _: CurrentUser = Depends(require_roles(*NURSE_ROLES)),
+):
+    """
+    Returns pending + recently-completed doses within the window.
+    Window is centered on now: [now - window_hours/2, now + window_hours/2].
+    """
+    now = datetime.now(timezone.utc)
+    half = timedelta(hours=window_hours / 2)
+    start = now - half
+    end = now + half
+
+    stmt = (
+        select(MedicationAdministration)
+        .where(
+            and_(
+                MedicationAdministration.scheduled_at >= start,
+                MedicationAdministration.scheduled_at <= end,
+            )
+        )
+        .options(
+            selectinload(MedicationAdministration.prescription_item),
+            selectinload(MedicationAdministration.patient),
+        )
+        .order_by(MedicationAdministration.scheduled_at)
+    )
+    if patient_id:
+        stmt = stmt.where(MedicationAdministration.patient_id == patient_id)
+
+    rows = (await db.execute(stmt)).scalars().all()
+    return [_decorate(m) for m in rows]
+
+
+@router.get("/patient/{patient_id}", response_model=list[MedicationAdminOut])
+async def get_patient_meds(
+    patient_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _: CurrentUser = Depends(require_roles(*NURSE_ROLES)),
+):
+    stmt = (
+        select(MedicationAdministration)
+        .where(MedicationAdministration.patient_id == patient_id)
+        .options(
+            selectinload(MedicationAdministration.prescription_item),
+            selectinload(MedicationAdministration.patient),
+        )
+        .order_by(MedicationAdministration.scheduled_at.desc())
+        .limit(200)
+    )
+    rows = (await db.execute(stmt)).scalars().all()
+    return [_decorate(m) for m in rows]
+
+
+@router.post("/{admin_id}/administer", response_model=MedicationAdminOut)
+async def administer(
+    admin_id: uuid.UUID,
+    payload: AdministerIn,
+    db: AsyncSession = Depends(get_db),
+    current: CurrentUser = Depends(require_roles(*NURSE_ROLES)),
+):
+    m = (
+        await db.execute(
+            select(MedicationAdministration)
+            .where(MedicationAdministration.id == admin_id)
+            .options(
+                selectinload(MedicationAdministration.prescription_item),
+                selectinload(MedicationAdministration.patient),
+            )
+        )
+    ).scalar_one_or_none()
+    if not m:
+        raise HTTPException(status_code=404, detail="Administration not found")
+    if m.status == "given":
+        raise HTTPException(status_code=409, detail="Already administered")
+
+    m.status = "given"
+    m.administered_at = datetime.now(timezone.utc)
+    m.nurse_id = current.id
+    if payload.notes:
+        m.notes = payload.notes
+
+    await db.commit()
+    await db.refresh(m)
+    return _decorate(m)
+
+
+@router.post("/{admin_id}/skip", response_model=MedicationAdminOut)
+async def skip(
+    admin_id: uuid.UUID,
+    payload: SkipIn,
+    db: AsyncSession = Depends(get_db),
+    current: CurrentUser = Depends(require_roles(*NURSE_ROLES)),
+):
+    m = (
+        await db.execute(
+            select(MedicationAdministration)
+            .where(MedicationAdministration.id == admin_id)
+            .options(
+                selectinload(MedicationAdministration.prescription_item),
+                selectinload(MedicationAdministration.patient),
+            )
+        )
+    ).scalar_one_or_none()
+    if not m:
+        raise HTTPException(status_code=404, detail="Administration not found")
+
+    m.status = "skipped"
+    m.nurse_id = current.id
+    m.notes = payload.reason
+
+    await db.commit()
+    await db.refresh(m)
+    return _decorate(m)

@@ -1,23 +1,23 @@
 """
-Medication administration endpoints.
+Medication administration — nurse schedule + administer/skip.
 
-Role permissions:
-                            Patient  Doctor  Nurse  Reception  Lab  Admin
-  GET    /medications/schedule        ❌      ✅      ✅      ❌        ❌   ✅
-  GET    /medications/today           ❌      ✅      ✅      ❌        ❌   ✅
-  GET    /medications/patient/{pid}   own     ✅      ✅      ❌        ❌   ✅
-  POST   /medications/{id}/administer ❌      ❌      ✅      ❌        ❌   ✅
-  POST   /medications/{id}/skip       ❌      ❌      ✅      ❌        ❌   ✅
+Design:
+  - `ScheduledDose` is the unit: one row per scheduled dose.
+  - Giving a dose creates a `MedicationAdministration` row AND flips
+    the dose's status to ADMINISTERED.
+  - Skipping writes a `MedicationAdministration` row with `skip_reason`
+    AND flips status to SKIPPED.
 """
 
 import uuid
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.core.deps import CurrentUser
+from app.core.deps import require_roles
 from app.db.session import get_db
 from app.models.medication import (
     DoseStatus,
@@ -25,200 +25,174 @@ from app.models.medication import (
     ScheduledDose,
 )
 from app.models.user import User, UserRole
-from app.schemas.medication import (
-    MedicationAdministerPayload,
-    MedicationAdministrationRead,
-    MedicationSkipPayload,
-    ScheduledDoseBrief,
-    ScheduledDoseRead,
+from app.schemas.medication_admin import (
+    AdministerIn,
+    ScheduledDoseOut,
+    SkipIn,
 )
-
 
 router = APIRouter(prefix="/medications", tags=["medications"])
 
-
-# ============================================================
-# Helpers
-# ============================================================
-def _can_view(user: User) -> bool:
-    return user.role in (UserRole.NURSE, UserRole.DOCTOR, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+NURSE_ROLES = (UserRole.NURSE, UserRole.ADMIN, UserRole.SUPER_ADMIN)
 
 
-def _can_administer(user: User) -> bool:
-    return user.role in (UserRole.NURSE, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+def _decorate(dose: ScheduledDose) -> ScheduledDoseOut:
+    out = ScheduledDoseOut.model_validate(dose)
+    admin = dose.administration
+    if admin:
+        out.administered_at = admin.administered_at
+        out.administered_by_id = admin.administered_by_id
+        out.skip_reason = admin.skip_reason
+        out.skip_notes = admin.skip_notes
+        out.notes = admin.notes
+    return out
 
 
-async def _get_dose_or_404(db: AsyncSession, dose_id: uuid.UUID) -> ScheduledDose:
-    result = await db.execute(select(ScheduledDose).where(ScheduledDose.id == dose_id))
-    dose = result.scalar_one_or_none()
-    if dose is None:
-        raise HTTPException(status_code=404, detail="Scheduled dose not found")
-    return dose
-
-
-# ============================================================
-# GET /medications/schedule — doses in a time window
-# ============================================================
-@router.get(
-    "/schedule",
-    response_model=list[ScheduledDoseRead],
-    summary="Doses scheduled in a time window (default: now → +8h)",
-)
+@router.get("/schedule", response_model=list[ScheduledDoseOut])
 async def get_schedule(
-    current_user: CurrentUser,
+    window_hours: int = 12,
+    patient_id: uuid.UUID | None = None,
     db: AsyncSession = Depends(get_db),
-    from_time: datetime | None = Query(None),
-    to_time: datetime | None = Query(None),
-    status_filter: DoseStatus | None = Query(None, alias="status"),
-    limit: int = Query(200, ge=1, le=500),
-) -> list[ScheduledDoseRead]:
-    if not _can_view(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed")
-
+    _: User = Depends(require_roles(*NURSE_ROLES)),
+):
+    """
+    Pending + recently-completed doses within the window:
+    [now - window_hours/2, now + window_hours/2].
+    """
     now = datetime.now(timezone.utc)
-    start = from_time or now
-    end = to_time or (now + timedelta(hours=8))
+    half = timedelta(hours=window_hours / 2)
+    start = now - half
+    end = now + half
 
     stmt = (
         select(ScheduledDose)
-        .where(ScheduledDose.scheduled_for >= start)
-        .where(ScheduledDose.scheduled_for <= end)
+        .where(
+            and_(
+                ScheduledDose.scheduled_for >= start,
+                ScheduledDose.scheduled_for <= end,
+            )
+        )
+        .options(
+            selectinload(ScheduledDose.patient),
+            selectinload(ScheduledDose.administration),
+        )
+        .order_by(ScheduledDose.scheduled_for)
     )
-    if status_filter is not None:
-        stmt = stmt.where(ScheduledDose.status == status_filter)
+    if patient_id:
+        stmt = stmt.where(ScheduledDose.patient_id == patient_id)
 
-    stmt = stmt.order_by(ScheduledDose.scheduled_for.asc()).limit(limit)
-    result = await db.execute(stmt)
-    return [ScheduledDoseRead.model_validate(d) for d in result.scalars().all()]
-
-
-# ============================================================
-# GET /medications/today — all doses for today
-# ============================================================
-@router.get(
-    "/today",
-    response_model=list[ScheduledDoseRead],
-    summary="All doses scheduled for today (UTC)",
-)
-async def get_today(
-    current_user: CurrentUser,
-    db: AsyncSession = Depends(get_db),
-    limit: int = Query(200, ge=1, le=500),
-) -> list[ScheduledDoseRead]:
-    if not _can_view(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed")
-
-    now = datetime.now(timezone.utc)
-    day_start = datetime.combine(now.date(), time.min, tzinfo=timezone.utc)
-    day_end = day_start + timedelta(days=1)
-
-    stmt = (
-        select(ScheduledDose)
-        .where(ScheduledDose.scheduled_for >= day_start)
-        .where(ScheduledDose.scheduled_for < day_end)
-        .order_by(ScheduledDose.scheduled_for.asc())
-        .limit(limit)
-    )
-    result = await db.execute(stmt)
-    return [ScheduledDoseRead.model_validate(d) for d in result.scalars().all()]
+    rows = (await db.execute(stmt)).scalars().all()
+    return [_decorate(d) for d in rows]
 
 
-# ============================================================
-# GET /medications/patient/{patient_id}
-# ============================================================
-@router.get(
-    "/patient/{patient_id}",
-    response_model=list[ScheduledDoseBrief],
-    summary="Medication history for a patient",
-)
+@router.get("/patient/{patient_id}", response_model=list[ScheduledDoseOut])
 async def get_patient_meds(
     patient_id: uuid.UUID,
-    current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
-    limit: int = Query(100, ge=1, le=500),
-) -> list[ScheduledDoseBrief]:
-    if current_user.role == UserRole.PATIENT:
-        if patient_id != current_user.id:
-            raise HTTPException(status_code=403, detail="Not your medications")
-    elif not _can_view(current_user):
-        raise HTTPException(status_code=403, detail="Not allowed")
-
+    _: User = Depends(require_roles(*NURSE_ROLES)),
+):
     stmt = (
         select(ScheduledDose)
         .where(ScheduledDose.patient_id == patient_id)
+        .options(
+            selectinload(ScheduledDose.patient),
+            selectinload(ScheduledDose.administration),
+        )
         .order_by(ScheduledDose.scheduled_for.desc())
-        .limit(limit)
+        .limit(200)
     )
-    result = await db.execute(stmt)
-    return [ScheduledDoseBrief.model_validate(d) for d in result.scalars().all()]
+    rows = (await db.execute(stmt)).scalars().all()
+    return [_decorate(d) for d in rows]
 
 
-# ============================================================
-# POST /medications/{dose_id}/administer
-# ============================================================
-@router.post(
-    "/{dose_id}/administer",
-    response_model=MedicationAdministrationRead,
-    status_code=status.HTTP_201_CREATED,
-    summary="Mark a scheduled dose as administered",
-)
-async def administer_dose(
+@router.post("/{dose_id}/administer", response_model=ScheduledDoseOut)
+async def administer(
     dose_id: uuid.UUID,
-    payload: MedicationAdministerPayload,
-    current_user: CurrentUser,
+    payload: AdministerIn,
     db: AsyncSession = Depends(get_db),
-) -> MedicationAdministrationRead:
-    if not _can_administer(current_user):
-        raise HTTPException(status_code=403, detail="Only nurses can administer doses")
+    current: User = Depends(require_roles(*NURSE_ROLES)),
+):
+    dose = (
+        await db.execute(
+            select(ScheduledDose)
+            .where(ScheduledDose.id == dose_id)
+            .options(
+                selectinload(ScheduledDose.patient),
+                selectinload(ScheduledDose.administration),
+            )
+        )
+    ).scalar_one_or_none()
+    if not dose:
+        raise HTTPException(status_code=404, detail="Scheduled dose not found")
+    if dose.status == DoseStatus.ADMINISTERED:
+        raise HTTPException(status_code=409, detail="Already administered")
+    if dose.status == DoseStatus.CANCELLED:
+        raise HTTPException(status_code=409, detail="Dose was cancelled")
 
-    dose = await _get_dose_or_404(db, dose_id)
-    if dose.status != DoseStatus.PENDING:
-        raise HTTPException(status_code=400, detail=f"Dose is already {dose.status.value}")
-
-    admin = MedicationAdministration(
-        dose_id=dose.id,
-        administered_by_id=current_user.id,
-        notes=payload.notes,
-    )
-    db.add(admin)
     dose.status = DoseStatus.ADMINISTERED
+    admin = dose.administration or MedicationAdministration(dose_id=dose.id)
+    admin.administered_by_id = current.id
+    admin.administered_at = datetime.now(timezone.utc)
+    if payload.notes:
+        admin.notes = payload.notes
+    if dose.administration is None:
+        db.add(admin)
 
     await db.commit()
-    await db.refresh(admin)
-    return MedicationAdministrationRead.model_validate(admin)
+
+    # Reload to get fresh relationships
+    dose = (
+        await db.execute(
+            select(ScheduledDose)
+            .where(ScheduledDose.id == dose_id)
+            .options(
+                selectinload(ScheduledDose.patient),
+                selectinload(ScheduledDose.administration),
+            )
+        )
+    ).scalar_one()
+    return _decorate(dose)
 
 
-# ============================================================
-# POST /medications/{dose_id}/skip
-# ============================================================
-@router.post(
-    "/{dose_id}/skip",
-    response_model=MedicationAdministrationRead,
-    status_code=status.HTTP_201_CREATED,
-    summary="Mark a scheduled dose as skipped (with reason)",
-)
-async def skip_dose(
+@router.post("/{dose_id}/skip", response_model=ScheduledDoseOut)
+async def skip(
     dose_id: uuid.UUID,
-    payload: MedicationSkipPayload,
-    current_user: CurrentUser,
+    payload: SkipIn,
     db: AsyncSession = Depends(get_db),
-) -> MedicationAdministrationRead:
-    if not _can_administer(current_user):
-        raise HTTPException(status_code=403, detail="Only nurses can skip doses")
+    current: User = Depends(require_roles(*NURSE_ROLES)),
+):
+    dose = (
+        await db.execute(
+            select(ScheduledDose)
+            .where(ScheduledDose.id == dose_id)
+            .options(
+                selectinload(ScheduledDose.patient),
+                selectinload(ScheduledDose.administration),
+            )
+        )
+    ).scalar_one_or_none()
+    if not dose:
+        raise HTTPException(status_code=404, detail="Scheduled dose not found")
 
-    dose = await _get_dose_or_404(db, dose_id)
-    if dose.status != DoseStatus.PENDING:
-        raise HTTPException(status_code=400, detail=f"Dose is already {dose.status.value}")
-
-    admin = MedicationAdministration(
-        dose_id=dose.id,
-        administered_by_id=current_user.id,
-        skip_reason=payload.skip_reason,
-        skip_notes=payload.skip_notes,
-    )
-    db.add(admin)
     dose.status = DoseStatus.SKIPPED
+    admin = dose.administration or MedicationAdministration(dose_id=dose.id)
+    admin.administered_by_id = current.id
+    admin.administered_at = datetime.now(timezone.utc)
+    admin.skip_reason = payload.reason
+    admin.skip_notes = payload.notes
+    if dose.administration is None:
+        db.add(admin)
 
     await db.commit()
-    await db.refresh(admin)
-    return MedicationAdministrationRead.model_validate(admin)
+
+    dose = (
+        await db.execute(
+            select(ScheduledDose)
+            .where(ScheduledDose.id == dose_id)
+            .options(
+                selectinload(ScheduledDose.patient),
+                selectinload(ScheduledDose.administration),
+            )
+        )
+    ).scalar_one()
+    return _decorate(dose)

@@ -1,115 +1,70 @@
-"""
-ORM models package.
+# Auto-generated. Do not edit manually.
 
-Every model is imported here so that `import app.models` (from alembic/env.py)
-registers all tables with Base.metadata.
-"""
-
-from app.models.appointment import Appointment, AppointmentStatus
-from app.models.audit_log import AuditAction, AuditLog
-from app.models.billing import Bill, BillItem, BillStatus, PaymentMethod
-from app.models.call import CallStatus, VideoCall
-from app.models.content import ContentBlock, ContentCategory
-from app.models.encounter import Encounter, EncounterStatus, EncounterType
-from app.models.lab import (
-    LabOrder,
-    LabOrderStatus,
-    LabPriority,
-    LabResult,
-    LabResultType,
-)
-from app.models.messaging import (
-    Message,
-    MessageAttachment,
-    Thread,
-    ThreadKind,
-    ThreadParticipant,
-)
-from app.models.medication import (
-    DoseStatus,
-    MedicationAdministration,
-    ScheduledDose,
-    SkipReason,
-)
-from app.models.shift import (
-    HandoverNote,
-    HandoverSeverity,
-    HandoverStatus,
-    NurseShift,
-    ShiftHandover,
-)
-from app.models.notification import (
-    Notification,
-    NotificationChannel,
-    NotificationKind,
-)
-from app.models.prescription import (
-    Prescription,
-    PrescriptionItem,
-    PrescriptionStatus,
-)
+from app.models.user import UserRole, UserStatus, User
 from app.models.refresh_token import RefreshToken
-from app.models.room import BedAssignment, Room, RoomType
-from app.models.user import User, UserRole, UserStatus
+from app.models.appointment import AppointmentStatus, Appointment
+from app.models.encounter import EncounterType, EncounterStatus, Encounter
+from app.models.prescription import PrescriptionStatus, Prescription, PrescriptionItem
 from app.models.vital import Vital
+from app.models.lab import LabOrderStatus, LabPriority, LabResultType, LabOrder, LabResult
+from app.models.messaging import ThreadKind, Thread, ThreadParticipant, Message, MessageAttachment
+from app.models.notification import NotificationKind, NotificationChannel, Notification
+from app.models.call import CallStatus, VideoCall
+from app.models.billing import BillStatus, PaymentMethod, Bill, BillItem
+from app.models.audit_log import AuditAction, AuditLog
+from app.models.content import ContentCategory, ContentBlock
+from app.models.medication import DoseStatus, SkipReason, ScheduledDose, MedicationAdministration
+from app.models.shift import HandoverStatus, HandoverSeverity, NurseShift, HandoverNote, ShiftHandover
+from app.models.room import RoomType, Room
+from app.models.bed_assignment import BedAssignment
 
 __all__ = [
-    # User & auth
-    "User",
     "UserRole",
     "UserStatus",
+    "User",
     "RefreshToken",
-    # Clinical
-    "Appointment",
     "AppointmentStatus",
-    "Encounter",
-    "EncounterStatus",
+    "Appointment",
     "EncounterType",
+    "EncounterStatus",
+    "Encounter",
+    "PrescriptionStatus",
     "Prescription",
     "PrescriptionItem",
-    "PrescriptionStatus",
     "Vital",
-    "LabOrder",
     "LabOrderStatus",
     "LabPriority",
-    "LabResult",
     "LabResultType",
-    # Messaging & notifications
-    "Thread",
+    "LabOrder",
+    "LabResult",
     "ThreadKind",
+    "Thread",
     "ThreadParticipant",
     "Message",
     "MessageAttachment",
-    "Notification",
     "NotificationKind",
     "NotificationChannel",
-    # Video
-    "VideoCall",
+    "Notification",
     "CallStatus",
-    # Billing
-    "Bill",
-    "BillItem",
+    "VideoCall",
     "BillStatus",
     "PaymentMethod",
-    # Audit
-    "AuditLog",
+    "Bill",
+    "BillItem",
     "AuditAction",
-    # Content
-    "ContentBlock",
+    "AuditLog",
     "ContentCategory",
-    # Rooms & assignments
-    "Room",
-    "RoomType",
-    "BedAssignment",
-    # Medications
-    "ScheduledDose",
+    "ContentBlock",
     "DoseStatus",
     "SkipReason",
+    "ScheduledDose",
     "MedicationAdministration",
-    # Shifts & handover
+    "HandoverStatus",
+    "HandoverSeverity",
     "NurseShift",
     "HandoverNote",
-    "HandoverSeverity",
     "ShiftHandover",
-    "HandoverStatus",
+    "RoomType",
+    "Room",
+    "BedAssignment",
 ]

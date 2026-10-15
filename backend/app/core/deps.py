@@ -143,6 +143,11 @@ def require_role(*allowed_roles: UserRole | str) -> Callable[..., Any]:
     return _checker
 
 
+# Alias — some API files use `require_roles(*roles)` (plural).
+# Same behavior as `require_role`.
+require_roles = require_role
+
+
 # ============================================================
 # Ready-made dependencies for common cases
 # ============================================================

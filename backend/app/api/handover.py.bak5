@@ -1,0 +1,75 @@
+from typing import Annotated
+"""
+Handover notes — per patient.
+"""
+
+import uuid
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from app.core.deps import CurrentUser, require_roles
+from app.db.session import get_db
+from app.models.shift import HandoverNote
+from app.models.user import UserRole
+from app.schemas.handover import HandoverCreate, HandoverOut
+
+router = APIRouter(prefix="/handover", tags=["handover"])
+
+NURSE_ROLES = (UserRole.NURSE, UserRole.DOCTOR, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+
+
+@router.get("", response_model=list[HandoverOut])
+async def list_handovers(
+    shift: str | None = Query(None, pattern="^(morning|evening|night)$"),
+    patient_id: uuid.UUID | None = None,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    _: Annotated[User, Depends(require_roles(*NURSE_ROLES))] = None,
+):
+    stmt = (
+        select(HandoverNote)
+        .options(
+            selectinload(HandoverNote.patient),
+            selectinload(HandoverNote.nurse),
+        )
+        .order_by(HandoverNote.created_at.desc())
+        .limit(limit)
+    )
+    if shift:
+        stmt = stmt.where(HandoverNote.shift == shift)
+    if patient_id:
+        stmt = stmt.where(HandoverNote.patient_id == patient_id)
+
+    return (await db.execute(stmt)).scalars().all()
+
+
+@router.post("", response_model=HandoverOut, status_code=status.HTTP_201_CREATED)
+async def create_handover(
+    payload: HandoverCreate,
+    db: AsyncSession = Depends(get_db),
+    current: Annotated[User, Depends(require_roles(UserRole.NURSE, UserRole.ADMIN, UserRole.SUPER_ADMIN))] = None,
+):
+    note = HandoverNote(
+        patient_id=payload.patient_id,
+        nurse_id=current.id,
+        shift=payload.shift,
+        severity=payload.severity,
+        note=payload.note,
+    )
+    db.add(note)
+    await db.commit()
+    await db.refresh(note)
+
+    stmt = (
+        select(HandoverNote)
+        .where(HandoverNote.id == note.id)
+        .options(
+            selectinload(HandoverNote.patient),
+            selectinload(HandoverNote.nurse),
+        )
+    )
+    return (await db.execute(stmt)).scalar_one()
