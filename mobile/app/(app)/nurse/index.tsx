@@ -168,7 +168,7 @@ export default function NurseDashboard() {
                   <View style={styles.taskContent}>
                     <Text style={styles.patientName}>{m.medication_name} {m.dose}</Text>
                     <Text style={styles.reason}>
-                      {new Date(m.scheduled_for).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {m.patient.full_name}
+                      {new Date(m.scheduled_for).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {m.patient?.full_name ?? "—"}
                     </Text>
                   </View>
                 </Pressable>

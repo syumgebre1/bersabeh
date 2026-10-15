@@ -162,7 +162,7 @@ export default function NurseHandover() {
                 <View style={styles.pendingHeader}>
                   <ClipboardCheck size={16} color={theme.colors.warning} strokeWidth={2.2} />
                   <Text style={styles.pendingFrom}>
-                    {h.from_nurse.full_name} · {new Date(h.handed_over_at).toLocaleString([], {
+                    {h.from_nurse?.full_name ?? "—"} · {new Date(h.handed_over_at).toLocaleString([], {
                       month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
                     })}
                   </Text>
@@ -226,7 +226,7 @@ export default function NurseHandover() {
                   </View>
                   <Text style={styles.noteBody}>{n.note}</Text>
                   <Text style={styles.noteAuthor}>
-                    {t("handover.by")} {n.author.full_name}
+                    {t("handover.by")} {n.author?.full_name ?? "—"}
                   </Text>
                 </View>
               );

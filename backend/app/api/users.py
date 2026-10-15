@@ -1,6 +1,9 @@
 """
 User management endpoints.
 
+Public:
+  GET   /users/doctors               — active doctors (name + specialty only)
+
 Self-service:
   GET   /users/me                    — own profile
   PATCH /users/me                    — update own profile
@@ -123,6 +126,41 @@ async def list_users(
 
 
 # ---- Pending patient approvals queue ----
+@router.get(
+    "/doctors",
+    response_model=list[dict],
+    summary="Public list of active doctors",
+    description=(
+        "Unauthenticated endpoint listing active doctors. Returns only public "
+        "fields (id, full_name, specialty, photo_url). Used by the patient "
+        "booking form and the landing page."
+    ),
+)
+async def list_public_doctors(
+    db: AsyncSession = Depends(get_db),
+) -> list[dict]:
+    stmt = (
+        select(User)
+        .where(
+            User.role == UserRole.DOCTOR,
+            User.status == UserStatus.ACTIVE,
+            User.is_deleted.is_(False),
+        )
+        .order_by(User.full_name)
+    )
+    result = await db.execute(stmt)
+    doctors = result.scalars().all()
+    return [
+        {
+            "id": str(d.id),
+            "full_name": d.full_name,
+            "specialty": getattr(d, "specialty", None),
+            "photo_url": getattr(d, "photo_url", None),
+        }
+        for d in doctors
+    ]
+
+
 @router.get(
     "/pending",
     response_model=list[UserPending],

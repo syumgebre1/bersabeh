@@ -136,7 +136,8 @@
     "showLess": "ጥቂት አሳይ",
     "noResults": "ምንም ውጤት የለም",
     "empty": "ባዶ",
-    "readMore": "ተጨማሪ ያንብቡ"
+    "readMore": "ተጨማሪ ያንብቡ",
+    "saving": "በማስቀመጥ ላይ…"
   },
   "medical": {
     "instructions": {
@@ -235,14 +236,22 @@
       "appointments": "ቀጠሮዎች",
       "noRecords": "የተመዘገበ ቀጠሮ የለም",
       "noToday": "ዛሬ ምንም ቀጠሮ የለም",
-      "reason": "የጉብኝቱ ምክንያት",
+      "reason": "የጉብኝቱ ምክንያት (አማራጭ)",
       "whatToBring": "ምን መያዝ ይኖርብዎታል",
       "bringId": "መታወቂያዎን እና የታካሚ ካርድዎን ይያዙ",
       "listMedications": "የሚወስዷቸውን መድኃኒቶች ይዘርዝሩ",
       "time": "ሰዓት",
       "duration": "ቆይታ",
       "room": "ክፍል",
-      "specialty": "የልዩ ሙያ ዘርፍ"
+      "specialty": "የልዩ ሙያ ዘርፍ",
+      "bookNew": "+ ቀጠሮ ያስይዙ",
+      "newTitle": "አዲስ ቀጠሮ ያስይዙ",
+      "selectDoctor": "ሐኪም ይምረጡ",
+      "noDoctors": "ምንም ሐኪም አልተገኘም",
+      "selectDate": "ቀን ይምረጡ",
+      "selectTime": "ሰዓት ይምረጡ",
+      "reasonPlaceholder": "ምልክቶችዎን ይግለጹ…",
+      "confirmBooking": "ቀጠሮ ያረጋግጡ"
     },
     "labs": {
       "result": "ውጤት",
@@ -298,7 +307,8 @@
       "today": "ዛሬ",
       "yesterday": "ትናንት",
       "earlier": "ቀደም ብሎ"
-    }
+    },
+    "roleName": "ታካሚ"
   },
   "topbar": {
     "searchPlaceholder": "ታካሚዎችን፣ ቀጠሮዎችን ይፈልጉ...",

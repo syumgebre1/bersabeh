@@ -564,3 +564,54 @@ export function useCreateVital() {
     },
   });
 }
+
+
+// ─────────────────────────────────────────────────────────────
+// Appointments — patient self-booking
+// ─────────────────────────────────────────────────────────────
+
+export interface AppointmentCreatePayload {
+  doctor_id: string;
+  scheduled_at: string;   // ISO 8601
+  duration_minutes?: number;
+  reason?: string | null;
+}
+
+export function useCreateAppointment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: AppointmentCreatePayload) =>
+      apiFetch<AppointmentRead>("/api/v1/appointments", {
+        method: "POST",
+        body: JSON.stringify({
+          doctor_id: payload.doctor_id,
+          scheduled_at: payload.scheduled_at,
+          duration_minutes: payload.duration_minutes ?? 30,
+          reason: payload.reason ?? null,
+        }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["appointments"] });
+    },
+  });
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// Public doctors list — for the patient booking form
+// ─────────────────────────────────────────────────────────────
+
+export interface PublicDoctor {
+  id: string;
+  full_name: string;
+  specialty: string | null;
+  photo_url: string | null;
+}
+
+export function useDoctors() {
+  return useQuery({
+    queryKey: ["public-doctors"],
+    queryFn: () => apiFetch<PublicDoctor[]>("/api/v1/users/doctors"),
+    staleTime: 5 * 60 * 1000, // 5 min — this list rarely changes
+  });
+}

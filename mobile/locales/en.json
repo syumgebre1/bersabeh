@@ -132,7 +132,8 @@
     "showLess": "Show less",
     "noResults": "No results",
     "empty": "Empty",
-    "readMore": "Read more"
+    "readMore": "Read more",
+    "saving": "Saving…"
   },
   "medical": {
     "instructions": {
@@ -231,14 +232,22 @@
       "appointments": "Appointments",
       "noRecords": "No appointments on record",
       "noToday": "No appointments today",
-      "reason": "Reason for visit",
+      "reason": "Reason for visit (optional)",
       "whatToBring": "What to bring",
       "bringId": "Bring your ID and patient card",
       "listMedications": "List any medications you're taking",
       "time": "Time",
       "duration": "Duration",
       "room": "Room",
-      "specialty": "Specialty"
+      "specialty": "Specialty",
+      "bookNew": "+ Book appointment",
+      "newTitle": "Book new appointment",
+      "selectDoctor": "Select doctor",
+      "noDoctors": "No doctors available",
+      "selectDate": "Select date",
+      "selectTime": "Select time",
+      "reasonPlaceholder": "Describe your symptoms…",
+      "confirmBooking": "Confirm booking"
     },
     "labs": {
       "result": "Result",
@@ -294,7 +303,8 @@
       "today": "Today",
       "yesterday": "Yesterday",
       "earlier": "Earlier"
-    }
+    },
+    "roleName": "Patient"
   },
   "topbar": {
     "searchPlaceholder": "Search patients, appointments...",

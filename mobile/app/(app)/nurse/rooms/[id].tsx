@@ -51,7 +51,7 @@ export default function RoomDetail() {
       await assignRoom.mutateAsync({
         roomId: id,
         patientId: selectedPatientId,
-        notes: assignNotes || undefined,
+        reason: assignNotes || undefined,
       });
       setShowAssign(false);
       setSelectedPatientId("");
@@ -68,7 +68,7 @@ export default function RoomDetail() {
     try {
       await dischargeRoom.mutateAsync({
         roomId: id,
-        discharge_reason: dischargeReason || undefined,
+        notes: dischargeReason || undefined,
       });
       setShowDischarge(false);
       setDischargeReason("");
@@ -150,12 +150,6 @@ export default function RoomDetail() {
                       </Text>
                     </View>
                   ) : null}
-                  <Text style={styles.admittedAt}>
-                    {t("nurse.admittedAt")}{" "}
-                    {new Date(room.current_occupant.admitted_at).toLocaleString([], {
-                      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                    })}
-                  </Text>
                 </View>
               </View>
             </DetailCard>

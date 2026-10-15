@@ -85,6 +85,15 @@ export default function PatientDashboard() {
           <View style={styles.emptyCard}>
             <CalendarClock size={22} color={theme.colors.muted} strokeWidth={1.8} />
             <Text style={styles.emptyText}>{t("patient.dashboard.noUpcoming")}</Text>
+            <Pressable
+              onPress={() => router.push("/(app)/patient/appointments/new" as any)}
+              style={({ hovered }: any) => [
+                styles.bookBtn,
+                hovered && styles.bookBtnHover,
+              ]}
+            >
+              <Text style={styles.bookBtnText}>{t("patient.appointments.bookNew")}</Text>
+            </Pressable>
           </View>
         )}
       </View>
@@ -207,6 +216,9 @@ const styles = StyleSheet.create({
   hovered: { opacity: 0.92 },
   emptyCard: { flexDirection: "row", alignItems: "center", gap: theme.spacing.md, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg, justifyContent: "center" },
   emptyRow: { alignItems: "center", paddingVertical: theme.spacing.lg },
+  bookBtn: { marginTop: theme.spacing.md, paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, cursor: "pointer" as any },
+  bookBtnHover: { opacity: 0.9 },
+  bookBtnText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 14, color: theme.colors.textInverse, letterSpacing: 0.2 },
   emptyText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.muted },
   apptCard: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: theme.spacing.lg, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.lg },
   apptLeft: { flexDirection: "row", alignItems: "center", gap: theme.spacing.lg, flexShrink: 1 },

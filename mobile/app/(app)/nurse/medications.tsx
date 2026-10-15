@@ -83,8 +83,8 @@ export default function NurseMedications() {
     try {
       await skip.mutateAsync({
         doseId: skippingDose.id,
-        skip_reason: skipReason,
-        skip_notes: skipNotes || undefined,
+        reason: skipReason,
+        notes: skipNotes || undefined,
       });
       setSkippingDose(null);
       setSkipNotes("");
@@ -166,7 +166,7 @@ export default function NurseMedications() {
                   <Text style={styles.medName}>
                     {dose.medication_name} <Text style={styles.medDose}>{dose.dose}</Text>
                   </Text>
-                  <Text style={styles.patientName}>{dose.patient.full_name}</Text>
+                  <Text style={styles.patientName}>{dose.patient?.full_name ?? "—"}</Text>
                   <Text style={styles.freq}>{dose.frequency}</Text>
                 </View>
 
@@ -215,7 +215,7 @@ export default function NurseMedications() {
 
             {skippingDose ? (
               <Text style={styles.modalInfo}>
-                {skippingDose.medication_name} {skippingDose.dose} · {skippingDose.patient.full_name}
+                {skippingDose.medication_name} {skippingDose.dose} · {skippingDose.patient?.full_name ?? "—"}
               </Text>
             ) : null}
 

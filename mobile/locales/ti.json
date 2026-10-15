@@ -136,7 +136,8 @@
     "showLess": "ንእሽቶ ኣርኢ",
     "noResults": "ዝኾነ ውጽኢት የልን",
     "empty": "ባዶ",
-    "readMore": "ተወሳኺ ኣንብቡ"
+    "readMore": "ተወሳኺ ኣንብቡ",
+    "saving": "ይዕቅብ ኣሎ…"
   },
   "medical": {
     "instructions": {
@@ -235,14 +236,22 @@
       "appointments": "ቀጠሮታት",
       "noRecords": "ዝተመዝገበ ቀጠሮ የልን",
       "noToday": "ሎሚ ዝኾነ ቀጠሮ የልን",
-      "reason": "ምኽንያት ምብጻሕ",
+      "reason": "ናይ ምብጻሕ ምኽንያት (ኣማራጺ)",
       "whatToBring": "እንታይ ክትሕዙ ኣለኩም",
       "bringId": "መለለዪ ሓበሬታኹምን ካርድ ሕሙምንኩም ሒዙ ንዓ",
       "listMedications": "እወስድዎ ዘለኹም መድሃኒታት ዘርዝሩ",
       "time": "ሰዓት",
       "duration": "ግዜ",
       "room": "ክፍሊ",
-      "specialty": "ፍሉይ ሞያ"
+      "specialty": "ፍሉይ ሞያ",
+      "bookNew": "+ ቆፀሮ ይሓዙ",
+      "newTitle": "ሓድሽ ቆፀሮ ሓዙ",
+      "selectDoctor": "ሓኪም ምረጹ",
+      "noDoctors": "ዝርከብ ሓኪም የለን",
+      "selectDate": "መዓልቲ ምረጹ",
+      "selectTime": "ሰዓት ምረጹ",
+      "reasonPlaceholder": "ምልክታትኩም ግለጹ…",
+      "confirmBooking": "ቆፀሮ ኣረጋግጹ"
     },
     "labs": {
       "result": "ውጽኢት",
@@ -298,7 +307,8 @@
       "today": "ሎሚ",
       "yesterday": "ትማሊ",
       "earlier": "ቅድሚ ሕጂ"
-    }
+    },
+    "roleName": "ሕሙም"
   },
   "topbar": {
     "searchPlaceholder": "ሕሙማት፣ ቀጠሮታት ድለ...",
