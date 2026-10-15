@@ -220,15 +220,14 @@ async def convert_request(
             raise HTTPException(status_code=404, detail="Existing patient not found")
     else:
         # Match by phone first (avoid dupes); else create pending patient
-        patient = (
-            await db.execute(
-                select(User).where(
-                    User.phone == req.phone,
-                    User.role == UserRole.PATIENT,
-                    User.is_deleted.is_(False),
-                )
-            )
-        ).scalar_one_or_none()
+        patient_result = await db.execute(
+            select(User).where(
+                User.phone == req.phone,
+                User.role == UserRole.PATIENT,
+                User.is_deleted.is_(False),
+            ).limit(1)
+        )
+        patient = patient_result.scalars().first()
 
         if not patient:
             # Create a pending patient. Password is random — they can reset later.

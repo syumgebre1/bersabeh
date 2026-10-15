@@ -767,5 +767,23 @@
     "submit": "ቆፀሮ ሕተቱ",
     "successTitle": "ሕቶኹም ተቐቢሉ",
     "successBody": "ናይ ኣቀባበል ጋንታና ኣብ 2 ሰዓት ውሽጢ ደዊሉ ቆፀሮኹም ከረጋግጽ እዩ።"
+  },
+  "requests": {
+    "eyebrow": "እታው",
+    "title": "ናይ ቆፀሮ ሕቶታት",
+    "filterNew": "ሓድሽ",
+    "filterContacted": "ተራኺቡ",
+    "filterConverted": "ተቐይሩ",
+    "statusNew": "ሓድሽ",
+    "statusContacted": "ተራኺቡ",
+    "statusConverted": "ተቐይሩ",
+    "statusCancelled": "ተሰረዘ",
+    "noRequests": "ክሳብ ሕጂ ሕቶ የለን",
+    "convert": "ቀይር",
+    "convertTitle": "ናብ ቆፀሮ ቀይር",
+    "convertConfirm": "ቆፀሮ ፍጠር",
+    "linkPatient": "ነባሪ ሕሙም ኣራኽብ",
+    "linkPatientHint": "ወይ ሓድሽ ሕሙም ንምፍጣር ጥርሑ ግደፍዎ",
+    "createNew": "ሓድሽ ሕሙም ፍጠር"
   }
 }

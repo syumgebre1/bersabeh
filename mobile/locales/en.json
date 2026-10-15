@@ -763,5 +763,23 @@
     "submit": "Request appointment",
     "successTitle": "Request received",
     "successBody": "Our reception team will call you within 2 hours to confirm your appointment."
+  },
+  "requests": {
+    "eyebrow": "Inbox",
+    "title": "Booking requests",
+    "filterNew": "New",
+    "filterContacted": "Contacted",
+    "filterConverted": "Converted",
+    "statusNew": "New",
+    "statusContacted": "Contacted",
+    "statusConverted": "Converted",
+    "statusCancelled": "Cancelled",
+    "noRequests": "No requests yet",
+    "convert": "Convert",
+    "convertTitle": "Convert to appointment",
+    "convertConfirm": "Create appointment",
+    "linkPatient": "Link to existing patient",
+    "linkPatientHint": "Or leave empty to create a new pending patient",
+    "createNew": "Create new patient"
   }
 }

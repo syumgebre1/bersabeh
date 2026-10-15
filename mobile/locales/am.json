@@ -767,5 +767,23 @@
     "submit": "ቀጠሮ ይጠይቁ",
     "successTitle": "ጥያቄዎ ተቀብሏል",
     "successBody": "የእንግዳ አቀባበል ቡድናችን በ2 ሰዓት ውስጥ ደውሎ ቀጠሮዎን ያረጋግጣል።"
+  },
+  "requests": {
+    "eyebrow": "ገቢ ሳጥን",
+    "title": "የቀጠሮ ጥያቄዎች",
+    "filterNew": "አዲስ",
+    "filterContacted": "ተገናኝቷል",
+    "filterConverted": "ተቀይሯል",
+    "statusNew": "አዲስ",
+    "statusContacted": "ተገናኝቷል",
+    "statusConverted": "ተቀይሯል",
+    "statusCancelled": "ተሰርዟል",
+    "noRequests": "እስካሁን ጥያቄ የለም",
+    "convert": "ቀይር",
+    "convertTitle": "ወደ ቀጠሮ ቀይር",
+    "convertConfirm": "ቀጠሮ ፍጠር",
+    "linkPatient": "ነባር ታካሚ አገናኝ",
+    "linkPatientHint": "ወይም አዲስ ታካሚ ለመፍጠር ባዶ ይተዉት",
+    "createNew": "አዲስ ታካሚ ፍጠር"
   }
 }

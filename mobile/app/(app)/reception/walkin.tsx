@@ -14,8 +14,7 @@ import {
 
 import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/api";
-import { useStaffList } from "@/lib/admin";
-import type { SessionUser } from "@/store/app";
+import { useDoctors } from "@/lib/admin";
 import { theme } from "@/constants/theme";
 
 
@@ -30,8 +29,8 @@ export default function WalkInRegister() {
   const router = useRouter();
   const qc = useQueryClient();
 
-  const { data: users } = useStaffList();
-  const doctors = (users ?? []).filter((u: SessionUser) => u.role === "doctor");
+  const { data: doctorsData } = useDoctors();
+  const doctors = doctorsData ?? [];
 
   // Patient fields
   const [fullName, setFullName] = useState("");
