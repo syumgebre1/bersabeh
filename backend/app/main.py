@@ -24,6 +24,7 @@ from app.api import (
     appointments,
     audit_logs,
     auth,
+    booking_requests,
     bills,
     calls,
     content,
@@ -135,6 +136,7 @@ app.include_router(messages.router, prefix=API_PREFIX)
 app.include_router(bills.router, prefix=API_PREFIX)
 app.include_router(audit_logs.router, prefix=API_PREFIX)
 app.include_router(content.router, prefix=API_PREFIX)
+app.include_router(booking_requests.router, prefix=API_PREFIX)
 app.include_router(uploads.router, prefix=API_PREFIX)
 app.include_router(ws.router, prefix=API_PREFIX)
 

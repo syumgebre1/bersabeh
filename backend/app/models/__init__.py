@@ -17,6 +17,7 @@ from app.models.medication import DoseStatus, SkipReason, ScheduledDose, Medicat
 from app.models.shift import HandoverStatus, HandoverSeverity, NurseShift, HandoverNote, ShiftHandover
 from app.models.room import RoomType, Room
 from app.models.bed_assignment import BedAssignment
+from app.models.booking_request import BookingRequestStatus, BookingRequest
 
 __all__ = [
     "UserRole",
@@ -67,4 +68,6 @@ __all__ = [
     "RoomType",
     "Room",
     "BedAssignment",
+    "BookingRequestStatus",
+    "BookingRequest",
 ]
