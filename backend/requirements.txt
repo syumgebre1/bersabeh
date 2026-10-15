@@ -1,3 +1,4 @@
+gunicorn==23.0.0
 # ============================================================
 # Bersabeh Clinic Platform — Backend dependencies
 # Python 3.14 (see DECISIONS.md for why 3.14, not 3.12)

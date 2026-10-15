@@ -34,6 +34,3 @@ export const CLINIC: ClinicInfo = {
   workingHours: 'Mon–Sat 08:00–20:00 · Sun 09:00–13:00',
   parkingNote: 'Street parking available; paid lot next door at Getu Center.',
 };
-
-export const API_BASE_URL = 'http://localhost:8000';
-export const WS_BASE_URL = 'ws://localhost:8000';
