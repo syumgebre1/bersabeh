@@ -5,43 +5,17 @@
 import { ArrowLeft, Calendar, Check, Clock, User as UserIcon } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text,
   TextInput, View,
 } from "react-native";
 
 import { Button } from "@/components/ui/Button";
+import { DateStrip } from "@/components/ui/DateStrip";
+import { TimeSlotGrid } from "@/components/ui/TimeSlotGrid";
 import { useCreateAppointment, useDoctors } from "@/lib/admin";
 import { theme } from "@/constants/theme";
-
-
-// Generate 30-min time slots from 08:00 to 17:30
-function generateSlots(): string[] {
-  const slots: string[] = [];
-  for (let h = 8; h <= 17; h++) {
-    slots.push(`${String(h).padStart(2, "0")}:00`);
-    if (h < 17 || true) slots.push(`${String(h).padStart(2, "0")}:30`);
-  }
-  return slots;
-}
-
-// Generate next 14 selectable days (today excluded — must be future)
-function generateDays(): Array<{ iso: string; dayNum: number; month: string; weekday: string }> {
-  const out: Array<{ iso: string; dayNum: number; month: string; weekday: string }> = [];
-  const today = new Date();
-  for (let i = 1; i <= 14; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    out.push({
-      iso: d.toISOString().slice(0, 10),
-      dayNum: d.getDate(),
-      month: d.toLocaleDateString("en", { month: "short" }),
-      weekday: d.toLocaleDateString("en", { weekday: "short" }),
-    });
-  }
-  return out;
-}
 
 
 export default function NewAppointment() {
@@ -57,8 +31,6 @@ export default function NewAppointment() {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const days = useMemo(generateDays, []);
-  const slots = useMemo(generateSlots, []);
 
   const canSubmit = doctorId && dateIso && time && !createAppt.isPending;
 
@@ -149,22 +121,7 @@ export default function NewAppointment() {
           <Calendar size={14} color={theme.colors.primary} strokeWidth={2.2} />
           <Text style={styles.sectionLabel}>{t("patient.appointments.selectDate")}</Text>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayRow}>
-          {days.map((d) => {
-            const active = dateIso === d.iso;
-            return (
-              <Pressable
-                key={d.iso}
-                onPress={() => setDateIso(d.iso)}
-                style={[styles.dayCard, active && styles.dayCardActive]}
-              >
-                <Text style={[styles.dayWeekday, active && styles.dayTextActive]}>{d.weekday}</Text>
-                <Text style={[styles.dayNumber, active && styles.dayTextActive]}>{d.dayNum}</Text>
-                <Text style={[styles.dayMonth, active && styles.dayTextActive]}>{d.month}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <DateStrip value={dateIso ?? ""} onChange={setDateIso} />
       </View>
 
       {/* 3. Time picker */}
@@ -173,20 +130,7 @@ export default function NewAppointment() {
           <Clock size={14} color={theme.colors.primary} strokeWidth={2.2} />
           <Text style={styles.sectionLabel}>{t("patient.appointments.selectTime")}</Text>
         </View>
-        <View style={styles.slotGrid}>
-          {slots.map((s) => {
-            const active = time === s;
-            return (
-              <Pressable
-                key={s}
-                onPress={() => setTime(s)}
-                style={[styles.slot, active && styles.slotActive]}
-              >
-                <Text style={[styles.slotText, active && styles.slotTextActive]}>{s}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <TimeSlotGrid value={time ?? ""} onChange={setTime} />
       </View>
 
       {/* 4. Reason */}
@@ -258,18 +202,6 @@ const styles = StyleSheet.create({
   doctorMeta: { fontFamily: theme.fontFamily.body, fontSize: 12.5, color: theme.colors.muted, marginTop: 2 },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: theme.colors.borderStrong, alignItems: "center", justifyContent: "center" },
   radioActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  dayRow: { gap: theme.spacing.sm, paddingVertical: 2 },
-  dayCard: { width: 64, paddingVertical: theme.spacing.md, borderRadius: theme.radius.md, backgroundColor: theme.colors.surface, borderWidth: 1.5, borderColor: theme.colors.border, alignItems: "center", gap: 2, cursor: "pointer" as any },
-  dayCardActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  dayWeekday: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 10.5, letterSpacing: 0.4, color: theme.colors.muted, textTransform: "uppercase" },
-  dayNumber: { fontFamily: theme.fontFamily.heading, fontSize: 22, color: theme.colors.text, letterSpacing: -0.5 },
-  dayMonth: { fontFamily: theme.fontFamily.body, fontSize: 10.5, color: theme.colors.muted },
-  dayTextActive: { color: theme.colors.textInverse },
-  slotGrid: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
-  slot: { paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, borderRadius: theme.radius.md, backgroundColor: theme.colors.surface, borderWidth: 1.5, borderColor: theme.colors.border, cursor: "pointer" as any },
-  slotActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  slotText: { fontFamily: theme.fontFamily.bodyMedium, fontSize: 13, color: theme.colors.text },
-  slotTextActive: { color: theme.colors.textInverse },
   textarea: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, fontFamily: theme.fontFamily.body, fontSize: 14.5, color: theme.colors.text, backgroundColor: theme.colors.surface, minHeight: 80, textAlignVertical: "top" },
   errorBanner: { backgroundColor: theme.colors.dangerBg, padding: theme.spacing.md, borderRadius: theme.radius.md },
   errorText: { fontFamily: theme.fontFamily.body, fontSize: 13.5, color: theme.colors.danger },
