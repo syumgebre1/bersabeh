@@ -615,3 +615,23 @@ export function useDoctors() {
     staleTime: 5 * 60 * 1000, // 5 min — this list rarely changes
   });
 }
+
+
+// ─────────────────────────────────────────────────────────────
+// Active patients list — for nurse/doctor/reception staff use
+// ─────────────────────────────────────────────────────────────
+
+export interface PatientBrief {
+  id: string;
+  full_name: string;
+  phone: string | null;
+  photo_url: string | null;
+}
+
+export function usePatients(search?: string) {
+  const qs = search ? `?search=${encodeURIComponent(search)}` : "";
+  return useQuery({
+    queryKey: ["patients", search ?? "all"],
+    queryFn: () => apiFetch<PatientBrief[]>(`/api/v1/users/patients${qs}`),
+  });
+}

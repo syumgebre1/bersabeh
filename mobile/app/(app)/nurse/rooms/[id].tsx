@@ -5,7 +5,7 @@
 import { ArrowLeft, Bed, Phone, UserCircle, X } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from "react-native";
@@ -17,8 +17,7 @@ import {
   useDischargeRoom,
   useRoom,
 } from "@/lib/nurse";
-import { useStaffList } from "@/lib/admin";
-import type { SessionUser } from "@/store/app";
+import { usePatients } from "@/lib/admin";
 import { theme } from "@/constants/theme";
 
 
@@ -28,14 +27,9 @@ export default function RoomDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const { data: room, isLoading, isError, refetch } = useRoom(id);
-  const { data: users } = useStaffList();
+  const { data: allPatients } = usePatients();
   const assignRoom = useAssignRoom();
   const dischargeRoom = useDischargeRoom();
-
-  const patients = useMemo(
-    () => (users ?? []).filter((u: SessionUser) => u.role === "patient"),
-    [users],
-  );
 
   const [showAssign, setShowAssign] = useState(false);
   const [showDischarge, setShowDischarge] = useState(false);
@@ -201,10 +195,10 @@ export default function RoomDetail() {
 
             <Text style={styles.label}>{t("reception.book.patient")}</Text>
             <View style={styles.pillWrap}>
-              {patients.length === 0 ? (
+              {allPatients?.length === 0 ? (
                 <Text style={styles.emptyText}>{t("reception.book.noPatients")}</Text>
               ) : (
-                patients.map((p) => (
+                allPatients?.map((p) => (
                   <Pressable
                     key={p.id}
                     onPress={() => setSelectedPatientId(p.id)}

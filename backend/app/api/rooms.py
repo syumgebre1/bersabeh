@@ -183,9 +183,8 @@ async def assign_patient(
     assignment = BedAssignment(
         patient_id=payload.patient_id,
         room_id=room_id,
-        admitted_by=current.id,
-        reason=payload.reason,
-        
+        assigned_by_id=current.id,
+        notes=payload.reason,
     )
     db.add(assignment)
     await db.commit()

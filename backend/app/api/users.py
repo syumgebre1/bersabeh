@@ -4,6 +4,9 @@ User management endpoints.
 Public:
   GET   /users/doctors               — active doctors (name + specialty only)
 
+Staff:
+  GET   /users/patients              — active patients (name + phone only)
+
 Self-service:
   GET   /users/me                    — own profile
   PATCH /users/me                    — update own profile
@@ -126,6 +129,54 @@ async def list_users(
 
 
 # ---- Pending patient approvals queue ----
+@router.get(
+    "/patients",
+    response_model=list[dict],
+    summary="List active patients (staff)",
+    description=(
+        "Returns active patients (id, full_name, phone) for staff use — "
+        "e.g. assigning a room, ordering a prescription. Accessible to "
+        "NURSE, DOCTOR, RECEPTION, ADMIN, SUPER_ADMIN."
+    ),
+)
+async def list_patients_for_staff(
+    current_user: CurrentUser,
+    db: AsyncSession = Depends(get_db),
+    search: str | None = Query(None, min_length=1, max_length=100),
+) -> list[dict]:
+    allowed = {
+        UserRole.NURSE, UserRole.DOCTOR, UserRole.RECEPTION,
+        UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.LAB,
+    }
+    if current_user.role not in allowed:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Requires one of roles: {sorted(r.value for r in allowed)}",
+        )
+
+    stmt = select(User).where(
+        User.role == UserRole.PATIENT,
+        User.status == UserStatus.ACTIVE,
+        User.is_deleted.is_(False),
+    )
+    if search:
+        like = f"%{search.lower()}%"
+        stmt = stmt.where(func.lower(User.full_name).like(like))
+    stmt = stmt.order_by(User.full_name).limit(200)
+
+    result = await db.execute(stmt)
+    patients = result.scalars().all()
+    return [
+        {
+            "id": str(p.id),
+            "full_name": p.full_name,
+            "phone": getattr(p, "phone", None),
+            "photo_url": getattr(p, "photo_url", None),
+        }
+        for p in patients
+    ]
+
+
 @router.get(
     "/doctors",
     response_model=list[dict],
