@@ -12,9 +12,8 @@ import {
 
 import { Button } from "@/components/ui/Button";
 import { useCreateVital } from "@/lib/admin";
-import { useStaffList } from "@/lib/admin";
+import { usePatients } from "@/lib/admin";
 import { useRooms } from "@/lib/nurse";
-import type { SessionUser } from "@/store/app";
 import { theme } from "@/constants/theme";
 
 
@@ -25,7 +24,7 @@ export default function LogVitals() {
   const { t } = useTranslation();
   const router = useRouter();
   const createVital = useCreateVital();
-  const { data: users, isLoading: usersLoading } = useStaffList();
+  const { data: allPatients, isLoading: patientsLoading } = usePatients();
   const { data: rooms } = useRooms();
 
   const [preset, setPreset] = useState<Preset>("quick");
@@ -47,20 +46,26 @@ export default function LogVitals() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Patients from occupied rooms + all patients (fallback)
+  // Patients in occupied rooms first, then all other active patients.
   const patients = useMemo(() => {
-    const occupied = (rooms ?? []).filter((r) => r.is_occupied && r.current_occupant);
-    if (occupied.length > 0) {
-      return occupied.map((r) => ({
+    const inRooms = new Map<string, string | null>();
+    for (const r of rooms ?? []) {
+      if (r.is_occupied && r.current_occupant) {
+        inRooms.set(r.current_occupant.patient.id, r.number);
+      }
+    }
+    const fromRooms = (rooms ?? [])
+      .filter((r) => r.is_occupied && r.current_occupant)
+      .map((r) => ({
         id: r.current_occupant!.patient.id,
         full_name: r.current_occupant!.patient.full_name,
-        room: r.number,
+        room: r.number as string | null,
       }));
-    }
-    return (users ?? [])
-      .filter((u: SessionUser) => u.role === "patient")
-      .map((u) => ({ id: u.id, full_name: u.full_name, room: null as string | null }));
-  }, [rooms, users]);
+    const others = (allPatients ?? [])
+      .filter((p) => !inRooms.has(p.id))
+      .map((p) => ({ id: p.id, full_name: p.full_name, room: null as string | null }));
+    return [...fromRooms, ...others];
+  }, [rooms, allPatients]);
 
   const parseNum = (v: string): number | null => {
     if (!v) return null;
@@ -163,7 +168,7 @@ export default function LogVitals() {
       <View style={styles.formCard}>
         {/* Patient picker */}
         <Text style={styles.label}>{t("reception.book.patient")}</Text>
-        {usersLoading ? (
+        {patientsLoading ? (
           <View style={styles.emptyRow}><ActivityIndicator size="small" color={theme.colors.primary} /></View>
         ) : patients.length === 0 ? (
           <Text style={styles.emptyText}>{t("reception.book.noPatients")}</Text>
